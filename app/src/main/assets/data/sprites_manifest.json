@@ -28,33 +28,6 @@
       "webp_path": "sprites/hud/siterocket.webp"
     },
     {
-      "name": "siteM16",
-      "txd": "hud",
-      "full_txd_sprite": "hud:siteM16",
-      "width": 64,
-      "height": 64,
-      "png_path": "sprites/hud/sitem16.png",
-      "webp_path": "sprites/hud/sitem16.webp"
-    },
-    {
-      "name": "radar_ZERO",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_ZERO",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_zero.png",
-      "webp_path": "sprites/hud/radar_zero.webp"
-    },
-    {
-      "name": "radar_WOOZIE",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_WOOZIE",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_woozie.png",
-      "webp_path": "sprites/hud/radar_woozie.webp"
-    },
-    {
       "name": "radar_waypoint",
       "txd": "hud",
       "full_txd_sprite": "hud:radar_waypoint",
@@ -82,15 +55,6 @@
       "webp_path": "sprites/hud/radar_truck.webp"
     },
     {
-      "name": "radar_triadsCasino",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_triadsCasino",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_triadscasino.png",
-      "webp_path": "sprites/hud/radar_triadscasino.webp"
-    },
-    {
       "name": "radar_triads",
       "txd": "hud",
       "full_txd_sprite": "hud:radar_triads",
@@ -100,33 +64,6 @@
       "webp_path": "sprites/hud/radar_triads.webp"
     },
     {
-      "name": "radar_TorenoRanch",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_TorenoRanch",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_torenoranch.png",
-      "webp_path": "sprites/hud/radar_torenoranch.webp"
-    },
-    {
-      "name": "radar_TORENO",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_TORENO",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_toreno.png",
-      "webp_path": "sprites/hud/radar_toreno.webp"
-    },
-    {
-      "name": "radar_THETRUTH",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_THETRUTH",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_thetruth.png",
-      "webp_path": "sprites/hud/radar_thetruth.webp"
-    },
-    {
       "name": "radar_tattoo",
       "txd": "hud",
       "full_txd_sprite": "hud:radar_tattoo",
@@ -134,15 +71,6 @@
       "height": 16,
       "png_path": "sprites/hud/radar_tattoo.png",
       "webp_path": "sprites/hud/radar_tattoo.webp"
-    },
-    {
-      "name": "radar_SWEET",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_SWEET",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_sweet.png",
-      "webp_path": "sprites/hud/radar_sweet.webp"
     },
     {
       "name": "radar_spray",
@@ -161,24 +89,6 @@
       "height": 16,
       "png_path": "sprites/hud/radar_school.png",
       "webp_path": "sprites/hud/radar_school.webp"
-    },
-    {
-      "name": "radar_saveGame",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_saveGame",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_savegame.png",
-      "webp_path": "sprites/hud/radar_savegame.webp"
-    },
-    {
-      "name": "radar_RYDER",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_RYDER",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_ryder.png",
-      "webp_path": "sprites/hud/radar_ryder.webp"
     },
     {
       "name": "radar_runway",
@@ -208,24 +118,6 @@
       "webp_path": "sprites/hud/radar_qmark.webp"
     },
     {
-      "name": "radar_propertyR",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_propertyR",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_propertyr.png",
-      "webp_path": "sprites/hud/radar_propertyr.webp"
-    },
-    {
-      "name": "radar_propertyG",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_propertyG",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_propertyg.png",
-      "webp_path": "sprites/hud/radar_propertyg.webp"
-    },
-    {
       "name": "radar_police",
       "txd": "hud",
       "full_txd_sprite": "hud:radar_police",
@@ -244,15 +136,6 @@
       "webp_path": "sprites/hud/radar_pizza.webp"
     },
     {
-      "name": "radar_OGLOC",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_OGLOC",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_ogloc.png",
-      "webp_path": "sprites/hud/radar_ogloc.webp"
-    },
-    {
       "name": "radar_north",
       "txd": "hud",
       "full_txd_sprite": "hud:radar_north",
@@ -260,51 +143,6 @@
       "height": 16,
       "png_path": "sprites/hud/radar_north.png",
       "webp_path": "sprites/hud/radar_north.webp"
-    },
-    {
-      "name": "radar_modGarage",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_modGarage",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_modgarage.png",
-      "webp_path": "sprites/hud/radar_modgarage.webp"
-    },
-    {
-      "name": "radar_MCSTRAP",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_MCSTRAP",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_mcstrap.png",
-      "webp_path": "sprites/hud/radar_mcstrap.webp"
-    },
-    {
-      "name": "radar_mafiaCasino",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_mafiaCasino",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_mafiacasino.png",
-      "webp_path": "sprites/hud/radar_mafiacasino.webp"
-    },
-    {
-      "name": "radar_MADDOG",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_MADDOG",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_maddog.png",
-      "webp_path": "sprites/hud/radar_maddog.webp"
-    },
-    {
-      "name": "radar_LocoSyndicate",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_LocoSyndicate",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_locosyndicate.png",
-      "webp_path": "sprites/hud/radar_locosyndicate.webp"
     },
     {
       "name": "radar_light",
@@ -352,60 +190,6 @@
       "webp_path": "sprites/hud/radar_girlfriend.webp"
     },
     {
-      "name": "radar_gangY",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_gangY",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_gangy.png",
-      "webp_path": "sprites/hud/radar_gangy.webp"
-    },
-    {
-      "name": "radar_gangP",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_gangP",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_gangp.png",
-      "webp_path": "sprites/hud/radar_gangp.webp"
-    },
-    {
-      "name": "radar_gangN",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_gangN",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_gangn.png",
-      "webp_path": "sprites/hud/radar_gangn.webp"
-    },
-    {
-      "name": "radar_gangG",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_gangG",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_gangg.png",
-      "webp_path": "sprites/hud/radar_gangg.webp"
-    },
-    {
-      "name": "radar_gangB",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_gangB",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_gangb.png",
-      "webp_path": "sprites/hud/radar_gangb.webp"
-    },
-    {
-      "name": "radar_Flag",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_Flag",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_flag.png",
-      "webp_path": "sprites/hud/radar_flag.webp"
-    },
-    {
       "name": "radar_fire",
       "txd": "hud",
       "full_txd_sprite": "hud:radar_fire",
@@ -413,24 +197,6 @@
       "height": 16,
       "png_path": "sprites/hud/radar_fire.png",
       "webp_path": "sprites/hud/radar_fire.webp"
-    },
-    {
-      "name": "radar_enemyAttack",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_enemyAttack",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_enemyattack.png",
-      "webp_path": "sprites/hud/radar_enemyattack.webp"
-    },
-    {
-      "name": "radar_emmetGun",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_emmetGun",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_emmetgun.png",
-      "webp_path": "sprites/hud/radar_emmetgun.webp"
     },
     {
       "name": "radar_diner",
@@ -442,51 +208,6 @@
       "webp_path": "sprites/hud/radar_diner.webp"
     },
     {
-      "name": "radar_dateFood",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_dateFood",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_datefood.png",
-      "webp_path": "sprites/hud/radar_datefood.webp"
-    },
-    {
-      "name": "radar_dateDrink",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_dateDrink",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_datedrink.png",
-      "webp_path": "sprites/hud/radar_datedrink.webp"
-    },
-    {
-      "name": "radar_dateDisco",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_dateDisco",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_datedisco.png",
-      "webp_path": "sprites/hud/radar_datedisco.webp"
-    },
-    {
-      "name": "radar_CRASH1",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_CRASH1",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_crash1.png",
-      "webp_path": "sprites/hud/radar_crash1.webp"
-    },
-    {
-      "name": "radar_CJ",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_CJ",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_cj.png",
-      "webp_path": "sprites/hud/radar_cj.webp"
-    },
-    {
       "name": "radar_chicken",
       "txd": "hud",
       "full_txd_sprite": "hud:radar_chicken",
@@ -494,15 +215,6 @@
       "height": 16,
       "png_path": "sprites/hud/radar_chicken.png",
       "webp_path": "sprites/hud/radar_chicken.webp"
-    },
-    {
-      "name": "radar_CESARVIAPANDO",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_CESARVIAPANDO",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_cesarviapando.png",
-      "webp_path": "sprites/hud/radar_cesarviapando.webp"
     },
     {
       "name": "radar_centre",
@@ -514,15 +226,6 @@
       "webp_path": "sprites/hud/radar_centre.webp"
     },
     {
-      "name": "radar_CATALINAPINK",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_CATALINAPINK",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_catalinapink.png",
-      "webp_path": "sprites/hud/radar_catalinapink.webp"
-    },
-    {
       "name": "radar_cash",
       "txd": "hud",
       "full_txd_sprite": "hud:radar_cash",
@@ -530,15 +233,6 @@
       "height": 16,
       "png_path": "sprites/hud/radar_cash.png",
       "webp_path": "sprites/hud/radar_cash.webp"
-    },
-    {
-      "name": "radar_burgerShot",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_burgerShot",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_burgershot.png",
-      "webp_path": "sprites/hud/radar_burgershot.webp"
     },
     {
       "name": "radar_bulldozer",
@@ -559,15 +253,6 @@
       "webp_path": "sprites/hud/radar_boatyard.webp"
     },
     {
-      "name": "radar_BIGSMOKE",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_BIGSMOKE",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_bigsmoke.png",
-      "webp_path": "sprites/hud/radar_bigsmoke.webp"
-    },
-    {
       "name": "radar_barbers",
       "txd": "hud",
       "full_txd_sprite": "hud:radar_barbers",
@@ -584,24 +269,6 @@
       "height": 16,
       "png_path": "sprites/hud/radar_ammugun.png",
       "webp_path": "sprites/hud/radar_ammugun.webp"
-    },
-    {
-      "name": "radar_airYard",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radar_airYard",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/hud/radar_airyard.png",
-      "webp_path": "sprites/hud/radar_airyard.webp"
-    },
-    {
-      "name": "radarRingPlane",
-      "txd": "hud",
-      "full_txd_sprite": "hud:radarRingPlane",
-      "width": 64,
-      "height": 64,
-      "png_path": "sprites/hud/radarringplane.png",
-      "webp_path": "sprites/hud/radarringplane.webp"
     },
     {
       "name": "fist",
@@ -777,15 +444,6 @@
       "webp_path": "sprites/particle/lunar.webp"
     },
     {
-      "name": "lockonFire",
-      "txd": "particle",
-      "full_txd_sprite": "particle:lockonFire",
-      "width": 32,
-      "height": 32,
-      "png_path": "sprites/particle/lockonfire.png",
-      "webp_path": "sprites/particle/lockonfire.webp"
-    },
-    {
       "name": "lockon",
       "txd": "particle",
       "full_txd_sprite": "particle:lockon",
@@ -829,15 +487,6 @@
       "height": 64,
       "png_path": "sprites/particle/handman.png",
       "webp_path": "sprites/particle/handman.webp"
-    },
-    {
-      "name": "finishFlag",
-      "txd": "particle",
-      "full_txd_sprite": "particle:finishFlag",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/particle/finishflag.png",
-      "webp_path": "sprites/particle/finishflag.webp"
     },
     {
       "name": "coronastar",
@@ -1788,15 +1437,6 @@
       "webp_path": "sprites/ld_dual/tvcorn.webp"
     },
     {
-      "name": "thrustG",
-      "txd": "ld_dual",
-      "full_txd_sprite": "ld_dual:thrustG",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/ld_dual/thrustg.png",
-      "webp_path": "sprites/ld_dual/thrustg.webp"
-    },
-    {
       "name": "shoot",
       "txd": "ld_dual",
       "full_txd_sprite": "ld_dual:shoot",
@@ -1842,15 +1482,6 @@
       "webp_path": "sprites/ld_dual/layer.webp"
     },
     {
-      "name": "Health",
-      "txd": "ld_dual",
-      "full_txd_sprite": "ld_dual:Health",
-      "width": 16,
-      "height": 4,
-      "png_path": "sprites/ld_dual/health.png",
-      "webp_path": "sprites/ld_dual/health.webp"
-    },
-    {
       "name": "ex4",
       "txd": "ld_dual",
       "full_txd_sprite": "ld_dual:ex4",
@@ -1885,15 +1516,6 @@
       "height": 32,
       "png_path": "sprites/ld_dual/ex1.png",
       "webp_path": "sprites/ld_dual/ex1.webp"
-    },
-    {
-      "name": "DUALITY",
-      "txd": "ld_dual",
-      "full_txd_sprite": "ld_dual:DUALITY",
-      "width": 256,
-      "height": 128,
-      "png_path": "sprites/ld_dual/duality.png",
-      "webp_path": "sprites/ld_dual/duality.webp"
     },
     {
       "name": "dark",
@@ -2658,96 +2280,6 @@
   ],
   "ld_otb2": [
     {
-      "name": "Ric5",
-      "txd": "ld_otb2",
-      "full_txd_sprite": "ld_otb2:Ric5",
-      "width": 64,
-      "height": 64,
-      "png_path": "sprites/ld_otb2/ric5.png",
-      "webp_path": "sprites/ld_otb2/ric5.webp"
-    },
-    {
-      "name": "Ric4",
-      "txd": "ld_otb2",
-      "full_txd_sprite": "ld_otb2:Ric4",
-      "width": 64,
-      "height": 64,
-      "png_path": "sprites/ld_otb2/ric4.png",
-      "webp_path": "sprites/ld_otb2/ric4.webp"
-    },
-    {
-      "name": "Ric3",
-      "txd": "ld_otb2",
-      "full_txd_sprite": "ld_otb2:Ric3",
-      "width": 64,
-      "height": 64,
-      "png_path": "sprites/ld_otb2/ric3.png",
-      "webp_path": "sprites/ld_otb2/ric3.webp"
-    },
-    {
-      "name": "Ric2",
-      "txd": "ld_otb2",
-      "full_txd_sprite": "ld_otb2:Ric2",
-      "width": 64,
-      "height": 64,
-      "png_path": "sprites/ld_otb2/ric2.png",
-      "webp_path": "sprites/ld_otb2/ric2.webp"
-    },
-    {
-      "name": "Ric1",
-      "txd": "ld_otb2",
-      "full_txd_sprite": "ld_otb2:Ric1",
-      "width": 64,
-      "height": 64,
-      "png_path": "sprites/ld_otb2/ric1.png",
-      "webp_path": "sprites/ld_otb2/ric1.webp"
-    },
-    {
-      "name": "butnC",
-      "txd": "ld_otb2",
-      "full_txd_sprite": "ld_otb2:butnC",
-      "width": 64,
-      "height": 64,
-      "png_path": "sprites/ld_otb2/butnc.png",
-      "webp_path": "sprites/ld_otb2/butnc.webp"
-    },
-    {
-      "name": "butnBo",
-      "txd": "ld_otb2",
-      "full_txd_sprite": "ld_otb2:butnBo",
-      "width": 64,
-      "height": 64,
-      "png_path": "sprites/ld_otb2/butnbo.png",
-      "webp_path": "sprites/ld_otb2/butnbo.webp"
-    },
-    {
-      "name": "butnB",
-      "txd": "ld_otb2",
-      "full_txd_sprite": "ld_otb2:butnB",
-      "width": 64,
-      "height": 64,
-      "png_path": "sprites/ld_otb2/butnb.png",
-      "webp_path": "sprites/ld_otb2/butnb.webp"
-    },
-    {
-      "name": "butnAo",
-      "txd": "ld_otb2",
-      "full_txd_sprite": "ld_otb2:butnAo",
-      "width": 256,
-      "height": 64,
-      "png_path": "sprites/ld_otb2/butnao.png",
-      "webp_path": "sprites/ld_otb2/butnao.webp"
-    },
-    {
-      "name": "butnA",
-      "txd": "ld_otb2",
-      "full_txd_sprite": "ld_otb2:butnA",
-      "width": 256,
-      "height": 64,
-      "png_path": "sprites/ld_otb2/butna.png",
-      "webp_path": "sprites/ld_otb2/butna.webp"
-    },
-    {
       "name": "backbet",
       "txd": "ld_otb2",
       "full_txd_sprite": "ld_otb2:backbet",
@@ -2784,15 +2316,6 @@
       "height": 4,
       "png_path": "sprites/ld_plan/blkdot.png",
       "webp_path": "sprites/ld_plan/blkdot.webp"
-    },
-    {
-      "name": "AirLogo",
-      "txd": "ld_plan",
-      "full_txd_sprite": "ld_plan:AirLogo",
-      "width": 256,
-      "height": 128,
-      "png_path": "sprites/ld_plan/airlogo.png",
-      "webp_path": "sprites/ld_plan/airlogo.webp"
     }
   ],
   "ld_poke": [
@@ -3825,15 +3348,6 @@
       "webp_path": "sprites/ld_spac/tvcorn.webp"
     },
     {
-      "name": "thrustG",
-      "txd": "ld_spac",
-      "full_txd_sprite": "ld_spac:thrustG",
-      "width": 16,
-      "height": 16,
-      "png_path": "sprites/ld_spac/thrustg.png",
-      "webp_path": "sprites/ld_spac/thrustg.webp"
-    },
-    {
       "name": "shoot",
       "txd": "ld_spac",
       "full_txd_sprite": "ld_spac:shoot",
@@ -3879,15 +3393,6 @@
       "webp_path": "sprites/ld_spac/layer.webp"
     },
     {
-      "name": "Health",
-      "txd": "ld_spac",
-      "full_txd_sprite": "ld_spac:Health",
-      "width": 16,
-      "height": 4,
-      "png_path": "sprites/ld_spac/health.png",
-      "webp_path": "sprites/ld_spac/health.webp"
-    },
-    {
       "name": "ex4",
       "txd": "ld_spac",
       "full_txd_sprite": "ld_spac:ex4",
@@ -3922,15 +3427,6 @@
       "height": 32,
       "png_path": "sprites/ld_spac/ex1.png",
       "webp_path": "sprites/ld_spac/ex1.webp"
-    },
-    {
-      "name": "DUALITY",
-      "txd": "ld_spac",
-      "full_txd_sprite": "ld_spac:DUALITY",
-      "width": 256,
-      "height": 128,
-      "png_path": "sprites/ld_spac/duality.png",
-      "webp_path": "sprites/ld_spac/duality.webp"
     },
     {
       "name": "dark",
@@ -4392,349 +3888,6 @@
       "height": 64,
       "png_path": "sprites/ld_tatt/10ls.png",
       "webp_path": "sprites/ld_tatt/10ls.webp"
-    }
-  ],
-  "loadscs": [
-    {
-      "name": "nvidia",
-      "txd": "loadscs",
-      "full_txd_sprite": "loadscs:nvidia",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadscs/nvidia.png",
-      "webp_path": "sprites/loadscs/nvidia.webp"
-    },
-    {
-      "name": "eax",
-      "txd": "loadscs",
-      "full_txd_sprite": "loadscs:eax",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadscs/eax.png",
-      "webp_path": "sprites/loadscs/eax.webp"
-    },
-    {
-      "name": "title_pc_EU",
-      "txd": "loadscs",
-      "full_txd_sprite": "loadscs:title_pc_EU",
-      "width": 1024,
-      "height": 1024,
-      "png_path": "sprites/loadscs/title_pc_eu.png",
-      "webp_path": "sprites/loadscs/title_pc_eu.webp"
-    },
-    {
-      "name": "title_pc_US",
-      "txd": "loadscs",
-      "full_txd_sprite": "loadscs:title_pc_US",
-      "width": 1024,
-      "height": 1024,
-      "png_path": "sprites/loadscs/title_pc_us.png",
-      "webp_path": "sprites/loadscs/title_pc_us.webp"
-    },
-    {
-      "name": "loadsc9",
-      "txd": "loadscs",
-      "full_txd_sprite": "loadscs:loadsc9",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadscs/loadsc9.png",
-      "webp_path": "sprites/loadscs/loadsc9.webp"
-    },
-    {
-      "name": "loadsc8",
-      "txd": "loadscs",
-      "full_txd_sprite": "loadscs:loadsc8",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadscs/loadsc8.png",
-      "webp_path": "sprites/loadscs/loadsc8.webp"
-    },
-    {
-      "name": "loadsc7",
-      "txd": "loadscs",
-      "full_txd_sprite": "loadscs:loadsc7",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadscs/loadsc7.png",
-      "webp_path": "sprites/loadscs/loadsc7.webp"
-    },
-    {
-      "name": "loadsc6",
-      "txd": "loadscs",
-      "full_txd_sprite": "loadscs:loadsc6",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadscs/loadsc6.png",
-      "webp_path": "sprites/loadscs/loadsc6.webp"
-    },
-    {
-      "name": "loadsc5",
-      "txd": "loadscs",
-      "full_txd_sprite": "loadscs:loadsc5",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadscs/loadsc5.png",
-      "webp_path": "sprites/loadscs/loadsc5.webp"
-    },
-    {
-      "name": "loadsc4",
-      "txd": "loadscs",
-      "full_txd_sprite": "loadscs:loadsc4",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadscs/loadsc4.png",
-      "webp_path": "sprites/loadscs/loadsc4.webp"
-    },
-    {
-      "name": "loadsc3",
-      "txd": "loadscs",
-      "full_txd_sprite": "loadscs:loadsc3",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadscs/loadsc3.png",
-      "webp_path": "sprites/loadscs/loadsc3.webp"
-    },
-    {
-      "name": "loadsc2",
-      "txd": "loadscs",
-      "full_txd_sprite": "loadscs:loadsc2",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadscs/loadsc2.png",
-      "webp_path": "sprites/loadscs/loadsc2.webp"
-    },
-    {
-      "name": "loadsc14",
-      "txd": "loadscs",
-      "full_txd_sprite": "loadscs:loadsc14",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadscs/loadsc14.png",
-      "webp_path": "sprites/loadscs/loadsc14.webp"
-    },
-    {
-      "name": "loadsc13",
-      "txd": "loadscs",
-      "full_txd_sprite": "loadscs:loadsc13",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadscs/loadsc13.png",
-      "webp_path": "sprites/loadscs/loadsc13.webp"
-    },
-    {
-      "name": "loadsc12",
-      "txd": "loadscs",
-      "full_txd_sprite": "loadscs:loadsc12",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadscs/loadsc12.png",
-      "webp_path": "sprites/loadscs/loadsc12.webp"
-    },
-    {
-      "name": "loadsc11",
-      "txd": "loadscs",
-      "full_txd_sprite": "loadscs:loadsc11",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadscs/loadsc11.png",
-      "webp_path": "sprites/loadscs/loadsc11.webp"
-    },
-    {
-      "name": "loadsc10",
-      "txd": "loadscs",
-      "full_txd_sprite": "loadscs:loadsc10",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadscs/loadsc10.png",
-      "webp_path": "sprites/loadscs/loadsc10.webp"
-    },
-    {
-      "name": "loadsc1",
-      "txd": "loadscs",
-      "full_txd_sprite": "loadscs:loadsc1",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadscs/loadsc1.png",
-      "webp_path": "sprites/loadscs/loadsc1.webp"
-    },
-    {
-      "name": "loadsc0",
-      "txd": "loadscs",
-      "full_txd_sprite": "loadscs:loadsc0",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadscs/loadsc0.png",
-      "webp_path": "sprites/loadscs/loadsc0.webp"
-    }
-  ],
-  "loadsuk": [
-    {
-      "name": "loadscuk",
-      "txd": "loadsuk",
-      "full_txd_sprite": "loadsuk:loadscuk",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadsuk/loadscuk.png",
-      "webp_path": "sprites/loadsuk/loadscuk.webp"
-    },
-    {
-      "name": "loadsc9",
-      "txd": "loadsuk",
-      "full_txd_sprite": "loadsuk:loadsc9",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadsuk/loadsc9.png",
-      "webp_path": "sprites/loadsuk/loadsc9.webp"
-    },
-    {
-      "name": "loadsc8",
-      "txd": "loadsuk",
-      "full_txd_sprite": "loadsuk:loadsc8",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadsuk/loadsc8.png",
-      "webp_path": "sprites/loadsuk/loadsc8.webp"
-    },
-    {
-      "name": "loadsc7",
-      "txd": "loadsuk",
-      "full_txd_sprite": "loadsuk:loadsc7",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadsuk/loadsc7.png",
-      "webp_path": "sprites/loadsuk/loadsc7.webp"
-    },
-    {
-      "name": "loadsc6",
-      "txd": "loadsuk",
-      "full_txd_sprite": "loadsuk:loadsc6",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadsuk/loadsc6.png",
-      "webp_path": "sprites/loadsuk/loadsc6.webp"
-    },
-    {
-      "name": "loadsc5",
-      "txd": "loadsuk",
-      "full_txd_sprite": "loadsuk:loadsc5",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadsuk/loadsc5.png",
-      "webp_path": "sprites/loadsuk/loadsc5.webp"
-    },
-    {
-      "name": "loadsc4",
-      "txd": "loadsuk",
-      "full_txd_sprite": "loadsuk:loadsc4",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadsuk/loadsc4.png",
-      "webp_path": "sprites/loadsuk/loadsc4.webp"
-    },
-    {
-      "name": "loadsc3",
-      "txd": "loadsuk",
-      "full_txd_sprite": "loadsuk:loadsc3",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadsuk/loadsc3.png",
-      "webp_path": "sprites/loadsuk/loadsc3.webp"
-    },
-    {
-      "name": "loadsc2",
-      "txd": "loadsuk",
-      "full_txd_sprite": "loadsuk:loadsc2",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadsuk/loadsc2.png",
-      "webp_path": "sprites/loadsuk/loadsc2.webp"
-    },
-    {
-      "name": "loadsc14",
-      "txd": "loadsuk",
-      "full_txd_sprite": "loadsuk:loadsc14",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadsuk/loadsc14.png",
-      "webp_path": "sprites/loadsuk/loadsc14.webp"
-    },
-    {
-      "name": "loadsc13",
-      "txd": "loadsuk",
-      "full_txd_sprite": "loadsuk:loadsc13",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadsuk/loadsc13.png",
-      "webp_path": "sprites/loadsuk/loadsc13.webp"
-    },
-    {
-      "name": "loadsc12",
-      "txd": "loadsuk",
-      "full_txd_sprite": "loadsuk:loadsc12",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadsuk/loadsc12.png",
-      "webp_path": "sprites/loadsuk/loadsc12.webp"
-    },
-    {
-      "name": "loadsc11",
-      "txd": "loadsuk",
-      "full_txd_sprite": "loadsuk:loadsc11",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadsuk/loadsc11.png",
-      "webp_path": "sprites/loadsuk/loadsc11.webp"
-    },
-    {
-      "name": "loadsc10",
-      "txd": "loadsuk",
-      "full_txd_sprite": "loadsuk:loadsc10",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadsuk/loadsc10.png",
-      "webp_path": "sprites/loadsuk/loadsc10.webp"
-    },
-    {
-      "name": "loadsc1",
-      "txd": "loadsuk",
-      "full_txd_sprite": "loadsuk:loadsc1",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadsuk/loadsc1.png",
-      "webp_path": "sprites/loadsuk/loadsc1.webp"
-    }
-  ],
-  "intro1": [
-    {
-      "name": "intro1",
-      "txd": "intro1",
-      "full_txd_sprite": "intro1:intro1",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/intro1/intro1.png",
-      "webp_path": "sprites/intro1/intro1.webp"
-    }
-  ],
-  "intro2": [
-    {
-      "name": "intro2",
-      "txd": "intro2",
-      "full_txd_sprite": "intro2:intro2",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/intro2/intro2.png",
-      "webp_path": "sprites/intro2/intro2.webp"
-    }
-  ],
-  "intro4": [
-    {
-      "name": "intro4",
-      "txd": "intro4",
-      "full_txd_sprite": "intro4:intro4",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/intro4/intro4.png",
-      "webp_path": "sprites/intro4/intro4.webp"
     }
   ],
   "ld_grav": [
@@ -5234,182 +4387,6 @@
       "height": 128,
       "png_path": "sprites/ld_shtr/bstars.png",
       "webp_path": "sprites/ld_shtr/bstars.webp"
-    }
-  ],
-  "load0uk": [
-    {
-      "name": "load0uk",
-      "txd": "load0uk",
-      "full_txd_sprite": "load0uk:load0uk",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/load0uk/load0uk.png",
-      "webp_path": "sprites/load0uk/load0uk.webp"
-    }
-  ],
-  "loadsc0": [
-    {
-      "name": "loadsc0",
-      "txd": "loadsc0",
-      "full_txd_sprite": "loadsc0:loadsc0",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadsc0/loadsc0.png",
-      "webp_path": "sprites/loadsc0/loadsc0.webp"
-    }
-  ],
-  "loadsc1": [
-    {
-      "name": "loadsc1",
-      "txd": "loadsc1",
-      "full_txd_sprite": "loadsc1:loadsc1",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadsc1/loadsc1.png",
-      "webp_path": "sprites/loadsc1/loadsc1.webp"
-    }
-  ],
-  "loadsc10": [
-    {
-      "name": "loadsc10",
-      "txd": "loadsc10",
-      "full_txd_sprite": "loadsc10:loadsc10",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadsc10/loadsc10.png",
-      "webp_path": "sprites/loadsc10/loadsc10.webp"
-    }
-  ],
-  "loadsc12": [
-    {
-      "name": "loadsc12",
-      "txd": "loadsc12",
-      "full_txd_sprite": "loadsc12:loadsc12",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadsc12/loadsc12.png",
-      "webp_path": "sprites/loadsc12/loadsc12.webp"
-    }
-  ],
-  "loadsc13": [
-    {
-      "name": "loadsc13",
-      "txd": "loadsc13",
-      "full_txd_sprite": "loadsc13:loadsc13",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadsc13/loadsc13.png",
-      "webp_path": "sprites/loadsc13/loadsc13.webp"
-    }
-  ],
-  "loadsc2": [
-    {
-      "name": "loadsc2",
-      "txd": "loadsc2",
-      "full_txd_sprite": "loadsc2:loadsc2",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadsc2/loadsc2.png",
-      "webp_path": "sprites/loadsc2/loadsc2.webp"
-    }
-  ],
-  "loadsc3": [
-    {
-      "name": "loadsc3",
-      "txd": "loadsc3",
-      "full_txd_sprite": "loadsc3:loadsc3",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadsc3/loadsc3.png",
-      "webp_path": "sprites/loadsc3/loadsc3.webp"
-    }
-  ],
-  "loadsc4": [
-    {
-      "name": "loadsc4",
-      "txd": "loadsc4",
-      "full_txd_sprite": "loadsc4:loadsc4",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadsc4/loadsc4.png",
-      "webp_path": "sprites/loadsc4/loadsc4.webp"
-    }
-  ],
-  "loadsc5": [
-    {
-      "name": "loadsc5",
-      "txd": "loadsc5",
-      "full_txd_sprite": "loadsc5:loadsc5",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadsc5/loadsc5.png",
-      "webp_path": "sprites/loadsc5/loadsc5.webp"
-    }
-  ],
-  "loadsc6": [
-    {
-      "name": "loadsc6",
-      "txd": "loadsc6",
-      "full_txd_sprite": "loadsc6:loadsc6",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadsc6/loadsc6.png",
-      "webp_path": "sprites/loadsc6/loadsc6.webp"
-    }
-  ],
-  "loadsc7": [
-    {
-      "name": "loadsc7",
-      "txd": "loadsc7",
-      "full_txd_sprite": "loadsc7:loadsc7",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadsc7/loadsc7.png",
-      "webp_path": "sprites/loadsc7/loadsc7.webp"
-    }
-  ],
-  "loadsc8": [
-    {
-      "name": "loadsc8",
-      "txd": "loadsc8",
-      "full_txd_sprite": "loadsc8:loadsc8",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadsc8/loadsc8.png",
-      "webp_path": "sprites/loadsc8/loadsc8.webp"
-    }
-  ],
-  "loadsc9": [
-    {
-      "name": "loadsc9",
-      "txd": "loadsc9",
-      "full_txd_sprite": "loadsc9:loadsc9",
-      "width": 512,
-      "height": 512,
-      "png_path": "sprites/loadsc9/loadsc9.png",
-      "webp_path": "sprites/loadsc9/loadsc9.webp"
-    }
-  ],
-  "splash1": [
-    {
-      "name": "splash1",
-      "txd": "splash1",
-      "full_txd_sprite": "splash1:splash1",
-      "width": 512,
-      "height": 256,
-      "png_path": "sprites/splash1/splash1.png",
-      "webp_path": "sprites/splash1/splash1.webp"
-    }
-  ],
-  "splash2": [
-    {
-      "name": "splash2",
-      "txd": "splash2",
-      "full_txd_sprite": "splash2:splash2",
-      "width": 512,
-      "height": 256,
-      "png_path": "sprites/splash2/splash2.png",
-      "webp_path": "sprites/splash2/splash2.webp"
     }
   ]
 }

@@ -3,5 +3,6 @@
     native <methods>;
 }
 
-# Keep NativeBridge
--keep class com.textdraw.editor.NativeBridge { *; }
+# Keep all app classes, activities, and bridges
+-keep class com.textdraw.editor.** { *; }
+-dontwarn com.textdraw.editor.**

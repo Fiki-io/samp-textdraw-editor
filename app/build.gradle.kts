@@ -38,7 +38,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -48,6 +49,19 @@ android {
         debug {
             isDebuggable = true
             signingConfig = signingConfigs.getByName("release")
+        }
+    }
+
+    packaging {
+        resources {
+            excludes += listOf(
+                "META-INF/*.version",
+                "DebugProbesKt.bin",
+                "kotlin-tooling-metadata.json",
+                "META-INF/DEPENDENCIES",
+                "META-INF/LICENSE*",
+                "META-INF/NOTICE*"
+            )
         }
     }
 
