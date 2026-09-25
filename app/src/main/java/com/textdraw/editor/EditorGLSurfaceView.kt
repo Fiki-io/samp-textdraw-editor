@@ -33,15 +33,27 @@ class EditorGLSurfaceView @JvmOverloads constructor(
     }
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
-        NativeBridge.nativeSurfaceCreated()
+        try {
+            NativeBridge.nativeSurfaceCreated()
+        } catch (t: Throwable) {
+            CrashHandler.handleManualException(context, t)
+        }
     }
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
-        NativeBridge.nativeSurfaceChanged(width, height)
+        try {
+            NativeBridge.nativeSurfaceChanged(width, height)
+        } catch (t: Throwable) {
+            CrashHandler.handleManualException(context, t)
+        }
     }
 
     override fun onDrawFrame(gl: GL10?) {
-        NativeBridge.nativeDrawFrame()
+        try {
+            NativeBridge.nativeDrawFrame()
+        } catch (t: Throwable) {
+            CrashHandler.handleManualException(context, t)
+        }
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -53,7 +65,11 @@ class EditorGLSurfaceView @JvmOverloads constructor(
         val y = event.y
 
         queueEvent {
-            NativeBridge.nativeTouchEvent(action, x, y, pointerCount)
+            try {
+                NativeBridge.nativeTouchEvent(action, x, y, pointerCount)
+            } catch (t: Throwable) {
+                CrashHandler.handleManualException(context, t)
+            }
         }
         return true
     }

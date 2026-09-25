@@ -33,6 +33,7 @@ set(ENGINE_SOURCES
     engine/PawnExporter.cpp
     ui/EditorUI.cpp
     utils/SampColorParser.cpp
+    utils/CrashHandlerNative.cpp
 )
 
 add_library(textdraw_editor SHARED

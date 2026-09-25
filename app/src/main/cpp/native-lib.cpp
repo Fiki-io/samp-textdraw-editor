@@ -11,6 +11,7 @@
 #include "ui/EditorUI.h"
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_opengl3.h"
+#include "utils/CrashHandlerNative.h"
 
 #define LOG_TAG "TextDraw_Native"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
@@ -87,6 +88,7 @@ Java_com_textdraw_editor_NativeBridge_nativeInit(JNIEnv* env, jobject thiz, jobj
         if (path_str) {
             g_storage_path = path_str;
             EditorUI::get().set_storage_directory(g_storage_path);
+            CrashHandlerNative::init("com.textdraw.editor", g_storage_path);
             env->ReleaseStringUTFChars(storage_path, path_str);
         }
     }
@@ -120,6 +122,8 @@ Java_com_textdraw_editor_NativeBridge_nativeSurfaceCreated(JNIEnv* env, jobject 
         return s_clipboard_cache.c_str();
     };
     
+    // Initialize OpenGL textures and systems on active EGL context
+    AssetManager::get().init_gl();
     DffRenderer::get().init();
     EditorUI::get().init();
     

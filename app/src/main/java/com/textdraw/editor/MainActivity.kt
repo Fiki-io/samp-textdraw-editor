@@ -28,18 +28,22 @@ class MainActivity : Activity() {
         // Hide status & navigation bars for immersive widescreen
         hideSystemUI()
 
-        // Ensure projects directory exists in app storage
-        val projectsDir = File(getExternalFilesDir(null), "projects")
-        if (!projectsDir.exists()) {
-            projectsDir.mkdirs()
+        try {
+            // Ensure projects directory exists in app storage
+            val projectsDir = File(getExternalFilesDir(null), "projects")
+            if (!projectsDir.exists()) {
+                projectsDir.mkdirs()
+            }
+
+            // Initialize Native C++ engine with APK assets and storage path
+            NativeBridge.nativeInit(assets, projectsDir.absolutePath)
+
+            // Set GL surface
+            glSurfaceView = EditorGLSurfaceView(this)
+            setContentView(glSurfaceView)
+        } catch (t: Throwable) {
+            CrashHandler.handleManualException(this, t)
         }
-
-        // Initialize Native C++ engine with APK assets and storage path
-        NativeBridge.nativeInit(assets, projectsDir.absolutePath)
-
-        // Set GL surface
-        glSurfaceView = EditorGLSurfaceView(this)
-        setContentView(glSurfaceView)
     }
 
     override fun onResume() {

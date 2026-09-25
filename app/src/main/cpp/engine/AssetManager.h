@@ -50,6 +50,7 @@ public:
     static AssetManager& get();
     
     void init(AAssetManager* mgr);
+    void init_gl();
     
     // Texture Loading & Caching (OpenGL ES)
     GLuint get_texture(const std::string& asset_path);

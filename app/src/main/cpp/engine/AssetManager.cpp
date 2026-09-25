@@ -1,5 +1,6 @@
 #include "AssetManager.h"
 #include <android/log.h>
+#include <EGL/egl.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "../utils/stb_image.h"
@@ -32,14 +33,17 @@ void AssetManager::init(AAssetManager* mgr) {
     
     // Load databases
     load_json_databases();
-    
-    // Pre-load font textures & UI textures
+    LOGI("Databases loaded successfully in nativeInit.");
+}
+
+void AssetManager::init_gl() {
+    LOGI("AssetManager::init_gl loading core textures with active EGL context...");
     font1_texture = get_texture("fonts/font1.png");
     font2_texture = get_texture("fonts/font2.png");
     mouse_texture = get_texture("ui/mouse.png");
     sampgui_texture = get_texture("ui/sampgui.png");
-    
-    LOGI("Preloaded core fonts and UI textures.");
+    LOGI("Preloaded core fonts and UI textures (font1=%u, font2=%u, mouse=%u, sampgui=%u).",
+         font1_texture, font2_texture, mouse_texture, sampgui_texture);
 }
 
 std::vector<uint8_t> AssetManager::read_asset_bytes(const std::string& path) {
@@ -157,6 +161,12 @@ void AssetManager::load_json_databases() {
 
 GLuint AssetManager::get_texture(const std::string& asset_path) {
     if (asset_path.empty()) return 0;
+
+    EGLContext egl_ctx = eglGetCurrentContext();
+    if (egl_ctx == EGL_NO_CONTEXT) {
+        LOGE("get_texture called without active EGL context for: %s", asset_path.c_str());
+        return 0;
+    }
     
     auto it = texture_cache.find(asset_path);
     if (it != texture_cache.end()) {
