@@ -6,7 +6,6 @@ plugins {
 android {
     namespace = "com.textdraw.editor"
     compileSdk = 34
-    ndkVersion = "26.1.10909125"
 
     defaultConfig {
         applicationId = "com.textdraw.editor"
