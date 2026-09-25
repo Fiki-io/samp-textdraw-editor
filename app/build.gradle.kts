@@ -27,6 +27,15 @@ android {
         }
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("release-key.jks")
+            storePassword = "textdraw_editor_keystore"
+            keyAlias = "textdraw_key"
+            keyPassword = "textdraw_editor_keystore"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -34,11 +43,11 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // Use debug signing for instant APK installation on devices
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
         }
         debug {
             isDebuggable = true
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 

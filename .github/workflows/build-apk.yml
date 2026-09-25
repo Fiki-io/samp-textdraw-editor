@@ -27,6 +27,17 @@ jobs:
         run: |
           yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses || true
 
+      - name: Cache Gradle & C++ Build Outputs
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            app/.cxx
+          key: ${{ runner.os }}-gradle-cxx-${{ hashFiles('**/*.gradle*', '**/CMakeLists.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-cxx-
+
       - name: Grant Execute Permission for Gradlew
         run: chmod +x gradlew
 
