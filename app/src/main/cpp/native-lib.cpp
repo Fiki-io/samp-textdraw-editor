@@ -47,7 +47,7 @@ static void android_set_clipboard(const char* text) {
     }
 }
 
-static std::string android_get_clipboard() {
+std::string android_get_clipboard() {
     std::string result = "";
     if (!g_vm) return result;
     JNIEnv* env = nullptr;

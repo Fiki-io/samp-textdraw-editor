@@ -37,6 +37,9 @@ private:
     void render_dpad_widget(TextDrawManager& manager, Viewport& viewport);
     
     // Modals
+    void render_file_modal(TextDrawManager& manager);
+    void render_edit_modal(TextDrawManager& manager);
+    void render_view_modal(Viewport& viewport);
     void render_sprite_picker(TextDrawManager& manager);
     void render_model_picker(TextDrawManager& manager);
     void render_export_modal(TextDrawManager& manager);
@@ -45,6 +48,10 @@ private:
     void render_load_project_modal(TextDrawManager& manager);
     void render_carcols_palette_modal(TextDraw* td, bool target_is_box, int veh_col_index = -1);
     
+    bool show_file_modal = false;
+    bool show_edit_modal = false;
+    bool show_view_modal = false;
+    bool show_new_project_confirm = false;
     bool show_sprite_picker = false;
     bool show_model_picker = false;
     bool show_export_modal = false;

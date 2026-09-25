@@ -18,12 +18,14 @@ uniform mat4 uModel;
 
 out vec3 vNormal;
 out vec2 vUV;
-out vec3 vFragPos;
+out vec3 vModelPos;
+out vec3 vModelNormal;
 
 void main() {
     vNormal = mat3(uModel) * aNormal;
+    vModelNormal = aNormal;
     vUV = aUV;
-    vFragPos = vec3(uModel * vec4(aPos, 1.0));
+    vModelPos = aPos;
     gl_Position = uMVP * vec4(aPos, 1.0);
 }
 )";
@@ -33,7 +35,8 @@ precision mediump float;
 
 in vec3 vNormal;
 in vec2 vUV;
-in vec3 vFragPos;
+in vec3 vModelPos;
+in vec3 vModelNormal;
 
 uniform vec3 uColor1;
 uniform vec3 uColor2;
@@ -44,17 +47,50 @@ out vec4 FragColor;
 void main() {
     vec3 norm = normalize(vNormal);
     vec3 lightDir = normalize(uLightDir);
-    float diff = max(dot(norm, lightDir), 0.25);
     
-    // GTA car shader lighting
-    vec3 baseColor = mix(uColor1, uColor2, step(0.5, vUV.y));
-    if (length(uColor1) < 0.01 && length(uColor2) < 0.01) {
-        baseColor = vec3(0.85, 0.85, 0.9);
+    // Key directional light
+    float diff1 = max(dot(norm, lightDir), 0.0);
+    // Fill light from opposite side
+    vec3 fillDir = normalize(vec3(-lightDir.x, 0.5, -lightDir.z));
+    float diff2 = max(dot(norm, fillDir), 0.0) * 0.35;
+    
+    // Specular highlight
+    vec3 viewDir = vec3(0.0, 0.0, 1.0);
+    vec3 halfDir = normalize(lightDir + viewDir);
+    float spec = pow(max(dot(norm, halfDir), 0.0), 20.0) * 0.35;
+    
+    // Base vehicle paint colors
+    vec3 bodyCol = uColor1;
+    if (length(bodyCol) < 0.02) {
+        bodyCol = vec3(0.85, 0.15, 0.15); // Default attractive sports red if black
     }
     
-    vec3 ambient = vec3(0.35, 0.35, 0.4);
-    vec3 result = (ambient + diff * vec3(1.0, 0.98, 0.92)) * baseColor;
-    FragColor = vec4(result, 1.0);
+    vec3 matColor = bodyCol;
+    if (vUV.y > 0.55 && length(uColor2) > 0.02) {
+        matColor = mix(bodyCol, uColor2, 0.85);
+    }
+    
+    // Tires & undercarriage detection (low Y in OpenGL coordinates)
+    if (vModelPos.y < -0.35) {
+        matColor = vec3(0.12, 0.12, 0.14); // Dark rubber
+        spec *= 0.2;
+    }
+    // Windshield/glass detection (higher Y, steep normal)
+    else if (vModelPos.y > 0.15 && vModelPos.y < 0.55 && abs(vModelNormal.z) > 0.35 && vModelNormal.y > 0.2) {
+        matColor = vec3(0.20, 0.25, 0.32); // Tinted glass
+        spec *= 1.5;
+    }
+    
+    vec3 ambient = vec3(0.32, 0.33, 0.38);
+    vec3 lightCol = vec3(1.0, 0.98, 0.95);
+    vec3 litColor = matColor * (ambient + (diff1 + diff2) * lightCol) + vec3(spec);
+    
+    // Subtle rim lighting for crisp edges
+    float rim = 1.0 - max(dot(norm, viewDir), 0.0);
+    rim = pow(rim, 3.0) * 0.3;
+    litColor += rim * vec3(0.7, 0.8, 1.0);
+    
+    FragColor = vec4(litColor, 1.0);
 }
 )";
 
@@ -219,6 +255,37 @@ bool DffRenderer::load_model_mesh(int model_id, DffMesh& out_mesh) {
                 break;
             }
         }
+    } else if (model_id >= 321 && model_id <= 372) {
+        switch (model_id) {
+            case 331: dff_name = "brassknuckle.dff"; break;
+            case 334: dff_name = "nitestick.dff"; break;
+            case 335: dff_name = "knifecur.dff"; break;
+            case 336: dff_name = "bat.dff"; break;
+            case 337: dff_name = "shovel.dff"; break;
+            case 339: dff_name = "katana.dff"; break;
+            case 341: dff_name = "chnsaw.dff"; break;
+            case 342: dff_name = "grenade.dff"; break;
+            case 344: dff_name = "molotov.dff"; break;
+            case 346: dff_name = "colt45.dff"; break;
+            case 347: dff_name = "silenced.dff"; break;
+            case 348: dff_name = "desert_eagle.dff"; break;
+            case 349: dff_name = "chromegun.dff"; break;
+            case 350: dff_name = "sawnoff.dff"; break;
+            case 351: dff_name = "shotgspa.dff"; break;
+            case 352: dff_name = "micro_uzi.dff"; break;
+            case 353: dff_name = "mp5lng.dff"; break;
+            case 355: dff_name = "ak47.dff"; break;
+            case 356: dff_name = "m4.dff"; break;
+            case 357: dff_name = "cuntgun.dff"; break;
+            case 358: dff_name = "sniper.dff"; break;
+            case 359: dff_name = "rocketla.dff"; break;
+            case 360: dff_name = "heatseek.dff"; break;
+            case 361: dff_name = "flame.dff"; break;
+            case 362: dff_name = "minigun.dff"; break;
+            case 371: dff_name = "gun_para.dff"; break;
+            case 372: dff_name = "tec9.dff"; break;
+            default:  dff_name = "m4.dff"; break;
+        }
     } else {
         const auto& skintar = AssetManager::get().get_skins();
         for (const auto& s : skintar) {
@@ -232,6 +299,35 @@ bool DffRenderer::load_model_mesh(int model_id, DffMesh& out_mesh) {
     bool loaded = false;
     if (!dff_name.empty()) {
         auto bytes = AssetManager::get().load_model_dff(dff_name);
+        if (!bytes.empty()) {
+            loaded = parse_dff_data(bytes, out_mesh);
+        }
+    }
+    
+    // If specific DFF is not found, map to closest authentic GTA SA model (NEVER dummy cube!)
+    if (!loaded) {
+        std::string fallback_dff = "infernus.dff";
+        if (model_id >= 400 && model_id <= 611) {
+            if (model_id == 509 || model_id == 481 || model_id == 510) {
+                fallback_dff = "mtbike.dff";
+            } else if (model_id >= 461 && model_id <= 468) {
+                fallback_dff = "pcj600.dff";
+            } else if (model_id >= 511 && model_id <= 520) {
+                fallback_dff = "shamal.dff";
+            } else if (model_id >= 487 && model_id <= 488) {
+                fallback_dff = "maverick.dff";
+            } else if (model_id >= 446 && model_id <= 454) {
+                fallback_dff = "speeder.dff";
+            } else {
+                fallback_dff = "infernus.dff";
+            }
+        } else if (model_id >= 321 && model_id <= 372) {
+            fallback_dff = "m4.dff";
+        } else {
+            fallback_dff = "fam1.dff";
+        }
+        
+        auto bytes = AssetManager::get().load_model_dff(fallback_dff);
         if (!bytes.empty()) {
             loaded = parse_dff_data(bytes, out_mesh);
         }
@@ -261,7 +357,7 @@ static void parse_rw_geometries_recursive(const uint8_t* data, size_t offset, si
                 if (stype == 0x01) {
                     const uint8_t* ptr = data + header_end + 12;
                     uint16_t flags = *reinterpret_cast<const uint16_t*>(ptr);
-                    uint8_t num_uv = *(ptr + 2);
+                    uint16_t num_uv = *reinterpret_cast<const uint16_t*>(ptr + 2);
                     uint32_t num_tris = *reinterpret_cast<const uint32_t*>(ptr + 4);
                     uint32_t num_verts = *reinterpret_cast<const uint32_t*>(ptr + 8);
                     
@@ -269,9 +365,10 @@ static void parse_rw_geometries_recursive(const uint8_t* data, size_t offset, si
                         size_t cur = header_end + 12 + 16;
                         if (flags & 0x0008) cur += num_verts * 4; // prelit colors
                         const float* uvs = nullptr;
-                        if ((flags & 0x0004) || num_uv > 0) {
+                        uint16_t actual_uv = (num_uv > 0) ? num_uv : ((flags & 0x0004) ? 1 : 0);
+                        if (actual_uv > 0) {
                             uvs = reinterpret_cast<const float*>(data + cur);
-                            cur += num_verts * 8 * std::max((int)num_uv, 1);
+                            cur += num_verts * 8 * actual_uv;
                         }
                         
                         const uint16_t* tris = reinterpret_cast<const uint16_t*>(data + cur);
@@ -280,9 +377,10 @@ static void parse_rw_geometries_recursive(const uint8_t* data, size_t offset, si
                         if (cur + 24 <= chunk_end) {
                             const float* bounds = reinterpret_cast<const float*>(data + cur);
                             if (bounds[3] > out_bounds[3]) {
+                                // GTA coords -> OpenGL: X=Right, Y=Up (GTA Z), Z=-Forward (GTA -Y)
                                 out_bounds[0] = bounds[0];
-                                out_bounds[1] = bounds[1];
-                                out_bounds[2] = bounds[2];
+                                out_bounds[1] = bounds[2];
+                                out_bounds[2] = -bounds[1];
                                 out_bounds[3] = bounds[3];
                             }
                             cur += 16;
@@ -301,13 +399,15 @@ static void parse_rw_geometries_recursive(const uint8_t* data, size_t offset, si
                                 uint16_t base_index = (uint16_t)out_verts.size();
                                 for (uint32_t i = 0; i < num_verts; ++i) {
                                     DffVertex v;
+                                    // GTA coords: X=Right, Y=Forward, Z=Up
+                                    // OpenGL coords: X=Right, Y=Up (GTA Z), Z=-Forward (GTA -Y)
                                     v.x = vert_pos[i * 3 + 0];
-                                    v.y = vert_pos[i * 3 + 1];
-                                    v.z = vert_pos[i * 3 + 2];
+                                    v.y = vert_pos[i * 3 + 2];
+                                    v.z = -vert_pos[i * 3 + 1];
                                     if (vert_norm) {
                                         v.nx = vert_norm[i * 3 + 0];
-                                        v.ny = vert_norm[i * 3 + 1];
-                                        v.nz = vert_norm[i * 3 + 2];
+                                        v.ny = vert_norm[i * 3 + 2];
+                                        v.nz = -vert_norm[i * 3 + 1];
                                     } else {
                                         v.nx = 0.0f; v.ny = 1.0f; v.nz = 0.0f;
                                     }
@@ -347,12 +447,28 @@ bool DffRenderer::parse_dff_data(const std::vector<uint8_t>& data, DffMesh& out_
     
     std::vector<DffVertex> verts;
     std::vector<uint16_t> indices;
-    float bounds[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+    float bounds[4] = {0.0f, 0.0f, 0.0f, 0.0f};
     
     parse_rw_geometries_recursive(data.data(), 0, data.size(), verts, indices, bounds);
     
     if (verts.empty() || indices.empty()) {
         return false;
+    }
+    
+    if (bounds[3] <= 0.1f) {
+        float min_x = verts[0].x, max_x = verts[0].x;
+        float min_y = verts[0].y, max_y = verts[0].y;
+        float min_z = verts[0].z, max_z = verts[0].z;
+        for (const auto& v : verts) {
+            min_x = std::min(min_x, v.x); max_x = std::max(max_x, v.x);
+            min_y = std::min(min_y, v.y); max_y = std::max(max_y, v.y);
+            min_z = std::min(min_z, v.z); max_z = std::max(max_z, v.z);
+        }
+        bounds[0] = (min_x + max_x) * 0.5f;
+        bounds[1] = (min_y + max_y) * 0.5f;
+        bounds[2] = (min_z + max_z) * 0.5f;
+        float dx = max_x - min_x, dy = max_y - min_y, dz = max_z - min_z;
+        bounds[3] = std::sqrt(dx*dx + dy*dy + dz*dz) * 0.5f;
     }
     
     out_mesh.bound_sphere[0] = bounds[0];

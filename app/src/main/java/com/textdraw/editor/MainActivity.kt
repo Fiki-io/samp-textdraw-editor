@@ -115,12 +115,29 @@ class MainActivity : Activity() {
         @JvmStatic
         fun getFromClipboard(): String {
             var result = ""
-            instance?.get()?.let { activity ->
-                val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                val clip = clipboard.primaryClip
-                if (clip != null && clip.itemCount > 0) {
-                    result = clip.getItemAt(0).text?.toString() ?: ""
+            val activity = instance?.get() ?: return ""
+            try {
+                if (android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) {
+                    val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+                    val clip = clipboard?.primaryClip
+                    if (clip != null && clip.itemCount > 0) {
+                        result = clip.getItemAt(0).coerceToText(activity).toString()
+                    }
+                } else {
+                    val future = java.util.concurrent.FutureTask {
+                        val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+                        val clip = clipboard?.primaryClip
+                        if (clip != null && clip.itemCount > 0) {
+                            clip.getItemAt(0).coerceToText(activity).toString()
+                        } else {
+                            ""
+                        }
+                    }
+                    activity.runOnUiThread(future)
+                    result = future.get(500, java.util.concurrent.TimeUnit.MILLISECONDS) ?: ""
                 }
+            } catch (e: Throwable) {
+                android.util.Log.e("MainActivity", "Error getting clipboard: ${e.message}")
             }
             return result
         }
@@ -141,8 +158,22 @@ class MainActivity : Activity() {
                     val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as? android.view.inputmethod.InputMethodManager ?: return@runOnUiThread
                     if (activity.isFinishing) return@runOnUiThread
                     if (visible) {
-                        imm.showSoftInput(activity.glSurfaceView, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
+                        activity.glSurfaceView.isFocusable = true
+                        activity.glSurfaceView.isFocusableInTouchMode = true
+                        activity.glSurfaceView.requestFocus()
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                            try {
+                                activity.window?.decorView?.windowInsetsController?.show(WindowInsets.Type.ime())
+                            } catch (_: Throwable) {}
+                        }
+                        imm.showSoftInput(activity.glSurfaceView, android.view.inputmethod.InputMethodManager.SHOW_FORCED)
+                        imm.toggleSoftInput(android.view.inputmethod.InputMethodManager.SHOW_FORCED, android.view.inputmethod.InputMethodManager.HIDE_IMPLICIT_ONLY)
                     } else {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                            try {
+                                activity.window?.decorView?.windowInsetsController?.hide(WindowInsets.Type.ime())
+                            } catch (_: Throwable) {}
+                        }
                         imm.hideSoftInputFromWindow(activity.glSurfaceView.windowToken, 0)
                     }
                 }
@@ -154,12 +185,21 @@ class MainActivity : Activity() {
             instance?.get()?.let { activity ->
                 activity.runOnUiThread {
                     if (activity.isFinishing) return@runOnUiThread
+                    val isMultiline = (fieldId == 1 || fieldId == 5)
                     val input = android.widget.EditText(activity).apply {
                         setText(initialText)
                         setSelection(text.length)
                         setTextColor(android.graphics.Color.WHITE)
                         setBackgroundColor(android.graphics.Color.parseColor("#22242A"))
                         setPadding(32, 24, 32, 24)
+                        if (isMultiline) {
+                            isSingleLine = false
+                            minLines = 4
+                            maxLines = 10
+                            gravity = android.view.Gravity.TOP or android.view.Gravity.START
+                        } else {
+                            isSingleLine = true
+                        }
                     }
                     val container = android.widget.FrameLayout(activity).apply {
                         setPadding(40, 20, 40, 10)
@@ -172,6 +212,13 @@ class MainActivity : Activity() {
                             val result = input.text.toString()
                             activity.glSurfaceView.queueEvent {
                                 NativeBridge.nativeSetDialogText(fieldId, result)
+                            }
+                        }
+                        .setNeutralButton("Tempel Clipboard") { _, _ ->
+                            val clipText = getFromClipboard()
+                            if (clipText.isNotEmpty()) {
+                                input.setText(clipText)
+                                input.setSelection(input.text.length)
                             }
                         }
                         .setNegativeButton("Batal", null)

@@ -14,13 +14,14 @@ EditorUI& EditorUI::get() {
 }
 
 extern void android_show_text_dialog(const char* title, const char* initial_text, int field_id);
+extern std::string android_get_clipboard();
 
 void EditorUI::init() {
     apply_gtasa_theme();
 }
 
 void EditorUI::apply_ui_scale(float scale) {
-    ui_scale = std::max(1.3f, scale);
+    ui_scale = std::clamp(scale, 1.15f, 1.40f);
     ImGuiIO& io = ImGui::GetIO();
     io.FontGlobalScale = ui_scale;
     apply_gtasa_theme();
@@ -97,6 +98,9 @@ void EditorUI::render(TextDrawManager& manager, Viewport& viewport) {
     render_dpad_widget(manager, viewport);
     
     // Modals
+    if (show_file_modal) render_file_modal(manager);
+    if (show_edit_modal) render_edit_modal(manager);
+    if (show_view_modal) render_view_modal(viewport);
     if (show_sprite_picker) render_sprite_picker(manager);
     if (show_model_picker) render_model_picker(manager);
     if (show_export_modal) render_export_modal(manager);
@@ -256,53 +260,27 @@ void EditorUI::render_canvas_overlay(TextDrawManager& manager, Viewport& viewpor
 
 void EditorUI::render_top_bar(TextDrawManager& manager, Viewport& viewport) {
     if (ImGui::BeginMainMenuBar()) {
-        ImGui::TextColored(ImVec4(0.95f, 0.72f, 0.15f, 1.0f), "GTA SA-MP TEXTDRAW");
+        ImGui::TextColored(ImVec4(0.95f, 0.72f, 0.15f, 1.0f), "GTA SA-MP");
         ImGui::Separator();
         
-        if (ImGui::BeginMenu("File")) {
-            if (ImGui::MenuItem("New Project")) manager.clear_all();
-            ImGui::Separator();
-            if (ImGui::MenuItem("Save Project (.json)")) open_save_project_modal();
-            if (ImGui::MenuItem("Open Project (.json)")) open_load_project_modal();
-            ImGui::Separator();
-            if (ImGui::MenuItem("Export Pawn Code (.pwn)")) open_export_modal();
-            if (ImGui::MenuItem("Import Pawn Code...")) open_import_modal();
-            ImGui::EndMenu();
+        // Touch-safe top buttons (no auto-dropdown that triggers accidental touch clicks)
+        if (ImGui::Button("FILE")) {
+            show_file_modal = true;
+        }
+        if (ImGui::Button("EDIT")) {
+            show_edit_modal = true;
+        }
+        if (ImGui::Button("VIEW")) {
+            show_view_modal = true;
         }
         
-        if (ImGui::BeginMenu("Edit")) {
-            if (ImGui::MenuItem("Undo", "Ctrl+Z", false, manager.can_undo())) manager.undo();
-            if (ImGui::MenuItem("Redo", "Ctrl+Y", false, manager.can_redo())) manager.redo();
-            ImGui::Separator();
-            if (ImGui::MenuItem("Duplicate", "Ctrl+D")) manager.duplicate_selected();
-            if (ImGui::MenuItem("Delete", "Del")) manager.delete_selected();
-            ImGui::EndMenu();
-        }
-        
-        if (ImGui::BeginMenu("View")) {
-            bool is_4_3 = (viewport.aspect_mode == AspectRatioMode::RATIO_4_3);
-            if (ImGui::MenuItem("4:3 Classic SA-MP", nullptr, is_4_3)) {
-                viewport.aspect_mode = AspectRatioMode::RATIO_4_3;
-                viewport.update_viewport_rect();
-            }
-            if (ImGui::MenuItem("16:9 Widescreen", nullptr, !is_4_3)) {
-                viewport.aspect_mode = AspectRatioMode::RATIO_16_9;
-                viewport.update_viewport_rect();
-            }
-            ImGui::Separator();
-            ImGui::MenuItem("Grid Lines", nullptr, &viewport.enable_grid);
-            if (ImGui::MenuItem("Reset Zoom & Pan")) viewport.reset_view();
-            ImGui::EndMenu();
-        }
-        
-        // Quick tools in menu bar
         ImGui::Separator();
         if (ImGui::Button("Undo") && manager.can_undo()) manager.undo();
         if (ImGui::Button("Redo") && manager.can_redo()) manager.redo();
         
         ImGui::Separator();
         ImGui::Text("Snap:");
-        ImGui::SetNextItemWidth(70);
+        ImGui::SetNextItemWidth(65.0f * ui_scale);
         float steps[] = {0.1f, 0.5f, 1.0f, 5.0f, 10.0f};
         const char* step_names[] = {"0.1", "0.5", "1.0", "5.0", "10.0"};
         int cur_step = 2; // default 1.0
@@ -313,13 +291,160 @@ void EditorUI::render_top_bar(TextDrawManager& manager, Viewport& viewport) {
         }
         
         // Export button right aligned
-        ImGui::SetCursorPosX(ImGui::GetWindowWidth() - 110.0f);
-        if (ImGui::Button("EXPORT PWN")) {
-            open_export_modal();
+        float exp_btn_w = 110.0f * ui_scale;
+        if (ImGui::GetWindowWidth() > 480.0f) {
+            ImGui::SetCursorPosX(ImGui::GetWindowWidth() - exp_btn_w - 10.0f);
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.85f, 0.65f, 0.15f, 0.90f));
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.10f, 0.10f, 0.12f, 1.00f));
+            if (ImGui::Button("EXPORT PWN", ImVec2(exp_btn_w, 0))) {
+                open_export_modal();
+            }
+            ImGui::PopStyleColor(2);
         }
         
         ImGui::EndMainMenuBar();
     }
+}
+
+void EditorUI::render_file_modal(TextDrawManager& manager) {
+    ImGuiIO& io = ImGui::GetIO();
+    float s = std::clamp(ui_scale, 1.0f, 1.35f);
+    float w = std::min(io.DisplaySize.x * 0.88f, 380.0f * s);
+    float h = std::min(io.DisplaySize.y * 0.88f, 340.0f * s);
+    
+    ImGui::SetNextWindowSize(ImVec2(w, h), ImGuiCond_Always);
+    ImGui::SetNextWindowPos(ImVec2((io.DisplaySize.x - w) * 0.5f, (io.DisplaySize.y - h) * 0.5f), ImGuiCond_Always);
+    
+    if (ImGui::Begin("File Menu##Modal", &show_file_modal, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse)) {
+        ImVec2 b_size(-1, 38.0f * s);
+        
+        if (show_new_project_confirm) {
+            ImGui::TextColored(ImVec4(1.0f, 0.35f, 0.35f, 1.0f), "Konfirmasi Buat Project Baru?");
+            ImGui::TextWrapped("Semua TextDraw saat ini akan dihapus.");
+            ImGui::Spacing();
+            if (ImGui::Button("YA, BERSIHKAN SEMUA", ImVec2(-1, 40.0f * s))) {
+                manager.clear_all();
+                show_new_project_confirm = false;
+                show_file_modal = false;
+            }
+            if (ImGui::Button("BATAL", ImVec2(-1, 34.0f * s))) {
+                show_new_project_confirm = false;
+            }
+        } else {
+            if (ImGui::Button("+ New Project", b_size)) {
+                if (manager.get_all_textdraws().empty()) {
+                    manager.clear_all();
+                    show_file_modal = false;
+                } else {
+                    show_new_project_confirm = true;
+                }
+            }
+            if (ImGui::Button("Save Project (.json)", b_size)) {
+                show_file_modal = false;
+                open_save_project_modal();
+            }
+            if (ImGui::Button("Open Project (.json)", b_size)) {
+                show_file_modal = false;
+                open_load_project_modal();
+            }
+            if (ImGui::Button("Export Pawn Code (.pwn)", b_size)) {
+                show_file_modal = false;
+                open_export_modal();
+            }
+            if (ImGui::Button("Import Pawn Code...", b_size)) {
+                show_file_modal = false;
+                open_import_modal();
+            }
+            ImGui::Spacing();
+            if (ImGui::Button("Tutup", ImVec2(-1, 32.0f * s))) {
+                show_file_modal = false;
+            }
+        }
+    }
+    ImGui::End();
+}
+
+void EditorUI::render_edit_modal(TextDrawManager& manager) {
+    ImGuiIO& io = ImGui::GetIO();
+    float s = std::clamp(ui_scale, 1.0f, 1.35f);
+    float w = std::min(io.DisplaySize.x * 0.88f, 360.0f * s);
+    float h = std::min(io.DisplaySize.y * 0.88f, 310.0f * s);
+    
+    ImGui::SetNextWindowSize(ImVec2(w, h), ImGuiCond_Always);
+    ImGui::SetNextWindowPos(ImVec2((io.DisplaySize.x - w) * 0.5f, (io.DisplaySize.y - h) * 0.5f), ImGuiCond_Always);
+    
+    if (ImGui::Begin("Edit Menu##Modal", &show_edit_modal, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse)) {
+        ImVec2 b_size(-1, 38.0f * s);
+        
+        bool can_u = manager.can_undo();
+        if (!can_u) ImGui::BeginDisabled();
+        if (ImGui::Button("Undo (Ctrl+Z)", b_size)) {
+            manager.undo();
+            show_edit_modal = false;
+        }
+        if (!can_u) ImGui::EndDisabled();
+        
+        bool can_r = manager.can_redo();
+        if (!can_r) ImGui::BeginDisabled();
+        if (ImGui::Button("Redo (Ctrl+Y)", b_size)) {
+            manager.redo();
+            show_edit_modal = false;
+        }
+        if (!can_r) ImGui::EndDisabled();
+        
+        bool has_sel = (manager.get_active_textdraw() != nullptr);
+        if (!has_sel) ImGui::BeginDisabled();
+        if (ImGui::Button("Duplicate Selected", b_size)) {
+            manager.duplicate_selected();
+            show_edit_modal = false;
+        }
+        if (ImGui::Button("Delete Selected", b_size)) {
+            manager.delete_selected();
+            show_edit_modal = false;
+        }
+        if (!has_sel) ImGui::EndDisabled();
+        
+        ImGui::Spacing();
+        if (ImGui::Button("Tutup", ImVec2(-1, 32.0f * s))) {
+            show_edit_modal = false;
+        }
+    }
+    ImGui::End();
+}
+
+void EditorUI::render_view_modal(Viewport& viewport) {
+    ImGuiIO& io = ImGui::GetIO();
+    float s = std::clamp(ui_scale, 1.0f, 1.35f);
+    float w = std::min(io.DisplaySize.x * 0.88f, 360.0f * s);
+    float h = std::min(io.DisplaySize.y * 0.88f, 290.0f * s);
+    
+    ImGui::SetNextWindowSize(ImVec2(w, h), ImGuiCond_Always);
+    ImGui::SetNextWindowPos(ImVec2((io.DisplaySize.x - w) * 0.5f, (io.DisplaySize.y - h) * 0.5f), ImGuiCond_Always);
+    
+    if (ImGui::Begin("View Settings##Modal", &show_view_modal, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse)) {
+        ImVec2 b_size(-1, 36.0f * s);
+        
+        bool is_4_3 = (viewport.aspect_mode == AspectRatioMode::RATIO_4_3);
+        if (ImGui::Button(is_4_3 ? "[v] 4:3 Classic SA-MP (Aktif)" : "4:3 Classic SA-MP", b_size)) {
+            viewport.aspect_mode = AspectRatioMode::RATIO_4_3;
+            viewport.update_viewport_rect();
+        }
+        if (ImGui::Button(!is_4_3 ? "[v] 16:9 Widescreen (Aktif)" : "16:9 Widescreen", b_size)) {
+            viewport.aspect_mode = AspectRatioMode::RATIO_16_9;
+            viewport.update_viewport_rect();
+        }
+        ImGui::Spacing();
+        ImGui::Checkbox("Tampilkan Grid Lines", &viewport.enable_grid);
+        ImGui::Spacing();
+        if (ImGui::Button("Reset Zoom & Pan", b_size)) {
+            viewport.reset_view();
+            show_view_modal = false;
+        }
+        if (ImGui::Button("Tutup", ImVec2(-1, 32.0f * s))) {
+            show_view_modal = false;
+        }
+    }
+    ImGui::End();
 }
 
 void EditorUI::render_bottom_toolbar(TextDrawManager& manager, Viewport& viewport) {
@@ -548,16 +673,20 @@ void EditorUI::render_dpad_widget(TextDrawManager& manager, Viewport& viewport) 
     if (!td) return;
     
     ImGuiIO& io = ImGui::GetIO();
-    float s = std::max(1.0f, ui_scale / 1.35f);
-    float w = 170.0f * s;
-    float h = 170.0f * s;
+    float s = std::clamp(ui_scale, 1.0f, 1.25f);
+    float w = 146.0f * s;
+    float h = 146.0f * s;
     
-    ImGui::SetNextWindowPos(ImVec2(16.0f, io.DisplaySize.y - h - 75.0f * s), ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowSize(ImVec2(w, h));
+    float pos_x = 12.0f * s;
+    float pos_y = io.DisplaySize.y - h - 68.0f * s;
+    if (pos_y < 42.0f * s) pos_y = 42.0f * s;
     
-    ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar;
+    ImGui::SetNextWindowPos(ImVec2(pos_x, pos_y), ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2(w, h), ImGuiCond_Always);
+    
+    ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse;
     if (ImGui::Begin("Micro D-Pad", nullptr, flags)) {
-        float btn_size = 42.0f * s;
+        float btn_size = 36.0f * s;
         
         // Up
         ImGui::SetCursorPosX((w - btn_size) * 0.5f - 8.0f * s);
@@ -595,22 +724,35 @@ void EditorUI::render_dpad_widget(TextDrawManager& manager, Viewport& viewport) 
 }
 
 void EditorUI::render_sprite_picker(TextDrawManager& manager) {
-    ImGui::SetNextWindowSize(ImVec2(600, 500), ImGuiCond_FirstUseEver);
-    if (ImGui::Begin("Browse GTA SA Sprites (591 Sprites)", &show_sprite_picker)) {
-        ImGui::InputText("Filter", sprite_search_filter, sizeof(sprite_search_filter));
+    ImGuiIO& io = ImGui::GetIO();
+    float s = std::clamp(ui_scale, 1.0f, 1.35f);
+    float w = std::min(io.DisplaySize.x * 0.92f, 620.0f * s);
+    float h = std::min(io.DisplaySize.y * 0.90f, 450.0f * s);
+    
+    ImGui::SetNextWindowSize(ImVec2(w, h), ImGuiCond_Always);
+    ImGui::SetNextWindowPos(ImVec2((io.DisplaySize.x - w) * 0.5f, (io.DisplaySize.y - h) * 0.5f), ImGuiCond_Always);
+    
+    if (ImGui::Begin("Browse GTA SA Sprites (591 Sprites)", &show_sprite_picker, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse)) {
+        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 75.0f * s);
+        ImGui::InputText("Filter##Sprite", sprite_search_filter, sizeof(sprite_search_filter));
+        ImGui::SameLine();
+        if (ImGui::Button("KETIK##Sprite", ImVec2(70.0f * s, 0))) {
+            android_show_text_dialog("Filter Sprite", sprite_search_filter, 3);
+        }
+        
         std::string filter = sprite_search_filter;
         std::transform(filter.begin(), filter.end(), filter.begin(), ::tolower);
         
         ImGui::Separator();
         
         const auto& groups = AssetManager::get().get_sprites();
-        if (ImGui::BeginChild("SpriteList")) {
+        float list_h = h - 110.0f * s;
+        if (ImGui::BeginChild("SpriteList", ImVec2(0, list_h), true)) {
             for (const auto& [txd, list] : groups) {
-                // Check if any sprite matches
                 bool group_matches = filter.empty() || (txd.find(filter) != std::string::npos);
                 if (!group_matches) {
-                    for (const auto& s : list) {
-                        if (s.name.find(filter) != std::string::npos) {
+                    for (const auto& sp : list) {
+                        if (sp.name.find(filter) != std::string::npos) {
                             group_matches = true;
                             break;
                         }
@@ -619,18 +761,18 @@ void EditorUI::render_sprite_picker(TextDrawManager& manager) {
                 if (!group_matches) continue;
                 
                 if (ImGui::CollapsingHeader(txd.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
-                    for (const auto& s : list) {
-                        if (!filter.empty() && s.full_name.find(filter) == std::string::npos) continue;
+                    for (const auto& sp : list) {
+                        if (!filter.empty() && sp.full_name.find(filter) == std::string::npos) continue;
                         
-                        if (ImGui::Button(s.full_name.c_str(), ImVec2(-1, 32))) {
+                        if (ImGui::Button(sp.full_name.c_str(), ImVec2(-1, 32.0f * s))) {
                             TextDraw* td = manager.get_active_textdraw();
                             if (td) {
                                 td->font = 4;
-                                td->text = s.full_name;
-                                td->text_width = (float)s.width;
-                                td->text_height = (float)s.height;
+                                td->text = sp.full_name;
+                                td->text_width = (float)sp.width;
+                                td->text_height = (float)sp.height;
                             } else {
-                                manager.create_sprite(320.0f, 240.0f, (float)s.width, (float)s.height, s.full_name);
+                                manager.create_sprite(320.0f, 240.0f, (float)sp.width, (float)sp.height, sp.full_name);
                             }
                             show_sprite_picker = false;
                         }
@@ -639,66 +781,141 @@ void EditorUI::render_sprite_picker(TextDrawManager& manager) {
             }
             ImGui::EndChild();
         }
+        
+        ImGui::Separator();
+        if (ImGui::Button("Tutup", ImVec2(100.0f * s, 32.0f * s))) {
+            show_sprite_picker = false;
+        }
     }
     ImGui::End();
 }
 
 void EditorUI::render_model_picker(TextDrawManager& manager) {
-    ImGui::SetNextWindowSize(ImVec2(550, 480), ImGuiCond_FirstUseEver);
-    if (ImGui::Begin("Browse 3D Preview Models", &show_model_picker)) {
-        ImGui::InputText("Search Vehicles / Skins", model_search_filter, sizeof(model_search_filter));
+    ImGuiIO& io = ImGui::GetIO();
+    float s = std::clamp(ui_scale, 1.0f, 1.35f);
+    float w = std::min(io.DisplaySize.x * 0.92f, 620.0f * s);
+    float h = std::min(io.DisplaySize.y * 0.90f, 450.0f * s);
+    
+    ImGui::SetNextWindowSize(ImVec2(w, h), ImGuiCond_Always);
+    ImGui::SetNextWindowPos(ImVec2((io.DisplaySize.x - w) * 0.5f, (io.DisplaySize.y - h) * 0.5f), ImGuiCond_Always);
+    
+    if (ImGui::Begin("Browse 3D Preview Models", &show_model_picker, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse)) {
+        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 75.0f * s);
+        ImGui::InputText("Filter##Model", model_search_filter, sizeof(model_search_filter));
+        ImGui::SameLine();
+        if (ImGui::Button("KETIK##Model", ImVec2(70.0f * s, 0))) {
+            android_show_text_dialog("Filter 3D Model", model_search_filter, 4);
+        }
+        
         std::string filter = model_search_filter;
         std::transform(filter.begin(), filter.end(), filter.begin(), ::tolower);
         
         ImGui::Separator();
         
-        if (ImGui::BeginTabBar("ModelTabs")) {
-            if (ImGui::BeginTabItem("Vehicles (400 - 611)")) {
-                const auto& vehs = AssetManager::get().get_vehicles();
-                for (const auto& v : vehs) {
-                    std::string label = std::to_string(v.id) + ": " + v.name + " (" + v.type + ")";
-                    std::string low = label;
-                    std::transform(low.begin(), low.end(), low.begin(), ::tolower);
-                    if (!filter.empty() && low.find(filter) == std::string::npos) continue;
-                    
-                    if (ImGui::Selectable(label.c_str())) {
-                        TextDraw* td = manager.get_active_textdraw();
-                        if (td) {
-                            td->font = 5;
-                            td->preview_model = v.id;
-                            td->text = std::to_string(v.id);
-                        } else {
-                            manager.create_preview_model(320.0f, 240.0f, 100.0f, 80.0f, v.id);
+        float tab_h = h - 110.0f * s;
+        if (ImGui::BeginChild("ModelTabsRegion", ImVec2(0, tab_h), true)) {
+            if (ImGui::BeginTabBar("ModelTabs")) {
+                if (ImGui::BeginTabItem("Vehicles (400 - 611)")) {
+                    const auto& vehs = AssetManager::get().get_vehicles();
+                    for (const auto& v : vehs) {
+                        std::string label = std::to_string(v.id) + ": " + v.name + " (" + v.type + ")";
+                        std::string low = label;
+                        std::transform(low.begin(), low.end(), low.begin(), ::tolower);
+                        if (!filter.empty() && low.find(filter) == std::string::npos) continue;
+                        
+                        if (ImGui::Selectable(label.c_str(), false, ImGuiSelectableFlags_None, ImVec2(-1, 30.0f * s))) {
+                            TextDraw* td = manager.get_active_textdraw();
+                            if (td) {
+                                td->font = 5;
+                                td->preview_model = v.id;
+                                td->text = std::to_string(v.id);
+                                td->rot_x = -16.0f;
+                                td->rot_y = 0.0f;
+                                td->rot_z = -55.0f;
+                                td->zoom = 1.0f;
+                                td->veh_color1 = 3;
+                                td->veh_color2 = 3;
+                            } else {
+                                manager.create_preview_model(320.0f, 240.0f, 100.0f, 80.0f, v.id);
+                            }
+                            show_model_picker = false;
                         }
-                        show_model_picker = false;
                     }
+                    ImGui::EndTabItem();
                 }
-                ImGui::EndTabItem();
-            }
-            
-            if (ImGui::BeginTabItem("Skins (0 - 311)")) {
-                const auto& skins = AssetManager::get().get_skins();
-                for (const auto& s : skins) {
-                    std::string label = std::to_string(s.id) + ": " + s.name;
-                    std::string low = label;
-                    std::transform(low.begin(), low.end(), low.begin(), ::tolower);
-                    if (!filter.empty() && low.find(filter) == std::string::npos) continue;
-                    
-                    if (ImGui::Selectable(label.c_str())) {
-                        TextDraw* td = manager.get_active_textdraw();
-                        if (td) {
-                            td->font = 5;
-                            td->preview_model = s.id;
-                            td->text = std::to_string(s.id);
-                        } else {
-                            manager.create_preview_model(320.0f, 240.0f, 80.0f, 120.0f, s.id);
+                
+                if (ImGui::BeginTabItem("Skins (0 - 311)")) {
+                    const auto& skins = AssetManager::get().get_skins();
+                    for (const auto& sk : skins) {
+                        std::string label = std::to_string(sk.id) + ": " + sk.name;
+                        std::string low = label;
+                        std::transform(low.begin(), low.end(), low.begin(), ::tolower);
+                        if (!filter.empty() && low.find(filter) == std::string::npos) continue;
+                        
+                        if (ImGui::Selectable(label.c_str(), false, ImGuiSelectableFlags_None, ImVec2(-1, 30.0f * s))) {
+                            TextDraw* td = manager.get_active_textdraw();
+                            if (td) {
+                                td->font = 5;
+                                td->preview_model = sk.id;
+                                td->text = std::to_string(sk.id);
+                                td->rot_x = 0.0f;
+                                td->rot_y = 0.0f;
+                                td->rot_z = -15.0f;
+                                td->zoom = 0.85f;
+                            } else {
+                                manager.create_preview_model(320.0f, 240.0f, 80.0f, 120.0f, sk.id);
+                            }
+                            show_model_picker = false;
                         }
-                        show_model_picker = false;
                     }
+                    ImGui::EndTabItem();
                 }
-                ImGui::EndTabItem();
+                
+                if (ImGui::BeginTabItem("Weapons (321 - 372)")) {
+                    struct WeapDef { int id; const char* name; };
+                    static const WeapDef kWeaps[] = {
+                        {331, "Brass Knuckles"}, {334, "Nightstick"}, {335, "Combat Knife"},
+                        {336, "Baseball Bat"}, {337, "Shovel"}, {339, "Katana"},
+                        {341, "Chainsaw"}, {342, "Grenade"}, {344, "Molotov Cocktail"},
+                        {346, "9mm Pistol (Colt 45)"}, {347, "Silenced 9mm"}, {348, "Desert Eagle"},
+                        {349, "Shotgun (Chrome)"}, {350, "Sawnoff Shotgun"}, {351, "Combat Shotgun (SPAS-12)"},
+                        {352, "Micro Uzi"}, {353, "MP5"}, {355, "AK-47"}, {356, "M4 Assault Rifle"},
+                        {357, "Country Rifle"}, {358, "Sniper Rifle"}, {359, "Rocket Launcher (RPG)"},
+                        {360, "Heat-Seeking Rocket"}, {361, "Flamethrower"}, {362, "Minigun"},
+                        {371, "Parachute"}, {372, "Tec-9"}
+                    };
+                    for (const auto& wdef : kWeaps) {
+                        std::string label = std::to_string(wdef.id) + ": " + wdef.name;
+                        std::string low = label;
+                        std::transform(low.begin(), low.end(), low.begin(), ::tolower);
+                        if (!filter.empty() && low.find(filter) == std::string::npos) continue;
+                        
+                        if (ImGui::Selectable(label.c_str(), false, ImGuiSelectableFlags_None, ImVec2(-1, 30.0f * s))) {
+                            TextDraw* td = manager.get_active_textdraw();
+                            if (td) {
+                                td->font = 5;
+                                td->preview_model = wdef.id;
+                                td->text = std::to_string(wdef.id);
+                                td->rot_x = -15.0f;
+                                td->rot_y = 0.0f;
+                                td->rot_z = -45.0f;
+                                td->zoom = 1.2f;
+                            } else {
+                                manager.create_preview_model(320.0f, 240.0f, 90.0f, 75.0f, wdef.id);
+                            }
+                            show_model_picker = false;
+                        }
+                    }
+                    ImGui::EndTabItem();
+                }
+                ImGui::EndTabBar();
             }
-            ImGui::EndTabBar();
+        }
+        ImGui::EndChild();
+        
+        ImGui::Separator();
+        if (ImGui::Button("Tutup", ImVec2(100.0f * s, 32.0f * s))) {
+            show_model_picker = false;
         }
     }
     ImGui::End();
@@ -709,39 +926,55 @@ void EditorUI::render_carcols_palette_modal(TextDraw* td, bool target_is_box, in
         show_carcols_picker = false;
         return;
     }
-    ImGui::SetNextWindowSize(ImVec2(480, 400), ImGuiCond_FirstUseEver);
-    if (ImGui::Begin("SA-MP Color Palette (256 Colors)", &show_carcols_picker)) {
+    ImGuiIO& io = ImGui::GetIO();
+    float s = std::clamp(ui_scale, 1.0f, 1.35f);
+    float w = std::min(io.DisplaySize.x * 0.90f, 500.0f * s);
+    float h = std::min(io.DisplaySize.y * 0.88f, 380.0f * s);
+    
+    ImGui::SetNextWindowSize(ImVec2(w, h), ImGuiCond_Always);
+    ImGui::SetNextWindowPos(ImVec2((io.DisplaySize.x - w) * 0.5f, (io.DisplaySize.y - h) * 0.5f), ImGuiCond_Always);
+    
+    if (ImGui::Begin("SA-MP Color Palette (256 Colors)", &show_carcols_picker, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse)) {
         const auto& cols = AssetManager::get().get_colors();
         int cols_per_row = 8;
-        float btn_w = 48.0f;
-        float btn_h = 32.0f;
+        float btn_w = 48.0f * s;
+        float btn_h = 32.0f * s;
         
-        for (size_t i = 0; i < cols.size(); ++i) {
-            const auto& c = cols[i];
-            ImVec4 btn_col(c.r / 255.0f, c.g / 255.0f, c.b / 255.0f, 1.0f);
-            ImGui::PushID((int)i);
-            ImGui::PushStyleColor(ImGuiCol_Button, btn_col);
-            
-            char id_str[16];
-            snprintf(id_str, sizeof(id_str), "%d", c.id);
-            if (ImGui::Button(id_str, ImVec2(btn_w, btn_h))) {
-                if (veh_col_index == 1) {
-                    td->veh_color1 = c.id;
-                } else if (veh_col_index == 2) {
-                    td->veh_color2 = c.id;
-                } else if (target_is_box) {
-                    td->box_color = ((uint32_t)c.r << 24) | ((uint32_t)c.g << 16) | ((uint32_t)c.b << 8) | 0x80;
-                } else {
-                    td->color = ((uint32_t)c.r << 24) | ((uint32_t)c.g << 16) | ((uint32_t)c.b << 8) | 0xFF;
+        float list_h = h - 90.0f * s;
+        if (ImGui::BeginChild("ColorGrid", ImVec2(0, list_h), true)) {
+            for (size_t i = 0; i < cols.size(); ++i) {
+                const auto& c = cols[i];
+                ImVec4 btn_col(c.r / 255.0f, c.g / 255.0f, c.b / 255.0f, 1.0f);
+                ImGui::PushID((int)i);
+                ImGui::PushStyleColor(ImGuiCol_Button, btn_col);
+                
+                char id_str[16];
+                snprintf(id_str, sizeof(id_str), "%d", c.id);
+                if (ImGui::Button(id_str, ImVec2(btn_w, btn_h))) {
+                    if (veh_col_index == 1) {
+                        td->veh_color1 = c.id;
+                    } else if (veh_col_index == 2) {
+                        td->veh_color2 = c.id;
+                    } else if (target_is_box) {
+                        td->box_color = ((uint32_t)c.r << 24) | ((uint32_t)c.g << 16) | ((uint32_t)c.b << 8) | 0x80;
+                    } else {
+                        td->color = ((uint32_t)c.r << 24) | ((uint32_t)c.g << 16) | ((uint32_t)c.b << 8) | 0xFF;
+                    }
+                    show_carcols_picker = false;
                 }
-                show_carcols_picker = false;
+                ImGui::PopStyleColor();
+                ImGui::PopID();
+                
+                if ((i + 1) % cols_per_row != 0) {
+                    ImGui::SameLine();
+                }
             }
-            ImGui::PopStyleColor();
-            ImGui::PopID();
-            
-            if ((i + 1) % cols_per_row != 0) {
-                ImGui::SameLine();
-            }
+        }
+        ImGui::EndChild();
+        
+        ImGui::Separator();
+        if (ImGui::Button("Tutup", ImVec2(100.0f * s, 32.0f * s))) {
+            show_carcols_picker = false;
         }
     }
     ImGui::End();
@@ -752,23 +985,186 @@ void EditorUI::open_export_modal() {
 }
 
 void EditorUI::render_export_modal(TextDrawManager& manager) {
-    ImGui::SetNextWindowSize(ImVec2(650, 500), ImGuiCond_FirstUseEver);
-    if (ImGui::Begin("Export Pawn Code", &show_export_modal)) {
-        if (export_code_buffer.empty() || ImGui::Button("Refresh Code")) {
+    ImGuiIO& io = ImGui::GetIO();
+    float s = std::clamp(ui_scale, 1.0f, 1.35f);
+    float w = std::min(io.DisplaySize.x * 0.92f, 640.0f * s);
+    float h = std::min(io.DisplaySize.y * 0.90f, 460.0f * s);
+    
+    ImGui::SetNextWindowSize(ImVec2(w, h), ImGuiCond_Always);
+    ImGui::SetNextWindowPos(ImVec2((io.DisplaySize.x - w) * 0.5f, (io.DisplaySize.y - h) * 0.5f), ImGuiCond_Always);
+    
+    if (ImGui::Begin("Export Pawn Code", &show_export_modal, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse)) {
+        if (export_code_buffer.empty() || ImGui::Button("Perbarui Kode", ImVec2(120.0f * s, 32.0f * s))) {
             export_code_buffer = PawnExporter::export_pawn(manager.get_all_textdraws());
         }
         ImGui::SameLine();
-        if (ImGui::Button("Copy to Clipboard")) {
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.85f, 0.65f, 0.15f, 0.90f));
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.10f, 0.10f, 0.12f, 1.00f));
+        if (ImGui::Button("📋 Salin ke Clipboard", ImVec2(160.0f * s, 32.0f * s))) {
             ImGui::SetClipboardText(export_code_buffer.c_str());
         }
+        ImGui::PopStyleColor(2);
         
         ImGui::Separator();
         
+        float out_h = h - 135.0f * s;
         ImGui::InputTextMultiline("##PawnOutput", const_cast<char*>(export_code_buffer.c_str()),
-                                  export_code_buffer.size() + 1, ImVec2(-1, -1),
+                                  export_code_buffer.size() + 1, ImVec2(-1, out_h),
                                   ImGuiInputTextFlags_ReadOnly);
+                                  
+        ImGui::Separator();
+        if (ImGui::Button("Tutup", ImVec2(100.0f * s, 32.0f * s))) {
+            show_export_modal = false;
+        }
     }
     ImGui::End();
+}
+
+static void parse_and_import_pawn(const char* code, TextDrawManager& manager) {
+    if (!code || !*code) return;
+    
+    std::stringstream ss(code);
+    std::string line;
+    std::unordered_map<std::string, TextDraw*> created_map;
+    
+    manager.save_undo_state();
+    
+    while (std::getline(ss, line)) {
+        size_t start = line.find_first_not_of(" \t\r\n");
+        if (start == std::string::npos) continue;
+        line = line.substr(start);
+        
+        size_t p_create = line.find("TextDrawCreate(");
+        size_t p_player = line.find("CreatePlayerTextDraw(");
+        
+        if (p_create != std::string::npos) {
+            size_t eq = line.find('=');
+            std::string var = "";
+            if (eq != std::string::npos && eq < p_create) {
+                var = line.substr(0, eq);
+                var.erase(var.find_last_not_of(" \t") + 1);
+                size_t v_start = var.find_last_of(" \t");
+                if (v_start != std::string::npos) var = var.substr(v_start + 1);
+            }
+            
+            float x = 320.0f, y = 240.0f;
+            char txt[512] = "";
+            const char* args = line.c_str() + p_create + 15;
+            if (sscanf(args, "%f, %f, \"%[^\"]\"", &x, &y, txt) >= 2) {
+                TextDraw* td = manager.create_text(x, y, txt);
+                if (td && !var.empty()) {
+                    td->variable_name = var;
+                    created_map[var] = td;
+                }
+            }
+        } else if (p_player != std::string::npos) {
+            size_t eq = line.find('=');
+            std::string var = "";
+            if (eq != std::string::npos && eq < p_player) {
+                var = line.substr(0, eq);
+                size_t brk = var.find('[');
+                if (brk != std::string::npos) var = var.substr(0, brk);
+                var.erase(var.find_last_not_of(" \t") + 1);
+                size_t v_start = var.find_last_of(" \t");
+                if (v_start != std::string::npos) var = var.substr(v_start + 1);
+            }
+            
+            float x = 320.0f, y = 240.0f;
+            char txt[512] = "";
+            const char* args = line.c_str() + p_player + 21;
+            char pid_dummy[64];
+            if (sscanf(args, "%[^,], %f, %f, \"%[^\"]\"", pid_dummy, &x, &y, txt) >= 3) {
+                TextDraw* td = manager.create_text(x, y, txt);
+                if (td) {
+                    td->is_player = true;
+                    if (!var.empty()) {
+                        td->variable_name = var;
+                        created_map[var] = td;
+                    }
+                }
+            }
+        }
+        
+        for (auto& pair : created_map) {
+            const std::string& var = pair.first;
+            TextDraw* td = pair.second;
+            if (!td) continue;
+            
+            if (line.find(var) != std::string::npos) {
+                float f1 = 0, f2 = 0, f3 = 0, f4 = 0;
+                int i1 = 0, i2 = 0;
+                unsigned int u1 = 0;
+                
+                if (line.find("LetterSize") != std::string::npos) {
+                    if (sscanf(line.c_str() + line.find("LetterSize"), "LetterSize(%*[^,], %f, %f)", &f1, &f2) == 2) {
+                        td->letter_width = f1;
+                        td->letter_height = f2;
+                    }
+                } else if (line.find("TextSize") != std::string::npos) {
+                    if (sscanf(line.c_str() + line.find("TextSize"), "TextSize(%*[^,], %f, %f)", &f1, &f2) == 2) {
+                        td->text_width = f1;
+                        td->text_height = f2;
+                    }
+                } else if (line.find("Alignment") != std::string::npos) {
+                    if (sscanf(line.c_str() + line.find("Alignment"), "Alignment(%*[^,], %d)", &i1) == 1) {
+                        td->alignment = (TextDrawAlignment)i1;
+                    }
+                } else if (line.find("Color") != std::string::npos && line.find("BoxColor") == std::string::npos && line.find("VehCol") == std::string::npos) {
+                    if (sscanf(line.c_str() + line.find("Color"), "Color(%*[^,], 0x%X)", &u1) == 1 ||
+                        sscanf(line.c_str() + line.find("Color"), "Color(%*[^,], %u)", &u1) == 1) {
+                        td->color = u1;
+                    }
+                } else if (line.find("UseBox") != std::string::npos) {
+                    if (sscanf(line.c_str() + line.find("UseBox"), "UseBox(%*[^,], %d)", &i1) == 1) {
+                        td->use_box = (i1 != 0);
+                    }
+                } else if (line.find("BoxColor") != std::string::npos) {
+                    if (sscanf(line.c_str() + line.find("BoxColor"), "BoxColor(%*[^,], 0x%X)", &u1) == 1 ||
+                        sscanf(line.c_str() + line.find("BoxColor"), "BoxColor(%*[^,], %u)", &u1) == 1) {
+                        td->box_color = u1;
+                    }
+                } else if (line.find("SetShadow") != std::string::npos) {
+                    if (sscanf(line.c_str() + line.find("SetShadow"), "SetShadow(%*[^,], %d)", &i1) == 1) {
+                        td->shadow = i1;
+                    }
+                } else if (line.find("SetOutline") != std::string::npos) {
+                    if (sscanf(line.c_str() + line.find("SetOutline"), "SetOutline(%*[^,], %d)", &i1) == 1) {
+                        td->outline = i1;
+                    }
+                } else if (line.find("Font") != std::string::npos) {
+                    if (sscanf(line.c_str() + line.find("Font"), "Font(%*[^,], %d)", &i1) == 1) {
+                        td->font = i1;
+                    }
+                } else if (line.find("SetProportional") != std::string::npos) {
+                    if (sscanf(line.c_str() + line.find("SetProportional"), "SetProportional(%*[^,], %d)", &i1) == 1) {
+                        td->proportional = (i1 != 0);
+                    }
+                } else if (line.find("SetSelectable") != std::string::npos) {
+                    if (sscanf(line.c_str() + line.find("SetSelectable"), "SetSelectable(%*[^,], %d)", &i1) == 1) {
+                        td->selectable = (i1 != 0);
+                    }
+                } else if (line.find("SetPreviewModel") != std::string::npos) {
+                    if (sscanf(line.c_str() + line.find("SetPreviewModel"), "SetPreviewModel(%*[^,], %d)", &i1) == 1) {
+                        td->font = 5;
+                        td->preview_model = i1;
+                        td->text = std::to_string(i1);
+                    }
+                } else if (line.find("SetPreviewRot") != std::string::npos) {
+                    if (sscanf(line.c_str() + line.find("SetPreviewRot"), "SetPreviewRot(%*[^,], %f, %f, %f, %f)", &f1, &f2, &f3, &f4) == 4) {
+                        td->rot_x = f1;
+                        td->rot_y = f2;
+                        td->rot_z = f3;
+                        td->zoom = f4;
+                    }
+                } else if (line.find("SetPreviewVehCol") != std::string::npos) {
+                    if (sscanf(line.c_str() + line.find("SetPreviewVehCol"), "SetPreviewVehCol(%*[^,], %d, %d)", &i1, &i2) == 2) {
+                        td->veh_color1 = i1;
+                        td->veh_color2 = i2;
+                    }
+                }
+            }
+        }
+    }
 }
 
 void EditorUI::open_import_modal() {
@@ -776,29 +1172,45 @@ void EditorUI::open_import_modal() {
 }
 
 void EditorUI::render_import_modal(TextDrawManager& manager) {
-    ImGui::SetNextWindowSize(ImVec2(600, 400), ImGuiCond_FirstUseEver);
-    if (ImGui::Begin("Import Pawn Code", &show_import_modal)) {
-        ImGui::Text("Paste your TextDraw Pawn code below:");
-        ImGui::InputTextMultiline("##PawnImport", import_buffer, sizeof(import_buffer), ImVec2(-1, -40));
+    ImGuiIO& io = ImGui::GetIO();
+    float s = std::clamp(ui_scale, 1.0f, 1.35f);
+    float w = std::min(io.DisplaySize.x * 0.92f, 620.0f * s);
+    float h = std::min(io.DisplaySize.y * 0.90f, 440.0f * s);
+    
+    ImGui::SetNextWindowSize(ImVec2(w, h), ImGuiCond_Always);
+    ImGui::SetNextWindowPos(ImVec2((io.DisplaySize.x - w) * 0.5f, (io.DisplaySize.y - h) * 0.5f), ImGuiCond_Always);
+    
+    if (ImGui::Begin("Import Pawn Code", &show_import_modal, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse)) {
+        ImGui::Text("Tempel kode TextDraw Pawn Anda di bawah ini:");
         
-        if (ImGui::Button("Import Script", ImVec2(120, 32))) {
-            // Very simple parser for TextDrawCreate / CreatePlayerTextDraw
-            std::stringstream ss(import_buffer);
-            std::string line;
-            while (std::getline(ss, line)) {
-                size_t p = line.find("TextDrawCreate(");
-                if (p != std::string::npos) {
-                    float x = 320.0f, y = 240.0f;
-                    char txt[128] = "";
-                    if (sscanf(line.c_str() + p + 15, "%f, %f, \"%[^\"]\"", &x, &y, txt) >= 2) {
-                        manager.create_text(x, y, txt);
-                    }
-                }
+        // Prominent 1-tap clipboard paste button
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.85f, 0.65f, 0.15f, 0.90f));
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.10f, 0.10f, 0.12f, 1.00f));
+        if (ImGui::Button("📋 TEMPEL DARI SALINAN HP (CLIPBOARD)", ImVec2(ImGui::GetContentRegionAvail().x - 85.0f * s, 36.0f * s))) {
+            std::string clip = android_get_clipboard();
+            if (!clip.empty()) {
+                strncpy(import_buffer, clip.c_str(), sizeof(import_buffer) - 1);
             }
+        }
+        ImGui::PopStyleColor(2);
+        
+        ImGui::SameLine();
+        if (ImGui::Button("✏️ KETIK", ImVec2(80.0f * s, 36.0f * s))) {
+            android_show_text_dialog("Input Pawn Code", import_buffer, 5);
+        }
+        
+        ImGui::Spacing();
+        
+        float input_h = h - 145.0f * s;
+        ImGui::InputTextMultiline("##PawnImport", import_buffer, sizeof(import_buffer), ImVec2(-1, input_h));
+        
+        ImGui::Separator();
+        if (ImGui::Button("PROSES IMPORT", ImVec2(140.0f * s, 34.0f * s))) {
+            parse_and_import_pawn(import_buffer, manager);
             show_import_modal = false;
         }
         ImGui::SameLine();
-        if (ImGui::Button("Cancel", ImVec2(100, 32))) {
+        if (ImGui::Button("Batal", ImVec2(90.0f * s, 34.0f * s))) {
             show_import_modal = false;
         }
     }
@@ -814,20 +1226,36 @@ void EditorUI::open_load_project_modal() {
 }
 
 void EditorUI::render_save_project_modal(TextDrawManager& manager) {
-    ImGui::SetNextWindowSize(ImVec2(480, 220), ImGuiCond_FirstUseEver);
-    if (ImGui::Begin("Save Project (.json)", &show_save_project_modal)) {
-        ImGui::Text("Enter Project Name:");
-        ImGui::InputText(".json##Filename", project_name_buf, sizeof(project_name_buf));
+    ImGuiIO& io = ImGui::GetIO();
+    float s = std::clamp(ui_scale, 1.0f, 1.35f);
+    float w = std::min(io.DisplaySize.x * 0.90f, 480.0f * s);
+    float h = std::min(io.DisplaySize.y * 0.85f, 240.0f * s);
+    
+    ImGui::SetNextWindowSize(ImVec2(w, h), ImGuiCond_Always);
+    ImGui::SetNextWindowPos(ImVec2((io.DisplaySize.x - w) * 0.5f, (io.DisplaySize.y - h) * 0.5f), ImGuiCond_Always);
+    
+    if (ImGui::Begin("Save Project (.json)", &show_save_project_modal, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse)) {
+        ImGui::Text("Nama File Project:");
         
+        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 70.0f * s);
+        ImGui::InputText(".json##Filename", project_name_buf, sizeof(project_name_buf));
+        ImGui::SameLine();
+        if (ImGui::Button("KETIK##SaveName", ImVec2(65.0f * s, 0))) {
+            android_show_text_dialog("Nama Project", project_name_buf, 6);
+        }
+        
+        ImGui::Spacing();
         ImGui::Separator();
-        if (ImGui::Button("Save Project", ImVec2(130, 36))) {
+        ImGui::Spacing();
+        
+        if (ImGui::Button("Simpan Project", ImVec2(140.0f * s, 36.0f * s))) {
             std::string file_name = std::string(project_name_buf) + ".json";
             std::string full_path = storage_path.empty() ? file_name : (storage_path + "/" + file_name);
             manager.save_project_to_file(full_path, project_name_buf);
             show_save_project_modal = false;
         }
         ImGui::SameLine();
-        if (ImGui::Button("Cancel", ImVec2(100, 36))) {
+        if (ImGui::Button("Batal", ImVec2(90.0f * s, 36.0f * s))) {
             show_save_project_modal = false;
         }
     }
@@ -835,37 +1263,49 @@ void EditorUI::render_save_project_modal(TextDrawManager& manager) {
 }
 
 void EditorUI::render_load_project_modal(TextDrawManager& manager) {
-    ImGui::SetNextWindowSize(ImVec2(520, 420), ImGuiCond_FirstUseEver);
-    if (ImGui::Begin("Open Project (.json)", &show_load_project_modal)) {
-        ImGui::Text("Saved Projects in Storage:");
+    ImGuiIO& io = ImGui::GetIO();
+    float s = std::clamp(ui_scale, 1.0f, 1.35f);
+    float w = std::min(io.DisplaySize.x * 0.90f, 520.0f * s);
+    float h = std::min(io.DisplaySize.y * 0.88f, 380.0f * s);
+    
+    ImGui::SetNextWindowSize(ImVec2(w, h), ImGuiCond_Always);
+    ImGui::SetNextWindowPos(ImVec2((io.DisplaySize.x - w) * 0.5f, (io.DisplaySize.y - h) * 0.5f), ImGuiCond_Always);
+    
+    if (ImGui::Begin("Open Project (.json)", &show_load_project_modal, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse)) {
+        ImGui::Text("Daftar Project Tersimpan:");
         ImGui::Separator();
         
-        DIR* dir = opendir(storage_path.empty() ? "." : storage_path.c_str());
-        if (dir) {
-            struct dirent* ent;
-            bool found_any = false;
-            while ((ent = readdir(dir)) != nullptr) {
-                std::string fname = ent->d_name;
-                if (fname.size() > 5 && fname.substr(fname.size() - 5) == ".json") {
-                    found_any = true;
-                    if (ImGui::Selectable(fname.c_str(), false, ImGuiSelectableFlags_None, ImVec2(-1, 32))) {
-                        std::string full_path = storage_path.empty() ? fname : (storage_path + "/" + fname);
-                        manager.load_project_from_file(full_path);
-                        show_load_project_modal = false;
-                        break;
+        float list_h = h - 110.0f * s;
+        if (ImGui::BeginChild("ProjectList", ImVec2(0, list_h), true)) {
+            DIR* dir = opendir(storage_path.empty() ? "." : storage_path.c_str());
+            if (dir) {
+                struct dirent* ent;
+                bool found_any = false;
+                while ((ent = readdir(dir)) != nullptr) {
+                    std::string fname = ent->d_name;
+                    if (fname.size() > 5 && fname.substr(fname.size() - 5) == ".json") {
+                        found_any = true;
+                        std::string label = "📂 " + fname;
+                        if (ImGui::Selectable(label.c_str(), false, ImGuiSelectableFlags_None, ImVec2(-1, 36.0f * s))) {
+                            std::string full_path = storage_path.empty() ? fname : (storage_path + "/" + fname);
+                            manager.load_project_from_file(full_path);
+                            show_load_project_modal = false;
+                            break;
+                        }
                     }
                 }
+                closedir(dir);
+                if (!found_any) {
+                    ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "Belum ada project .json yang tersimpan.");
+                }
+            } else {
+                ImGui::TextColored(ImVec4(0.8f, 0.8f, 0.4f, 1.0f), "Tidak dapat membuka folder project.");
             }
-            closedir(dir);
-            if (!found_any) {
-                ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "No saved .json projects found yet.");
-            }
-        } else {
-            ImGui::TextColored(ImVec4(0.8f, 0.8f, 0.4f, 1.0f), "Could not access projects directory.");
         }
+        ImGui::EndChild();
         
         ImGui::Separator();
-        if (ImGui::Button("Close", ImVec2(100, 32))) {
+        if (ImGui::Button("Tutup", ImVec2(100.0f * s, 34.0f * s))) {
             show_load_project_modal = false;
         }
     }
@@ -884,6 +1324,8 @@ void EditorUI::set_dialog_text(int field_id, const std::string& text, TextDrawMa
         strncpy(model_search_filter, text.c_str(), sizeof(model_search_filter) - 1);
     } else if (field_id == 5) {
         strncpy(import_buffer, text.c_str(), sizeof(import_buffer) - 1);
+    } else if (field_id == 6) {
+        strncpy(project_name_buf, text.c_str(), sizeof(project_name_buf) - 1);
     }
 }
 

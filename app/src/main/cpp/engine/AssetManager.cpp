@@ -223,6 +223,25 @@ GLuint AssetManager::get_sprite_texture(const std::string& txd_sprite) {
 }
 
 std::vector<uint8_t> AssetManager::load_model_dff(const std::string& dff_name) {
-    std::string path = "models_3d/" + dff_name;
-    return read_asset_bytes(path);
+    if (dff_name.empty()) return {};
+    
+    std::string base = dff_name;
+    size_t last_slash = base.find_last_of("/\\");
+    if (last_slash != std::string::npos) {
+        base = base.substr(last_slash + 1);
+    }
+    
+    std::string path = "models_3d/" + base;
+    auto res = read_asset_bytes(path);
+    if (!res.empty()) return res;
+    
+    std::string lower = base;
+    std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+    if (lower != base) {
+        path = "models_3d/" + lower;
+        res = read_asset_bytes(path);
+        if (!res.empty()) return res;
+    }
+    
+    return {};
 }

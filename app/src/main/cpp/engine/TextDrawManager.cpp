@@ -99,12 +99,28 @@ TextDraw* TextDrawManager::create_preview_model(float x, float y, float w, float
     td.text_width = w;
     td.text_height = h;
     td.color = 0xFFFFFFFF;
-    td.rot_x = 0.0f;
-    td.rot_y = 0.0f;
-    td.rot_z = 0.0f;
-    td.zoom = 1.0f;
-    td.veh_color1 = 1;
-    td.veh_color2 = 1;
+    if (model_id >= 400 && model_id <= 611) {
+        td.rot_x = -16.0f;
+        td.rot_y = 0.0f;
+        td.rot_z = -55.0f;
+        td.zoom = 1.0f;
+        td.veh_color1 = 3;
+        td.veh_color2 = 3;
+    } else if (model_id >= 321 && model_id <= 372) {
+        td.rot_x = -15.0f;
+        td.rot_y = 0.0f;
+        td.rot_z = -45.0f;
+        td.zoom = 1.2f;
+        td.veh_color1 = 1;
+        td.veh_color2 = 1;
+    } else {
+        td.rot_x = 0.0f;
+        td.rot_y = 0.0f;
+        td.rot_z = -15.0f;
+        td.zoom = 0.85f;
+        td.veh_color1 = 1;
+        td.veh_color2 = 1;
+    }
     
     textdraws.push_back(td);
     update_z_indices();
