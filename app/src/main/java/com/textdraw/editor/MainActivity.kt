@@ -22,13 +22,17 @@ class MainActivity : Activity() {
         super.onCreate(savedInstanceState)
         instance = WeakReference(this)
 
-        // Keep screen on while editing
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-
-        // Hide status & navigation bars for immersive widescreen
-        hideSystemUI()
-
         try {
+            // Keep screen on while editing
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+            // Initialize GL Surface and set content view first so DecorView is created
+            glSurfaceView = EditorGLSurfaceView(this)
+            setContentView(glSurfaceView)
+
+            // Hide status & navigation bars for immersive widescreen
+            hideSystemUI()
+
             // Ensure projects directory exists in app storage
             val projectsDir = File(getExternalFilesDir(null), "projects")
             if (!projectsDir.exists()) {
@@ -37,10 +41,6 @@ class MainActivity : Activity() {
 
             // Initialize Native C++ engine with APK assets and storage path
             NativeBridge.nativeInit(assets, projectsDir.absolutePath)
-
-            // Set GL surface
-            glSurfaceView = EditorGLSurfaceView(this)
-            setContentView(glSurfaceView)
         } catch (t: Throwable) {
             CrashHandler.handleManualException(this, t)
         }
@@ -49,23 +49,42 @@ class MainActivity : Activity() {
     override fun onResume() {
         super.onResume()
         hideSystemUI()
-        glSurfaceView.onResume()
+        if (::glSurfaceView.isInitialized) {
+            glSurfaceView.onResume()
+        }
     }
 
     override fun onPause() {
         super.onPause()
-        glSurfaceView.onPause()
+        if (::glSurfaceView.isInitialized) {
+            glSurfaceView.onPause()
+        }
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            hideSystemUI()
+        }
     }
 
     private fun hideSystemUI() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            window.insetsController?.let { controller ->
-                controller.hide(WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars())
-                controller.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                val decor = window?.peekDecorView() ?: window?.decorView
+                decor?.windowInsetsController?.let { controller ->
+                    controller.hide(WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars())
+                    controller.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                    return
+                }
             }
-        } else {
+        } catch (_: Throwable) {
+            // Fallback gracefully on custom vendor ROMs if insetsController fails
+        }
+
+        try {
             @Suppress("DEPRECATION")
-            window.decorView.systemUiVisibility = (
+            window?.decorView?.systemUiVisibility = (
                 View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                 or View.SYSTEM_UI_FLAG_FULLSCREEN
                 or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
@@ -73,6 +92,8 @@ class MainActivity : Activity() {
                 or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
             )
+        } catch (_: Throwable) {
+            // Ignore if window is detached
         }
     }
 
