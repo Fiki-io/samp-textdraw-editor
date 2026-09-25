@@ -23,17 +23,9 @@ jobs:
           java-version: '17'
           cache: 'gradle'
 
-      - name: Accept Android SDK Licenses & Configure NDK
+      - name: Accept Android SDK Licenses
         run: |
-          echo "Accepting Android SDK licenses..."
           yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses || true
-          echo "Preinstalled NDKs:"
-          ls -la "$ANDROID_SDK_ROOT/ndk" 2>/dev/null || true
-          NDK_DIR=$(ls -d $ANDROID_SDK_ROOT/ndk/* 2>/dev/null | tail -n 1)
-          if [ -n "$NDK_DIR" ]; then
-            echo "Using preinstalled NDK: $NDK_DIR"
-            echo "ndk.dir=$NDK_DIR" > local.properties
-          fi
 
       - name: Grant Execute Permission for Gradlew
         run: chmod +x gradlew
