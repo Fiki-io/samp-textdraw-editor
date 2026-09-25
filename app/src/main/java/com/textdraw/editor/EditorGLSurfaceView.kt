@@ -21,6 +21,9 @@ class EditorGLSurfaceView @JvmOverloads constructor(
         renderMode = RENDERMODE_CONTINUOUSLY
         preserveEGLContextOnPause = true
 
+        isFocusable = true
+        isFocusableInTouchMode = true
+
         scaleDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
             override fun onScale(detector: ScaleGestureDetector): Boolean {
                 val factor = detector.scaleFactor
@@ -30,6 +33,30 @@ class EditorGLSurfaceView @JvmOverloads constructor(
                 return true
             }
         })
+    }
+
+    override fun onCreateInputConnection(outAttrs: android.view.inputmethod.EditorInfo): android.view.inputmethod.InputConnection {
+        outAttrs.inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+        outAttrs.imeOptions = android.view.inputmethod.EditorInfo.IME_ACTION_DONE or android.view.inputmethod.EditorInfo.IME_FLAG_NO_FULLSCREEN
+        return object : android.view.inputmethod.BaseInputConnection(this, false) {
+            override fun commitText(text: CharSequence?, newCursorPosition: Int): Boolean {
+                text?.let { str ->
+                    queueEvent {
+                        NativeBridge.nativeInputCharacters(str.toString())
+                    }
+                }
+                return true
+            }
+
+            override fun deleteSurroundingText(beforeLength: Int, afterLength: Int): Boolean {
+                if (beforeLength > 0) {
+                    queueEvent {
+                        NativeBridge.nativeInputKey(67) // Android KEYCODE_DEL
+                    }
+                }
+                return super.deleteSurroundingText(beforeLength, afterLength)
+            }
+        }
     }
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
@@ -42,7 +69,8 @@ class EditorGLSurfaceView @JvmOverloads constructor(
 
     override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
         try {
-            NativeBridge.nativeSurfaceChanged(width, height)
+            val density = resources.displayMetrics.density
+            NativeBridge.nativeSurfaceChanged(width, height, density)
         } catch (t: Throwable) {
             CrashHandler.handleManualException(context, t)
         }

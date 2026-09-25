@@ -24,8 +24,8 @@ public:
     static DffRenderer& get();
     
     void init();
-    void render_preview_model(int model_id, float screen_x, float screen_y, float screen_w, float screen_h,
-                             float rot_x, float rot_y, float rot_z, float zoom,
+    void begin_frame();
+    GLuint render_to_texture(int model_id, float rot_x, float rot_y, float rot_z, float zoom,
                              int veh_col1, int veh_col2);
 
 private:
@@ -38,6 +38,13 @@ private:
     GLint u_color1_loc = -1;
     GLint u_color2_loc = -1;
     GLint u_light_dir_loc = -1;
+
+    static const int FBO_COUNT = 4;
+    static const int FBO_SIZE = 256;
+    GLuint fbos[FBO_COUNT] = {0};
+    GLuint fbo_textures[FBO_COUNT] = {0};
+    GLuint fbo_depths[FBO_COUNT] = {0};
+    int current_fbo_index = 0;
     
     std::unordered_map<int, DffMesh> mesh_cache;
     

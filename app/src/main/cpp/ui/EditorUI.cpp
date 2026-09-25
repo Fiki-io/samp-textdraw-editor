@@ -13,7 +13,16 @@ EditorUI& EditorUI::get() {
     return instance;
 }
 
+extern void android_show_text_dialog(const char* title, const char* initial_text, int field_id);
+
 void EditorUI::init() {
+    apply_gtasa_theme();
+}
+
+void EditorUI::apply_ui_scale(float scale) {
+    ui_scale = std::max(1.3f, scale);
+    ImGuiIO& io = ImGui::GetIO();
+    io.FontGlobalScale = ui_scale;
     apply_gtasa_theme();
 }
 
@@ -57,17 +66,20 @@ void EditorUI::apply_gtasa_theme() {
     colors[ImGuiCol_TabHovered]            = ImVec4(0.40f, 0.32f, 0.15f, 0.85f);
     colors[ImGuiCol_TabActive]             = ImVec4(0.28f, 0.22f, 0.10f, 1.00f);
 
-    style.WindowRounding    = 8.0f;
-    style.ChildRounding     = 6.0f;
-    style.FrameRounding     = 6.0f;
-    style.PopupRounding     = 8.0f;
-    style.ScrollbarRounding = 6.0f;
-    style.GrabRounding      = 4.0f;
-    style.TabRounding       = 6.0f;
+    float s = ui_scale;
+    style.WindowRounding    = 8.0f * s;
+    style.ChildRounding     = 6.0f * s;
+    style.FrameRounding     = 6.0f * s;
+    style.PopupRounding     = 8.0f * s;
+    style.ScrollbarRounding = 6.0f * s;
+    style.GrabRounding      = 4.0f * s;
+    style.TabRounding       = 6.0f * s;
     style.WindowBorderSize  = 1.0f;
     style.FrameBorderSize   = 0.5f;
-    style.ItemSpacing       = ImVec2(8.0f, 6.0f);
-    style.TouchExtraPadding = ImVec2(4.0f, 4.0f); // Helpful for mobile touch
+    style.ItemSpacing       = ImVec2(8.0f * s, 6.0f * s);
+    style.TouchExtraPadding = ImVec2(6.0f * s, 6.0f * s);
+    style.FramePadding      = ImVec2(8.0f * s, 6.0f * s);
+    style.WindowPadding     = ImVec2(10.0f * s, 10.0f * s);
 }
 
 void EditorUI::render(TextDrawManager& manager, Viewport& viewport) {
@@ -157,12 +169,19 @@ void EditorUI::render_canvas_overlay(TextDrawManager& manager, Viewport& viewpor
                 draw_list->AddText(ImVec2(sx + 4, sy + 4), IM_COL32(255, 200, 200, 255), td.text.c_str());
             }
         } else if (td.font == 5) { // 3D Model Preview
-            // Real 3D Preview pass with DffRenderer
-            DffRenderer::get().render_preview_model(
-                td.preview_model, sx, sy, sw, sh,
-                td.rot_x, td.rot_y, td.rot_z, td.zoom,
+            GLuint tex = DffRenderer::get().render_to_texture(
+                td.preview_model, td.rot_x, td.rot_y, td.rot_z, td.zoom,
                 td.veh_color1, td.veh_color2
             );
+            if (tex != 0) {
+                // UVs flipped vertically for OpenGL FBO texture
+                draw_list->AddImage((ImTextureID)(intptr_t)tex,
+                                   ImVec2(sx, sy), ImVec2(sx + sw, sy + sh),
+                                   ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
+            } else {
+                draw_list->AddRect(ImVec2(sx, sy), ImVec2(sx + sw, sy + sh), IM_COL32(255, 180, 50, 200));
+                draw_list->AddText(ImVec2(sx + 4, sy + 4), IM_COL32(255, 255, 255, 255), "3D Model");
+            }
         } else { // Fonts 0, 1, 2, 3 (Text)
             float font_scale = (td.letter_height * 0.9f) * (viewport.canvas_screen_h / 480.0f);
             float font_size = 16.0f * font_scale;
@@ -305,29 +324,34 @@ void EditorUI::render_top_bar(TextDrawManager& manager, Viewport& viewport) {
 
 void EditorUI::render_bottom_toolbar(TextDrawManager& manager, Viewport& viewport) {
     ImGuiIO& io = ImGui::GetIO();
-    float bar_w = std::min(io.DisplaySize.x - 40.0f, 620.0f);
-    float bar_h = 56.0f;
+    float s = std::max(1.0f, ui_scale / 1.35f);
+    float bar_w = std::min(io.DisplaySize.x - 20.0f, 760.0f * s);
+    float bar_h = 56.0f * s;
     
-    ImGui::SetNextWindowPos(ImVec2((io.DisplaySize.x - bar_w) * 0.5f, io.DisplaySize.y - bar_h - 16.0f));
+    ImGui::SetNextWindowPos(ImVec2((io.DisplaySize.x - bar_w) * 0.5f, io.DisplaySize.y - bar_h - 10.0f));
     ImGui::SetNextWindowSize(ImVec2(bar_w, bar_h));
     
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
                              ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar;
                              
     if (ImGui::Begin("##BottomToolbar", nullptr, flags)) {
-        if (ImGui::Button("+ TEXT", ImVec2(90, 40))) {
+        ImVec2 b_small(82.0f * s, 40.0f * s);
+        ImVec2 b_med(98.0f * s, 40.0f * s);
+        ImVec2 b_large(116.0f * s, 40.0f * s);
+
+        if (ImGui::Button("+ TEXT", b_small)) {
             manager.create_text(320.0f, 240.0f, "New Textdraw");
         }
         ImGui::SameLine();
-        if (ImGui::Button("+ BOX", ImVec2(90, 40))) {
+        if (ImGui::Button("+ BOX", b_small)) {
             manager.create_box(320.0f, 240.0f, 140.0f, 40.0f, 0x000000A0);
         }
         ImGui::SameLine();
-        if (ImGui::Button("+ SPRITE", ImVec2(100, 40))) {
+        if (ImGui::Button("+ SPRITE", b_med)) {
             show_sprite_picker = true;
         }
         ImGui::SameLine();
-        if (ImGui::Button("+ 3D MODEL", ImVec2(110, 40))) {
+        if (ImGui::Button("+ 3D MODEL", b_large)) {
             show_model_picker = true;
         }
         ImGui::SameLine();
@@ -336,11 +360,11 @@ void EditorUI::render_bottom_toolbar(TextDrawManager& manager, Viewport& viewpor
         
         bool has_sel = (manager.get_active_textdraw() != nullptr);
         if (!has_sel) ImGui::BeginDisabled();
-        if (ImGui::Button("CLONE", ImVec2(80, 40))) {
+        if (ImGui::Button("CLONE", b_small)) {
             manager.duplicate_selected();
         }
         ImGui::SameLine();
-        if (ImGui::Button("DEL", ImVec2(60, 40))) {
+        if (ImGui::Button("DEL", ImVec2(65.0f * s, 40.0f * s))) {
             manager.delete_selected();
         }
         if (!has_sel) ImGui::EndDisabled();
@@ -353,18 +377,24 @@ void EditorUI::render_inspector(TextDrawManager& manager, Viewport& viewport) {
     if (!td) return; // Only show when a textdraw is selected
     
     ImGuiIO& io = ImGui::GetIO();
-    float panel_w = 340.0f;
-    float panel_h = io.DisplaySize.y - 120.0f;
+    float s = std::max(1.0f, ui_scale / 1.35f);
+    float panel_w = std::min(360.0f * s, io.DisplaySize.x * 0.44f);
+    float panel_h = io.DisplaySize.y - 75.0f * s;
     
-    ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - panel_w - 16.0f, 40.0f), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - panel_w - 12.0f, 32.0f * ui_scale), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(panel_w, panel_h), ImGuiCond_FirstUseEver);
     
     if (ImGui::Begin("Properties Inspector", nullptr)) {
         // Variable Name & Player Mode
         char var_buf[64];
         strncpy(var_buf, td->variable_name.c_str(), sizeof(var_buf));
+        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 65.0f * s);
         if (ImGui::InputText("Variable", var_buf, sizeof(var_buf))) {
             td->variable_name = var_buf;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("EDIT##Var", ImVec2(58.0f * s, 0))) {
+            android_show_text_dialog("Edit Variable Name", td->variable_name.c_str(), 2);
         }
         ImGui::Checkbox("Player TextDraw (PlayerText:)", &td->is_player);
         
@@ -390,11 +420,16 @@ void EditorUI::render_inspector(TextDrawManager& manager, Viewport& viewport) {
         
         // Font specific inputs
         if (td->font >= 0 && td->font <= 3) {
-            // Text Content
+            // Text Content with direct EDIT button for native soft keyboard
             char text_buf[256];
             strncpy(text_buf, td->text.c_str(), sizeof(text_buf));
+            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 65.0f * s);
             if (ImGui::InputText("Text Content", text_buf, sizeof(text_buf))) {
                 td->text = text_buf;
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("EDIT##Text", ImVec2(58.0f * s, 0))) {
+                android_show_text_dialog("Edit Text Content", td->text.c_str(), 1);
             }
             ImGui::DragFloat("Letter W", &td->letter_width, 0.01f, 0.0f, 5.0f, "%.3f");
             ImGui::DragFloat("Letter H", &td->letter_height, 0.05f, 0.0f, 10.0f, "%.2f");
@@ -408,17 +443,19 @@ void EditorUI::render_inspector(TextDrawManager& manager, Viewport& viewport) {
         } else if (td->font == 4) { // Sprite
             char sprite_buf[128];
             strncpy(sprite_buf, td->text.c_str(), sizeof(sprite_buf));
+            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 75.0f * s);
             if (ImGui::InputText("Sprite Name", sprite_buf, sizeof(sprite_buf))) {
                 td->text = sprite_buf;
             }
             ImGui::SameLine();
-            if (ImGui::Button("Browse##Sprite")) {
+            if (ImGui::Button("Browse##Sprite", ImVec2(70.0f * s, 0))) {
                 show_sprite_picker = true;
             }
         } else if (td->font == 5) { // 3D Model Preview
+            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 75.0f * s);
             ImGui::InputInt("Model ID", &td->preview_model);
             ImGui::SameLine();
-            if (ImGui::Button("Browse##Model")) {
+            if (ImGui::Button("Browse##Model", ImVec2(70.0f * s, 0))) {
                 show_model_picker = true;
             }
             ImGui::DragFloat("Rot X", &td->rot_x, 1.0f, 0.0f, 360.0f, "%.1f deg");
@@ -511,31 +548,32 @@ void EditorUI::render_dpad_widget(TextDrawManager& manager, Viewport& viewport) 
     if (!td) return;
     
     ImGuiIO& io = ImGui::GetIO();
-    float w = 150.0f;
-    float h = 150.0f;
+    float s = std::max(1.0f, ui_scale / 1.35f);
+    float w = 170.0f * s;
+    float h = 170.0f * s;
     
-    ImGui::SetNextWindowPos(ImVec2(16.0f, io.DisplaySize.y - h - 70.0f), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowPos(ImVec2(16.0f, io.DisplaySize.y - h - 75.0f * s), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(w, h));
     
     ImGuiWindowFlags flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar;
     if (ImGui::Begin("Micro D-Pad", nullptr, flags)) {
-        float btn_size = 38.0f;
+        float btn_size = 42.0f * s;
         
         // Up
-        ImGui::SetCursorPosX((w - btn_size) * 0.5f - 8.0f);
+        ImGui::SetCursorPosX((w - btn_size) * 0.5f - 8.0f * s);
         if (ImGui::Button("^##Up", ImVec2(btn_size, btn_size))) {
             manager.move_selected(0.0f, -dpad_step, 0.0f);
         }
         
         // Left, Step, Right
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 2.0f);
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 2.0f * s);
         if (ImGui::Button("<##Left", ImVec2(btn_size, btn_size))) {
             manager.move_selected(-dpad_step, 0.0f, 0.0f);
         }
         ImGui::SameLine();
         char step_lbl[16];
         snprintf(step_lbl, sizeof(step_lbl), "%.1f", dpad_step);
-        if (ImGui::Button(step_lbl, ImVec2(btn_size + 4.0f, btn_size))) {
+        if (ImGui::Button(step_lbl, ImVec2(btn_size + 4.0f * s, btn_size))) {
             // Cycle steps
             if (dpad_step < 0.3f) dpad_step = 0.5f;
             else if (dpad_step < 0.8f) dpad_step = 1.0f;
@@ -548,7 +586,7 @@ void EditorUI::render_dpad_widget(TextDrawManager& manager, Viewport& viewport) 
         }
         
         // Down
-        ImGui::SetCursorPosX((w - btn_size) * 0.5f - 8.0f);
+        ImGui::SetCursorPosX((w - btn_size) * 0.5f - 8.0f * s);
         if (ImGui::Button("v##Down", ImVec2(btn_size, btn_size))) {
             manager.move_selected(0.0f, dpad_step, 0.0f);
         }
@@ -832,5 +870,20 @@ void EditorUI::render_load_project_modal(TextDrawManager& manager) {
         }
     }
     ImGui::End();
+}
+
+void EditorUI::set_dialog_text(int field_id, const std::string& text, TextDrawManager& manager) {
+    TextDraw* td = manager.get_active_textdraw();
+    if (field_id == 1 && td) {
+        td->text = text;
+    } else if (field_id == 2 && td) {
+        td->variable_name = text;
+    } else if (field_id == 3) {
+        strncpy(sprite_search_filter, text.c_str(), sizeof(sprite_search_filter) - 1);
+    } else if (field_id == 4) {
+        strncpy(model_search_filter, text.c_str(), sizeof(model_search_filter) - 1);
+    } else if (field_id == 5) {
+        strncpy(import_buffer, text.c_str(), sizeof(import_buffer) - 1);
+    }
 }
 

@@ -149,6 +149,12 @@ DffRenderer::~DffRenderer() {
         if (pair.second.ebo) glDeleteBuffers(1, &pair.second.ebo);
     }
     mesh_cache.clear();
+
+    for (int i = 0; i < FBO_COUNT; ++i) {
+        if (fbos[i]) glDeleteFramebuffers(1, &fbos[i]);
+        if (fbo_textures[i]) glDeleteTextures(1, &fbo_textures[i]);
+        if (fbo_depths[i]) glDeleteRenderbuffers(1, &fbo_depths[i]);
+    }
 }
 
 void DffRenderer::init() {
@@ -168,7 +174,32 @@ void DffRenderer::init() {
     u_color1_loc = glGetUniformLocation(shader_program, "uColor1");
     u_color2_loc = glGetUniformLocation(shader_program, "uColor2");
     u_light_dir_loc = glGetUniformLocation(shader_program, "uLightDir");
-    LOGI("DffRenderer initialized successfully.");
+
+    for (int i = 0; i < FBO_COUNT; ++i) {
+        glGenFramebuffers(1, &fbos[i]);
+        glBindFramebuffer(GL_FRAMEBUFFER, fbos[i]);
+        
+        glGenTextures(1, &fbo_textures[i]);
+        glBindTexture(GL_TEXTURE_2D, fbo_textures[i]);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, FBO_SIZE, FBO_SIZE, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fbo_textures[i], 0);
+        
+        glGenRenderbuffers(1, &fbo_depths[i]);
+        glBindRenderbuffer(GL_RENDERBUFFER, fbo_depths[i]);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, FBO_SIZE, FBO_SIZE);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, fbo_depths[i]);
+        
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+    LOGI("DffRenderer initialized with FBO pool and shaders.");
+}
+
+void DffRenderer::begin_frame() {
+    current_fbo_index = 0;
 }
 
 bool DffRenderer::load_model_mesh(int model_id, DffMesh& out_mesh) {
@@ -214,158 +245,179 @@ bool DffRenderer::load_model_mesh(int model_id, DffMesh& out_mesh) {
     return true;
 }
 
-bool DffRenderer::parse_dff_data(const std::vector<uint8_t>& data, DffMesh& out_mesh) {
-    if (data.size() < 64) return false;
-    
-    // Search for Geometry Struct Chunk (0x0F then 0x01)
-    const uint8_t* p = data.data();
-    size_t size = data.size();
-    size_t offset = 0;
-    
-    while (offset + 12 <= size) {
-        uint32_t chunk_type = *reinterpret_cast<const uint32_t*>(p + offset);
-        uint32_t chunk_size = *reinterpret_cast<const uint32_t*>(p + offset + 4);
+static void parse_rw_geometries_recursive(const uint8_t* data, size_t offset, size_t end,
+                                         std::vector<DffVertex>& out_verts,
+                                         std::vector<uint16_t>& out_indices,
+                                         float out_bounds[4]) {
+    while (offset + 12 <= end) {
+        uint32_t ctype = *reinterpret_cast<const uint32_t*>(data + offset);
+        uint32_t csize = *reinterpret_cast<const uint32_t*>(data + offset + 4);
+        size_t header_end = offset + 12;
+        size_t chunk_end = std::min(header_end + csize, end);
         
-        if (chunk_type == 0x0F) { // rwID_GEOMETRY
-            size_t geom_offset = offset + 12;
-            if (geom_offset + 12 <= size) {
-                uint32_t s_type = *reinterpret_cast<const uint32_t*>(p + geom_offset);
-                uint32_t s_size = *reinterpret_cast<const uint32_t*>(p + geom_offset + 4);
-                if (s_type == 0x01 && geom_offset + 12 + s_size <= size) {
-                    const uint8_t* struct_ptr = p + geom_offset + 12;
-                    uint16_t format_flags = *reinterpret_cast<const uint16_t*>(struct_ptr);
-                    uint32_t num_tris = *reinterpret_cast<const uint32_t*>(struct_ptr + 4);
-                    uint32_t num_verts = *reinterpret_cast<const uint32_t*>(struct_ptr + 8);
+        if (ctype == 0x0F) { // rwID_GEOMETRY
+            if (header_end + 12 <= chunk_end) {
+                uint32_t stype = *reinterpret_cast<const uint32_t*>(data + header_end);
+                if (stype == 0x01) {
+                    const uint8_t* ptr = data + header_end + 12;
+                    uint16_t flags = *reinterpret_cast<const uint16_t*>(ptr);
+                    uint8_t num_uv = *(ptr + 2);
+                    uint32_t num_tris = *reinterpret_cast<const uint32_t*>(ptr + 4);
+                    uint32_t num_verts = *reinterpret_cast<const uint32_t*>(ptr + 8);
                     
-                    if (num_verts > 0 && num_tris > 0 && num_verts < 65536) {
-                        size_t cur = 16;
-                        if (format_flags & 0x0008) cur += num_verts * 4; // Prelit colors
+                    if (num_verts > 0 && num_tris > 0 && (out_verts.size() + num_verts) < 65535) {
+                        size_t cur = header_end + 12 + 16;
+                        if (flags & 0x0008) cur += num_verts * 4; // prelit colors
                         const float* uvs = nullptr;
-                        if (format_flags & 0x0004) { // Textured
-                            uvs = reinterpret_cast<const float*>(struct_ptr + cur);
-                            cur += num_verts * 8;
+                        if ((flags & 0x0004) || num_uv > 0) {
+                            uvs = reinterpret_cast<const float*>(data + cur);
+                            cur += num_verts * 8 * std::max((int)num_uv, 1);
                         }
                         
-                        // Triangles: (v2, v1, flags, v3)
-                        const uint16_t* tri_raw = reinterpret_cast<const uint16_t*>(struct_ptr + cur);
+                        const uint16_t* tris = reinterpret_cast<const uint16_t*>(data + cur);
                         cur += num_tris * 8;
                         
-                        // Bounding sphere
-                        const float* sphere = reinterpret_cast<const float*>(struct_ptr + cur);
-                        out_mesh.bound_sphere[0] = sphere[0];
-                        out_mesh.bound_sphere[1] = sphere[1];
-                        out_mesh.bound_sphere[2] = sphere[2];
-                        out_mesh.bound_sphere[3] = sphere[3];
-                        cur += 16;
-                        
-                        uint32_t has_verts = *reinterpret_cast<const uint32_t*>(struct_ptr + cur); cur += 4;
-                        uint32_t has_norms = *reinterpret_cast<const uint32_t*>(struct_ptr + cur); cur += 4;
-                        
-                        const float* verts = nullptr;
-                        if (has_verts) {
-                            verts = reinterpret_cast<const float*>(struct_ptr + cur);
-                            cur += num_verts * 12;
-                        }
-                        const float* norms = nullptr;
-                        if (has_norms) {
-                            norms = reinterpret_cast<const float*>(struct_ptr + cur);
-                            cur += num_verts * 12;
-                        }
-                        
-                        if (verts) {
-                            std::vector<DffVertex> vert_list(num_verts);
-                            for (uint32_t v = 0; v < num_verts; ++v) {
-                                vert_list[v].x = verts[v * 3 + 0];
-                                vert_list[v].y = verts[v * 3 + 1];
-                                vert_list[v].z = verts[v * 3 + 2];
-                                if (norms) {
-                                    vert_list[v].nx = norms[v * 3 + 0];
-                                    vert_list[v].ny = norms[v * 3 + 1];
-                                    vert_list[v].nz = norms[v * 3 + 2];
-                                } else {
-                                    vert_list[v].nx = 0.0f; vert_list[v].ny = 1.0f; vert_list[v].nz = 0.0f;
+                        if (cur + 24 <= chunk_end) {
+                            const float* bounds = reinterpret_cast<const float*>(data + cur);
+                            if (bounds[3] > out_bounds[3]) {
+                                out_bounds[0] = bounds[0];
+                                out_bounds[1] = bounds[1];
+                                out_bounds[2] = bounds[2];
+                                out_bounds[3] = bounds[3];
+                            }
+                            cur += 16;
+                            uint32_t has_verts = *reinterpret_cast<const uint32_t*>(data + cur);
+                            uint32_t has_normals = *reinterpret_cast<const uint32_t*>(data + cur + 4);
+                            cur += 8;
+                            
+                            if (has_verts && cur + num_verts * 12 <= chunk_end) {
+                                const float* vert_pos = reinterpret_cast<const float*>(data + cur);
+                                cur += num_verts * 12;
+                                const float* vert_norm = nullptr;
+                                if (has_normals && cur + num_verts * 12 <= chunk_end) {
+                                    vert_norm = reinterpret_cast<const float*>(data + cur);
                                 }
-                                if (uvs) {
-                                    vert_list[v].u = uvs[v * 2 + 0];
-                                    vert_list[v].v = uvs[v * 2 + 1];
-                                } else {
-                                    vert_list[v].u = 0.0f; vert_list[v].v = 0.0f;
+                                
+                                uint16_t base_index = (uint16_t)out_verts.size();
+                                for (uint32_t i = 0; i < num_verts; ++i) {
+                                    DffVertex v;
+                                    v.x = vert_pos[i * 3 + 0];
+                                    v.y = vert_pos[i * 3 + 1];
+                                    v.z = vert_pos[i * 3 + 2];
+                                    if (vert_norm) {
+                                        v.nx = vert_norm[i * 3 + 0];
+                                        v.ny = vert_norm[i * 3 + 1];
+                                        v.nz = vert_norm[i * 3 + 2];
+                                    } else {
+                                        v.nx = 0.0f; v.ny = 1.0f; v.nz = 0.0f;
+                                    }
+                                    if (uvs) {
+                                        v.u = uvs[i * 2 + 0];
+                                        v.v = uvs[i * 2 + 1];
+                                    } else {
+                                        v.u = 0.0f; v.v = 0.0f;
+                                    }
+                                    out_verts.push_back(v);
+                                }
+                                
+                                for (uint32_t i = 0; i < num_tris; ++i) {
+                                    uint16_t v2 = tris[i * 4 + 0];
+                                    uint16_t v1 = tris[i * 4 + 1];
+                                    uint16_t v3 = tris[i * 4 + 3];
+                                    if (v1 < num_verts && v2 < num_verts && v3 < num_verts) {
+                                        out_indices.push_back(base_index + v1);
+                                        out_indices.push_back(base_index + v2);
+                                        out_indices.push_back(base_index + v3);
+                                    }
                                 }
                             }
-                            
-                            std::vector<uint16_t> indices;
-                            indices.reserve(num_tris * 3);
-                            for (uint32_t t = 0; t < num_tris; ++t) {
-                                uint16_t v2 = tri_raw[t * 4 + 0];
-                                uint16_t v1 = tri_raw[t * 4 + 1];
-                                uint16_t v3 = tri_raw[t * 4 + 3];
-                                if (v1 < num_verts && v2 < num_verts && v3 < num_verts) {
-                                    indices.push_back(v1);
-                                    indices.push_back(v2);
-                                    indices.push_back(v3);
-                                }
-                            }
-                            
-                            // Upload to OpenGL ES
-                            glGenVertexArrays(1, &out_mesh.vao);
-                            glGenBuffers(1, &out_mesh.vbo);
-                            glGenBuffers(1, &out_mesh.ebo);
-                            
-                            glBindVertexArray(out_mesh.vao);
-                            glBindBuffer(GL_ARRAY_BUFFER, out_mesh.vbo);
-                            glBufferData(GL_ARRAY_BUFFER, vert_list.size() * sizeof(DffVertex), vert_list.data(), GL_STATIC_DRAW);
-                            
-                            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, out_mesh.ebo);
-                            glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint16_t), indices.data(), GL_STATIC_DRAW);
-                            
-                            // Pos
-                            glEnableVertexAttribArray(0);
-                            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(DffVertex), (void*)offsetof(DffVertex, x));
-                            // Normal
-                            glEnableVertexAttribArray(1);
-                            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(DffVertex), (void*)offsetof(DffVertex, nx));
-                            // UV
-                            glEnableVertexAttribArray(2);
-                            glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(DffVertex), (void*)offsetof(DffVertex, u));
-                            
-                            glBindVertexArray(0);
-                            out_mesh.index_count = (GLsizei)indices.size();
-                            return true;
                         }
                     }
                 }
             }
+        } else if (ctype == 0x10 || ctype == 0x1A) { // rwID_CLUMP or rwID_GEOMETRYLIST
+            parse_rw_geometries_recursive(data, header_end, chunk_end, out_verts, out_indices, out_bounds);
         }
-        offset += 12 + chunk_size;
+        offset = chunk_end;
     }
-    return false;
+}
+
+bool DffRenderer::parse_dff_data(const std::vector<uint8_t>& data, DffMesh& out_mesh) {
+    if (data.size() < 64) return false;
+    
+    std::vector<DffVertex> verts;
+    std::vector<uint16_t> indices;
+    float bounds[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+    
+    parse_rw_geometries_recursive(data.data(), 0, data.size(), verts, indices, bounds);
+    
+    if (verts.empty() || indices.empty()) {
+        return false;
+    }
+    
+    out_mesh.bound_sphere[0] = bounds[0];
+    out_mesh.bound_sphere[1] = bounds[1];
+    out_mesh.bound_sphere[2] = bounds[2];
+    out_mesh.bound_sphere[3] = (bounds[3] > 0.1f) ? bounds[3] : 2.5f;
+    
+    glGenVertexArrays(1, &out_mesh.vao);
+    glGenBuffers(1, &out_mesh.vbo);
+    glGenBuffers(1, &out_mesh.ebo);
+    
+    glBindVertexArray(out_mesh.vao);
+    glBindBuffer(GL_ARRAY_BUFFER, out_mesh.vbo);
+    glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(DffVertex), verts.data(), GL_STATIC_DRAW);
+    
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, out_mesh.ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint16_t), indices.data(), GL_STATIC_DRAW);
+    
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(DffVertex), (void*)offsetof(DffVertex, x));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(DffVertex), (void*)offsetof(DffVertex, nx));
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(DffVertex), (void*)offsetof(DffVertex, u));
+    
+    glBindVertexArray(0);
+    out_mesh.index_count = (GLsizei)indices.size();
+    
+    LOGI("Successfully loaded DFF mesh with %zu vertices, %zu indices (radius=%.2f)",
+         verts.size(), indices.size(), out_mesh.bound_sphere[3]);
+    return true;
 }
 
 void DffRenderer::create_fallback_mesh(DffMesh& out_mesh) {
-    // Elegant low-poly vehicle prism fallback
+    // Stylized low-poly car mesh fallback
     std::vector<DffVertex> verts = {
-        // Front
-        {-1.0f, -0.5f,  1.8f,  0.0f, 0.0f, 1.0f, 0.0f, 0.0f},
-        { 1.0f, -0.5f,  1.8f,  0.0f, 0.0f, 1.0f, 1.0f, 0.0f},
-        { 0.8f,  0.5f,  1.0f,  0.0f, 0.7f, 0.7f, 1.0f, 1.0f},
-        {-0.8f,  0.5f,  1.0f,  0.0f, 0.7f, 0.7f, 0.0f, 1.0f},
-        // Back
-        {-1.0f, -0.5f, -1.8f,  0.0f, 0.0f, -1.0f, 0.0f, 0.0f},
-        { 1.0f, -0.5f, -1.8f,  0.0f, 0.0f, -1.0f, 1.0f, 0.0f},
-        { 0.8f,  0.6f, -1.0f,  0.0f, 0.7f, -0.7f, 1.0f, 1.0f},
-        {-0.8f,  0.6f, -1.0f,  0.0f, 0.7f, -0.7f, 0.0f, 1.0f},
+        // Hood & Front
+        {-0.9f, -0.4f,  1.7f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f},
+        { 0.9f, -0.4f,  1.7f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f},
+        { 0.85f, 0.3f,  0.8f,  0.0f,  0.7f,  0.7f, 1.0f, 0.5f},
+        {-0.85f, 0.3f,  0.8f,  0.0f,  0.7f,  0.7f, 0.0f, 0.5f},
+        // Cabin Roof
+        {-0.75f, 0.7f, -0.2f,  0.0f,  1.0f,  0.0f, 0.0f, 0.8f},
+        { 0.75f, 0.7f, -0.2f,  0.0f,  1.0f,  0.0f, 1.0f, 0.8f},
+        { 0.75f, 0.7f, -1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f},
+        {-0.75f, 0.7f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f},
+        // Trunk & Rear
+        { 0.85f, 0.35f,-1.7f,  0.0f,  0.2f, -0.9f, 1.0f, 0.5f},
+        {-0.85f, 0.35f,-1.7f,  0.0f,  0.2f, -0.9f, 0.0f, 0.5f},
+        {-0.9f, -0.4f, -1.8f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f},
+        { 0.9f, -0.4f, -1.8f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f},
     };
     std::vector<uint16_t> indices = {
-        0, 1, 2,  0, 2, 3, // Front
-        5, 4, 7,  5, 7, 6, // Back
-        3, 2, 6,  3, 6, 7, // Roof
-        4, 5, 1,  4, 1, 0, // Bottom
-        4, 0, 3,  4, 3, 7, // Left
-        1, 5, 6,  1, 6, 2  // Right
+        0, 1, 2,  0, 2, 3,       // Front Hood
+        3, 2, 5,  3, 5, 4,       // Windshield
+        4, 5, 6,  4, 6, 7,       // Roof
+        7, 6, 8,  7, 8, 9,       // Rear Window
+        9, 8, 11, 9, 11, 10,     // Trunk
+        0, 3, 4,  0, 4, 10,      // Left Side
+        1, 11, 5, 1, 5, 2,       // Right Side
+        0, 10, 11, 0, 11, 1      // Bottom
     };
     
     out_mesh.bound_sphere[0] = 0.0f;
-    out_mesh.bound_sphere[1] = 0.0f;
+    out_mesh.bound_sphere[1] = 0.1f;
     out_mesh.bound_sphere[2] = 0.0f;
     out_mesh.bound_sphere[3] = 2.2f;
     
@@ -391,45 +443,45 @@ void DffRenderer::create_fallback_mesh(DffMesh& out_mesh) {
     out_mesh.index_count = (GLsizei)indices.size();
 }
 
-void DffRenderer::render_preview_model(int model_id, float screen_x, float screen_y, float screen_w, float screen_h,
-                                     float rot_x, float rot_y, float rot_z, float zoom,
-                                     int veh_col1, int veh_col2) {
-    if (!shader_program || screen_w <= 1.0f || screen_h <= 1.0f) return;
+GLuint DffRenderer::render_to_texture(int model_id, float rot_x, float rot_y, float rot_z, float zoom,
+                                      int veh_col1, int veh_col2) {
+    if (!shader_program || fbos[0] == 0) return 0;
     
     DffMesh mesh;
     load_model_mesh(model_id, mesh);
-    if (!mesh.vao || mesh.index_count == 0) return;
+    if (!mesh.vao || mesh.index_count == 0) return 0;
     
-    // Set Scissor and Viewport for the textdraw preview box
-    GLint orig_viewport[4];
-    glGetIntegerv(GL_VIEWPORT, orig_viewport);
+    int fbo_idx = current_fbo_index % FBO_COUNT;
+    current_fbo_index++;
+    
+    GLint orig_fbo = 0;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &orig_fbo);
+    GLint orig_vp[4];
+    glGetIntegerv(GL_VIEWPORT, orig_vp);
     GLboolean orig_scissor = glIsEnabled(GL_SCISSOR_TEST);
-    GLint orig_scissor_box[4];
-    glGetIntegerv(GL_SCISSOR_BOX, orig_scissor_box);
+    glDisable(GL_SCISSOR_TEST);
     
-    // Invert Y for OpenGL coordinate space
-    float gl_y = (float)orig_viewport[3] - (screen_y + screen_h);
-    glEnable(GL_SCISSOR_TEST);
-    glScissor((GLint)screen_x, (GLint)gl_y, (GLsizei)screen_w, (GLsizei)screen_h);
-    glViewport((GLint)screen_x, (GLint)gl_y, (GLsizei)screen_w, (GLsizei)screen_h);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbos[fbo_idx]);
+    glViewport(0, 0, FBO_SIZE, FBO_SIZE);
     
-    glClear(GL_DEPTH_BUFFER_BIT);
+    // Clear transparent background
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
     glUseProgram(shader_program);
     
-    // Matrices
-    float aspect = screen_w / screen_h;
+    float aspect = 1.0f;
     Mat4 proj = Mat4::perspective(45.0f * (3.14159265f / 180.0f), aspect, 0.1f, 100.0f);
     
     float radius = mesh.bound_sphere[3];
     if (radius <= 0.1f) radius = 2.0f;
-    float dist = (radius * 2.5f) / std::max(zoom, 0.1f);
-    
+    float dist = (radius * 2.6f) / std::max(zoom, 0.1f);
     Mat4 view = Mat4::translation(0.0f, 0.0f, -dist);
     
-    // SA-MP rotation: RotX, RotY, RotZ in degrees
     const float to_rad = 3.14159265f / 180.0f;
     Mat4 rot = Mat4::rotation_zyx(rot_x * to_rad, rot_y * to_rad, rot_z * to_rad);
     Mat4 center = Mat4::translation(-mesh.bound_sphere[0], -mesh.bound_sphere[1], -mesh.bound_sphere[2]);
@@ -441,7 +493,6 @@ void DffRenderer::render_preview_model(int model_id, float screen_x, float scree
     glUniformMatrix4fv(u_mvp_loc, 1, GL_FALSE, mvp.m);
     glUniformMatrix4fv(u_model_loc, 1, GL_FALSE, model.m);
     
-    // Colors from Carcols
     const auto& carcols = AssetManager::get().get_colors();
     auto get_col_vec = [&](int cid) -> std::pair<float, std::pair<float, float>> {
         if (cid >= 0 && cid < (int)carcols.size()) {
@@ -460,12 +511,12 @@ void DffRenderer::render_preview_model(int model_id, float screen_x, float scree
     glDrawElements(GL_TRIANGLES, mesh.index_count, GL_UNSIGNED_SHORT, nullptr);
     glBindVertexArray(0);
     
-    // Restore states
     glDisable(GL_DEPTH_TEST);
-    glViewport(orig_viewport[0], orig_viewport[1], orig_viewport[2], orig_viewport[3]);
-    if (orig_scissor) {
-        glScissor(orig_scissor_box[0], orig_scissor_box[1], orig_scissor_box[2], orig_scissor_box[3]);
-    } else {
-        glDisable(GL_SCISSOR_TEST);
-    }
+    
+    // Restore states
+    glBindFramebuffer(GL_FRAMEBUFFER, orig_fbo);
+    glViewport(orig_vp[0], orig_vp[1], orig_vp[2], orig_vp[3]);
+    if (orig_scissor) glEnable(GL_SCISSOR_TEST);
+    
+    return fbo_textures[fbo_idx];
 }

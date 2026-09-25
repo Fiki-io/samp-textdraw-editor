@@ -20,9 +20,14 @@ public:
     void set_storage_directory(const std::string& path) { storage_path = path; }
     std::string get_exported_code() const { return export_code_buffer; }
     void set_import_code(const std::string& code);
+    void set_dialog_text(int field_id, const std::string& text, TextDrawManager& manager);
+
+    void apply_ui_scale(float scale);
+    float get_ui_scale() const { return ui_scale; }
 
 private:
     EditorUI() = default;
+    float ui_scale = 1.0f;
     
     void apply_gtasa_theme();
     void render_top_bar(TextDrawManager& manager, Viewport& viewport);

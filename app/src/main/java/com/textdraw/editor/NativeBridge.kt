@@ -9,10 +9,13 @@ object NativeBridge {
 
     external fun nativeInit(assetManager: AssetManager, storagePath: String)
     external fun nativeSurfaceCreated()
-    external fun nativeSurfaceChanged(width: Int, height: Int)
+    external fun nativeSurfaceChanged(width: Int, height: Int, density: Float)
     external fun nativeDrawFrame()
     external fun nativeTouchEvent(action: Int, x: Float, y: Float, pointerCount: Int)
     external fun nativePinchZoom(scaleFactor: Float)
+    external fun nativeInputCharacters(text: String)
+    external fun nativeInputKey(keyCode: Int)
+    external fun nativeSetDialogText(fieldId: Int, text: String)
     external fun nativeExportPawn(): String
     external fun nativeImportPawn(code: String)
 }

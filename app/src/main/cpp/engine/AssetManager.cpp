@@ -75,14 +75,15 @@ void AssetManager::load_json_databases() {
         std::string carcols_str = read_asset_text("data/carcols.json");
         if (!carcols_str.empty()) {
             auto j = nlohmann::json::parse(carcols_str);
+            colors.clear();
             for (const auto& item : j) {
                 VehicleColor vc;
-                vc.id = item["id"].get<int>();
-                vc.r = item["r"].get<uint8_t>();
-                vc.g = item["g"].get<uint8_t>();
-                vc.b = item["b"].get<uint8_t>();
-                vc.hex = item["hex"].get<std::string>();
-                vc.name = item["name"].get<std::string>();
+                vc.id = item.value("id", 0);
+                vc.r = (uint8_t)item.value("r", 255);
+                vc.g = (uint8_t)item.value("g", 255);
+                vc.b = (uint8_t)item.value("b", 255);
+                vc.hex = item.value("hex", "#FFFFFF");
+                vc.name = item.value("name", "Unknown");
                 colors.push_back(vc);
             }
             LOGI("Loaded %zu vehicle colors from carcols.json", colors.size());
@@ -96,13 +97,14 @@ void AssetManager::load_json_databases() {
         std::string veh_str = read_asset_text("data/vehicles.json");
         if (!veh_str.empty()) {
             auto j = nlohmann::json::parse(veh_str);
+            vehicles.clear();
             for (const auto& item : j) {
                 VehicleDef vd;
-                vd.id = item["id"].get<int>();
-                vd.name = item["name"].get<std::string>();
-                vd.type = item["type"].get<std::string>();
-                vd.dff = item["dff"].get<std::string>();
-                vd.txd = item["txd"].get<std::string>();
+                vd.id = item.value("id", 400);
+                vd.name = item.value("name", "Vehicle");
+                vd.type = item.value("type", "Automobile");
+                vd.dff = item.value("dff", "");
+                vd.txd = item.value("txd", "");
                 vehicles.push_back(vd);
             }
             LOGI("Loaded %zu vehicles from vehicles.json", vehicles.size());
@@ -116,13 +118,14 @@ void AssetManager::load_json_databases() {
         std::string skin_str = read_asset_text("data/skins.json");
         if (!skin_str.empty()) {
             auto j = nlohmann::json::parse(skin_str);
+            skins.clear();
             for (const auto& item : j) {
                 SkinDef sd;
-                sd.id = item["id"].get<int>();
-                sd.name = item["name"].get<std::string>();
-                sd.type = item["type"].get<std::string>();
-                sd.dff = item["dff"].get<std::string>();
-                sd.txd = item["txd"].get<std::string>();
+                sd.id = item.value("id", 0);
+                sd.name = item.value("name", "Skin");
+                sd.type = item.value("type", "Ped");
+                sd.dff = item.value("dff", "");
+                sd.txd = item.value("txd", "");
                 skins.push_back(sd);
             }
             LOGI("Loaded %zu skins from skins.json", skins.size());
@@ -137,16 +140,17 @@ void AssetManager::load_json_databases() {
         if (!sprite_str.empty()) {
             auto j = nlohmann::json::parse(sprite_str);
             size_t count = 0;
+            sprites_by_txd.clear();
             for (auto& [txd, list] : j.items()) {
                 std::vector<SpriteDef> sdefs;
                 for (const auto& item : list) {
                     SpriteDef sd;
-                    sd.name = item["name"].get<std::string>();
-                    sd.txd = item["txd"].get<std::string>();
-                    sd.full_name = item["full_txd_sprite"].get<std::string>();
-                    sd.width = item["width"].get<int>();
-                    sd.height = item["height"].get<int>();
-                    sd.webp_path = item["png_path"].get<std::string>(); // Use PNG path for universal stb_image decode
+                    sd.name = item.value("name", "");
+                    sd.txd = item.value("txd", txd);
+                    sd.full_name = item.value("full_txd_sprite", txd + ":" + sd.name);
+                    sd.width = item.value("width", 64);
+                    sd.height = item.value("height", 64);
+                    sd.webp_path = item.value("png_path", "sprites/" + txd + "/" + sd.name + ".png");
                     sdefs.push_back(sd);
                     count++;
                 }

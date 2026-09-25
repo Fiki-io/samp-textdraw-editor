@@ -133,5 +133,55 @@ class MainActivity : Activity() {
                 }
             }
         }
+
+        @JvmStatic
+        fun setKeyboardVisible(visible: Boolean) {
+            instance?.get()?.let { activity ->
+                activity.runOnUiThread {
+                    val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as? android.view.inputmethod.InputMethodManager ?: return@runOnUiThread
+                    if (activity.isFinishing) return@runOnUiThread
+                    if (visible) {
+                        imm.showSoftInput(activity.glSurfaceView, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
+                    } else {
+                        imm.hideSoftInputFromWindow(activity.glSurfaceView.windowToken, 0)
+                    }
+                }
+            }
+        }
+
+        @JvmStatic
+        fun showTextInputDialog(title: String, initialText: String, fieldId: Int) {
+            instance?.get()?.let { activity ->
+                activity.runOnUiThread {
+                    if (activity.isFinishing) return@runOnUiThread
+                    val input = android.widget.EditText(activity).apply {
+                        setText(initialText)
+                        setSelection(text.length)
+                        setTextColor(android.graphics.Color.WHITE)
+                        setBackgroundColor(android.graphics.Color.parseColor("#22242A"))
+                        setPadding(32, 24, 32, 24)
+                    }
+                    val container = android.widget.FrameLayout(activity).apply {
+                        setPadding(40, 20, 40, 10)
+                        addView(input)
+                    }
+                    val dialog = android.app.AlertDialog.Builder(activity, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+                        .setTitle(title)
+                        .setView(container)
+                        .setPositiveButton("Simpan") { _, _ ->
+                            val result = input.text.toString()
+                            activity.glSurfaceView.queueEvent {
+                                NativeBridge.nativeSetDialogText(fieldId, result)
+                            }
+                        }
+                        .setNegativeButton("Batal", null)
+                        .create()
+
+                    dialog.window?.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
+                    dialog.show()
+                    input.requestFocus()
+                }
+            }
+        }
     }
 }
