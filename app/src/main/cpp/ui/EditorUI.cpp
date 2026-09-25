@@ -331,7 +331,7 @@ void EditorUI::render_bottom_toolbar(TextDrawManager& manager, Viewport& viewpor
             show_model_picker = true;
         }
         ImGui::SameLine();
-        ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
+        ImGui::TextDisabled("|");
         ImGui::SameLine();
         
         bool has_sel = (manager.get_active_textdraw() != nullptr);
