@@ -10,6 +10,7 @@
 #include "engine/PawnExporter.h"
 #include "ui/EditorUI.h"
 #include "imgui/imgui.h"
+#include "imgui/imgui_internal.h"
 #include "imgui/imgui_impl_opengl3.h"
 #include "utils/CrashHandlerNative.h"
 
