@@ -1,0 +1,72 @@
+{
+  "fonts": [
+    {
+      "id": 0,
+      "name": "Diploma (Gothic)",
+      "texture": "fonts/font2.webp",
+      "texture_region": {
+        "x": 0,
+        "y": 0,
+        "w": 512,
+        "h": 256
+      },
+      "glyph_width": 32,
+      "glyph_height": 32,
+      "columns": 16,
+      "rows": 8,
+      "unprop": 27,
+      "proportions": []
+    },
+    {
+      "id": 1,
+      "name": "Chalet London 1960 (Standard SA-MP)",
+      "texture": "fonts/font1.webp",
+      "texture_region": {
+        "x": 0,
+        "y": 0,
+        "w": 512,
+        "h": 256
+      },
+      "glyph_width": 32,
+      "glyph_height": 32,
+      "columns": 16,
+      "rows": 8,
+      "unprop": 20,
+      "proportions": []
+    },
+    {
+      "id": 2,
+      "name": "Futura Condensed / Subheader",
+      "texture": "fonts/font2.webp",
+      "texture_region": {
+        "x": 0,
+        "y": 256,
+        "w": 512,
+        "h": 256
+      },
+      "glyph_width": 32,
+      "glyph_height": 32,
+      "columns": 16,
+      "rows": 8,
+      "unprop": 20,
+      "proportions": []
+    },
+    {
+      "id": 3,
+      "name": "Pricedown (GTA San Andreas Title)",
+      "texture": "fonts/font1.webp",
+      "texture_region": {
+        "x": 0,
+        "y": 256,
+        "w": 512,
+        "h": 256
+      },
+      "glyph_width": 32,
+      "glyph_height": 32,
+      "columns": 16,
+      "rows": 8,
+      "unprop": 25,
+      "proportions": []
+    }
+  ]
+}

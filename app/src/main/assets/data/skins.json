@@ -1,0 +1,1934 @@
+[
+  {
+    "id": 0,
+    "name": "null",
+    "dff": "null.dff",
+    "txd": "generic.txd",
+    "type": "PLAYER1"
+  },
+  {
+    "id": 7,
+    "name": "male01",
+    "dff": "male01.dff",
+    "txd": "male01.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 9,
+    "name": "BFORI",
+    "dff": "BFORI.dff",
+    "txd": "BFORI.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 10,
+    "name": "BFOST",
+    "dff": "BFOST.dff",
+    "txd": "BFOST.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 11,
+    "name": "VBFYCRP",
+    "dff": "VBFYCRP.dff",
+    "txd": "VBFYCRP.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 12,
+    "name": "BFYRI",
+    "dff": "BFYRI.dff",
+    "txd": "BFYRI.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 13,
+    "name": "BFYST",
+    "dff": "BFYST.dff",
+    "txd": "BFYST.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 14,
+    "name": "BMORI",
+    "dff": "BMORI.dff",
+    "txd": "bmori.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 15,
+    "name": "BMOST",
+    "dff": "BMOST.dff",
+    "txd": "bmost.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 16,
+    "name": "BMYAP",
+    "dff": "BMYAP.dff",
+    "txd": "BMYAP.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 17,
+    "name": "BMYBU",
+    "dff": "BMYBU.dff",
+    "txd": "BMYBU.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 18,
+    "name": "BMYBE",
+    "dff": "BMYBE.dff",
+    "txd": "BMYBE.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 19,
+    "name": "BMYDJ",
+    "dff": "BMYDJ.dff",
+    "txd": "BMYDJ.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 20,
+    "name": "BMYRI",
+    "dff": "BMYRI.dff",
+    "txd": "BMYRI.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 21,
+    "name": "BMYCR",
+    "dff": "BMYCR.dff",
+    "txd": "BMYCR.txd",
+    "type": "CRIMINAL"
+  },
+  {
+    "id": 22,
+    "name": "BMYST",
+    "dff": "BMYST.dff",
+    "txd": "BMYST.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 23,
+    "name": "WMYBMX",
+    "dff": "WMYBMX.dff",
+    "txd": "WMYBMX.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 24,
+    "name": "WBDYG1",
+    "dff": "WBDYG1.dff",
+    "txd": "WBDYG1.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 25,
+    "name": "WBDYG2",
+    "dff": "WBDYG2.dff",
+    "txd": "WBDYG2.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 26,
+    "name": "WMYBP",
+    "dff": "WMYBP.dff",
+    "txd": "WMYBP.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 27,
+    "name": "WMYCON",
+    "dff": "WMYCON.dff",
+    "txd": "WMYCON.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 28,
+    "name": "BMYDRUG",
+    "dff": "BMYDRUG.dff",
+    "txd": "BMYdrug.txd",
+    "type": "CRIMINAL"
+  },
+  {
+    "id": 29,
+    "name": "WMYDRUG",
+    "dff": "WMYDRUG.dff",
+    "txd": "WMYdrug.txd",
+    "type": "CRIMINAL"
+  },
+  {
+    "id": 30,
+    "name": "HMYDRUG",
+    "dff": "HMYDRUG.dff",
+    "txd": "HMYdrug.txd",
+    "type": "CRIMINAL"
+  },
+  {
+    "id": 31,
+    "name": "DWFOLC",
+    "dff": "DWFOLC.dff",
+    "txd": "dwfolc.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 32,
+    "name": "DWMOLC1",
+    "dff": "DWMOLC1.dff",
+    "txd": "dwmolc1.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 33,
+    "name": "DWMOLC2",
+    "dff": "DWMOLC2.dff",
+    "txd": "dwmolc2.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 34,
+    "name": "DWMYLC1",
+    "dff": "DWMYLC1.dff",
+    "txd": "dwmylc1.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 35,
+    "name": "HMOGAR",
+    "dff": "HMOGAR.dff",
+    "txd": "HMOgar.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 36,
+    "name": "WMYGOL1",
+    "dff": "WMYGOL1.dff",
+    "txd": "WMYgol1.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 37,
+    "name": "WMYGOL2",
+    "dff": "WMYGOL2.dff",
+    "txd": "WMYgol2.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 38,
+    "name": "HFORI",
+    "dff": "HFORI.dff",
+    "txd": "hfori.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 39,
+    "name": "HFOST",
+    "dff": "HFOST.dff",
+    "txd": "hfost.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 40,
+    "name": "HFYRI",
+    "dff": "HFYRI.dff",
+    "txd": "HFYRI.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 41,
+    "name": "HFYST",
+    "dff": "HFYST.dff",
+    "txd": "HFYST.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 43,
+    "name": "HMORI",
+    "dff": "HMORI.dff",
+    "txd": "HMORI.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 44,
+    "name": "HMOST",
+    "dff": "HMOST.dff",
+    "txd": "HMOST.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 45,
+    "name": "HMYBE",
+    "dff": "HMYBE.dff",
+    "txd": "HMYBE.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 46,
+    "name": "HMYRI",
+    "dff": "HMYRI.dff",
+    "txd": "HMYRI.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 47,
+    "name": "HMYCR",
+    "dff": "HMYCR.dff",
+    "txd": "HMYCR.txd",
+    "type": "CRIMINAL"
+  },
+  {
+    "id": 48,
+    "name": "HMYST",
+    "dff": "HMYST.dff",
+    "txd": "HMYST.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 49,
+    "name": "OMOKUNG",
+    "dff": "OMOKUNG.dff",
+    "txd": "OMOkung.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 50,
+    "name": "WMYMECH",
+    "dff": "WMYMECH.dff",
+    "txd": "WMYMECH.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 51,
+    "name": "BMYMOUN",
+    "dff": "BMYMOUN.dff",
+    "txd": "BMYMOUN.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 52,
+    "name": "WMYMOUN",
+    "dff": "WMYMOUN.dff",
+    "txd": "WMYMOUN.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 53,
+    "name": "OFORI",
+    "dff": "OFORI.dff",
+    "txd": "OFORI.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 54,
+    "name": "OFOST",
+    "dff": "OFOST.dff",
+    "txd": "OFOST.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 55,
+    "name": "OFYRI",
+    "dff": "OFYRI.dff",
+    "txd": "OFYRI.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 56,
+    "name": "OFYST",
+    "dff": "OFYST.dff",
+    "txd": "OFYST.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 57,
+    "name": "OMORI",
+    "dff": "OMORI.dff",
+    "txd": "OMORI.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 58,
+    "name": "OMOST",
+    "dff": "OMOST.dff",
+    "txd": "OMOST.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 59,
+    "name": "OMYRI",
+    "dff": "OMYRI.dff",
+    "txd": "OMYRI.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 60,
+    "name": "OMYST",
+    "dff": "OMYST.dff",
+    "txd": "OMYST.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 61,
+    "name": "WMYPLT",
+    "dff": "WMYPLT.dff",
+    "txd": "WMYPLT.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 62,
+    "name": "WMOPJ",
+    "dff": "WMOPJ.dff",
+    "txd": "WMOpj.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 63,
+    "name": "BFYPRO",
+    "dff": "BFYPRO.dff",
+    "txd": "BFYPRO.txd",
+    "type": "PROSTITUTE"
+  },
+  {
+    "id": 64,
+    "name": "HFYPRO",
+    "dff": "HFYPRO.dff",
+    "txd": "HFYPRO.txd",
+    "type": "PROSTITUTE"
+  },
+  {
+    "id": 66,
+    "name": "BMYPOL1",
+    "dff": "BMYPOL1.dff",
+    "txd": "BMYpol1.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 67,
+    "name": "BMYPOL2",
+    "dff": "BMYPOL2.dff",
+    "txd": "BMYpol2.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 68,
+    "name": "WMOPREA",
+    "dff": "WMOPREA.dff",
+    "txd": "WMOprea.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 69,
+    "name": "SBFYST",
+    "dff": "SBFYST.dff",
+    "txd": "sbfyst.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 70,
+    "name": "WMOSCI",
+    "dff": "WMOSCI.dff",
+    "txd": "WMOsci.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 71,
+    "name": "WMYSGRD",
+    "dff": "WMYSGRD.dff",
+    "txd": "WMYSGRD.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 72,
+    "name": "SWMYHP1",
+    "dff": "SWMYHP1.dff",
+    "txd": "SWMYhp1.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 73,
+    "name": "SWMYHP2",
+    "dff": "SWMYHP2.dff",
+    "txd": "SWMYhp2.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 75,
+    "name": "SWFOPRO",
+    "dff": "SWFOPRO.dff",
+    "txd": "sWFOpro.txd",
+    "type": "PROSTITUTE"
+  },
+  {
+    "id": 76,
+    "name": "WFYSTEW",
+    "dff": "WFYSTEW.dff",
+    "txd": "WFYSTEW.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 77,
+    "name": "SWMOTR1",
+    "dff": "SWMOTR1.dff",
+    "txd": "sWMOtr1.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 78,
+    "name": "WMOTR1",
+    "dff": "WMOTR1.dff",
+    "txd": "WMOTR1.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 79,
+    "name": "BMOTR1",
+    "dff": "BMOTR1.dff",
+    "txd": "BMOTR1.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 80,
+    "name": "VBMYBOX",
+    "dff": "VBMYBOX.dff",
+    "txd": "VBMYbox.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 81,
+    "name": "VWMYBOX",
+    "dff": "VWMYBOX.dff",
+    "txd": "VWMYbox.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 82,
+    "name": "VHMYELV",
+    "dff": "VHMYELV.dff",
+    "txd": "VHMYELV.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 83,
+    "name": "VBMYELV",
+    "dff": "VBMYELV.dff",
+    "txd": "VBMYELV.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 84,
+    "name": "VIMYELV",
+    "dff": "VIMYELV.dff",
+    "txd": "VIMYELV.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 85,
+    "name": "VWFYPRO",
+    "dff": "VWFYPRO.dff",
+    "txd": "VWFYPRO.txd",
+    "type": "PROSTITUTE"
+  },
+  {
+    "id": 87,
+    "name": "VWFYST1",
+    "dff": "VWFYST1.dff",
+    "txd": "VWFYST1.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 88,
+    "name": "WFORI",
+    "dff": "WFORI.dff",
+    "txd": "WFORI.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 89,
+    "name": "WFOST",
+    "dff": "WFOST.dff",
+    "txd": "WFOST.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 90,
+    "name": "WFYJG",
+    "dff": "WFYJG.dff",
+    "txd": "WFYJG.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 91,
+    "name": "WFYRI",
+    "dff": "WFYRI.dff",
+    "txd": "WFYRI.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 92,
+    "name": "WFYRO",
+    "dff": "WFYRO.dff",
+    "txd": "WFYRO.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 93,
+    "name": "WFYST",
+    "dff": "WFYST.dff",
+    "txd": "WFYST.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 94,
+    "name": "WMORI",
+    "dff": "WMORI.dff",
+    "txd": "WMORI.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 95,
+    "name": "WMOST",
+    "dff": "WMOST.dff",
+    "txd": "WMOST.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 96,
+    "name": "WMYJG",
+    "dff": "WMYJG.dff",
+    "txd": "WMYJG.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 97,
+    "name": "WMYLG",
+    "dff": "WMYLG.dff",
+    "txd": "WMYlG.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 98,
+    "name": "WMYRI",
+    "dff": "WMYRI.dff",
+    "txd": "WMYRI.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 99,
+    "name": "WMYRO",
+    "dff": "WMYRO.dff",
+    "txd": "WMYRO.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 100,
+    "name": "WMYCR",
+    "dff": "WMYCR.dff",
+    "txd": "WMYCR.txd",
+    "type": "CRIMINAL"
+  },
+  {
+    "id": 101,
+    "name": "WMYST",
+    "dff": "WMYST.dff",
+    "txd": "WMYST.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 102,
+    "name": "BALLAS1",
+    "dff": "BALLAS1.dff",
+    "txd": "BALLAS1.txd",
+    "type": "GANG1"
+  },
+  {
+    "id": 103,
+    "name": "BALLAS2",
+    "dff": "BALLAS2.dff",
+    "txd": "BALLAS2.txd",
+    "type": "GANG1"
+  },
+  {
+    "id": 104,
+    "name": "BALLAS3",
+    "dff": "BALLAS3.dff",
+    "txd": "BALLAS3.txd",
+    "type": "GANG1"
+  },
+  {
+    "id": 105,
+    "name": "FAM1",
+    "dff": "FAM1.dff",
+    "txd": "FAM1.txd",
+    "type": "GANG2"
+  },
+  {
+    "id": 106,
+    "name": "FAM2",
+    "dff": "FAM2.dff",
+    "txd": "FAM2.txd",
+    "type": "GANG2"
+  },
+  {
+    "id": 107,
+    "name": "FAM3",
+    "dff": "FAM3.dff",
+    "txd": "FAM3.txd",
+    "type": "GANG2"
+  },
+  {
+    "id": 108,
+    "name": "LSV1",
+    "dff": "LSV1.dff",
+    "txd": "LSV1.txd",
+    "type": "GANG3"
+  },
+  {
+    "id": 109,
+    "name": "LSV2",
+    "dff": "LSV2.dff",
+    "txd": "LSV2.txd",
+    "type": "GANG3"
+  },
+  {
+    "id": 110,
+    "name": "LSV3",
+    "dff": "LSV3.dff",
+    "txd": "LSV3.txd",
+    "type": "GANG3"
+  },
+  {
+    "id": 111,
+    "name": "MAFFA",
+    "dff": "MAFFA.dff",
+    "txd": "MAFFA.txd",
+    "type": "CRIMINAL"
+  },
+  {
+    "id": 112,
+    "name": "MAFFB",
+    "dff": "MAFFB.dff",
+    "txd": "MAFFB.txd",
+    "type": "CRIMINAL"
+  },
+  {
+    "id": 113,
+    "name": "MAFBOSS",
+    "dff": "MAFBOSS.dff",
+    "txd": "MAFBOSS.txd",
+    "type": "CRIMINAL"
+  },
+  {
+    "id": 114,
+    "name": "VLA1",
+    "dff": "VLA1.dff",
+    "txd": "VLA1.txd",
+    "type": "GANG8"
+  },
+  {
+    "id": 115,
+    "name": "VLA2",
+    "dff": "VLA2.dff",
+    "txd": "VLA2.txd",
+    "type": "GANG8"
+  },
+  {
+    "id": 116,
+    "name": "VLA3",
+    "dff": "VLA3.dff",
+    "txd": "VLA3.txd",
+    "type": "GANG8"
+  },
+  {
+    "id": 117,
+    "name": "TRIADA",
+    "dff": "TRIADA.dff",
+    "txd": "TRIADA.txd",
+    "type": "GANG7"
+  },
+  {
+    "id": 118,
+    "name": "TRIADB",
+    "dff": "TRIADB.dff",
+    "txd": "TRIADB.txd",
+    "type": "GANG7"
+  },
+  {
+    "id": 120,
+    "name": "TRIBOSS",
+    "dff": "TRIBOSS.dff",
+    "txd": "TRIBOSS.txd",
+    "type": "GANG7"
+  },
+  {
+    "id": 121,
+    "name": "DNB1",
+    "dff": "DNB1.dff",
+    "txd": "DNB1.txd",
+    "type": "GANG5"
+  },
+  {
+    "id": 122,
+    "name": "DNB2",
+    "dff": "DNB2.dff",
+    "txd": "DNB2.txd",
+    "type": "GANG5"
+  },
+  {
+    "id": 123,
+    "name": "DNB3",
+    "dff": "DNB3.dff",
+    "txd": "DNB3.txd",
+    "type": "GANG5"
+  },
+  {
+    "id": 124,
+    "name": "VMAFF1",
+    "dff": "VMAFF1.dff",
+    "txd": "VMAFF1.txd",
+    "type": "GANG6"
+  },
+  {
+    "id": 125,
+    "name": "VMAFF2",
+    "dff": "VMAFF2.dff",
+    "txd": "VMAFF2.txd",
+    "type": "GANG6"
+  },
+  {
+    "id": 126,
+    "name": "VMAFF3",
+    "dff": "VMAFF3.dff",
+    "txd": "VMAFF3.txd",
+    "type": "GANG6"
+  },
+  {
+    "id": 127,
+    "name": "VMAFF4",
+    "dff": "VMAFF4.dff",
+    "txd": "VMAFF4.txd",
+    "type": "GANG6"
+  },
+  {
+    "id": 128,
+    "name": "DNMYLC",
+    "dff": "DNMYLC.dff",
+    "txd": "DNMYLC.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 129,
+    "name": "DNFOLC1",
+    "dff": "DNFOLC1.dff",
+    "txd": "DNFOLC1.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 130,
+    "name": "DNFOLC2",
+    "dff": "DNFOLC2.dff",
+    "txd": "DNFOLC2.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 131,
+    "name": "DNFYLC",
+    "dff": "DNFYLC.dff",
+    "txd": "DNFYLC.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 132,
+    "name": "DNMOLC1",
+    "dff": "DNMOLC1.dff",
+    "txd": "DNMOLC1.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 133,
+    "name": "DNMOLC2",
+    "dff": "DNMOLC2.dff",
+    "txd": "DNMOLC2.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 134,
+    "name": "SBMOTR2",
+    "dff": "SBMOTR2.dff",
+    "txd": "SBMOTR2.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 135,
+    "name": "SWMOTR2",
+    "dff": "SWMOTR2.dff",
+    "txd": "SWMOTR2.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 136,
+    "name": "SBMYTR3",
+    "dff": "SBMYTR3.dff",
+    "txd": "SBMYTR3.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 137,
+    "name": "SWMOTR3",
+    "dff": "SWMOTR3.dff",
+    "txd": "SWMOTR3.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 138,
+    "name": "WFYBE",
+    "dff": "WFYBE.dff",
+    "txd": "WFYBE.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 139,
+    "name": "BFYBE",
+    "dff": "BFYBE.dff",
+    "txd": "BFYBE.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 140,
+    "name": "HFYBE",
+    "dff": "HFYBE.dff",
+    "txd": "HFYBE.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 141,
+    "name": "SOFYBU",
+    "dff": "SOFYBU.dff",
+    "txd": "SOFYBU.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 142,
+    "name": "SBMYST",
+    "dff": "SBMYST.dff",
+    "txd": "SBMYST.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 143,
+    "name": "SBMYCR",
+    "dff": "SBMYCR.dff",
+    "txd": "SBMYCR.txd",
+    "type": "CRIMINAL"
+  },
+  {
+    "id": 144,
+    "name": "BMYCG",
+    "dff": "BMYCG.dff",
+    "txd": "bmycg.txd",
+    "type": "CRIMINAL"
+  },
+  {
+    "id": 145,
+    "name": "WFYCRK",
+    "dff": "WFYCRK.dff",
+    "txd": "Wfycrk.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 146,
+    "name": "HMYCM",
+    "dff": "HMYCM.dff",
+    "txd": "hmycm.txd",
+    "type": "CRIMINAL"
+  },
+  {
+    "id": 147,
+    "name": "WMYBU",
+    "dff": "WMYBU.dff",
+    "txd": "wmybu.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 148,
+    "name": "BFYBU",
+    "dff": "BFYBU.dff",
+    "txd": "bfybu.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 150,
+    "name": "WFYBU",
+    "dff": "WFYBU.dff",
+    "txd": "wfybu.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 151,
+    "name": "DWFYLC1",
+    "dff": "DWFYLC1.dff",
+    "txd": "Dwfylc1.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 152,
+    "name": "WFYPRO",
+    "dff": "WFYPRO.dff",
+    "txd": "WFYpro.txd",
+    "type": "PROSTITUTE"
+  },
+  {
+    "id": 153,
+    "name": "WMYCONB",
+    "dff": "WMYCONB.dff",
+    "txd": "wmyconb.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 154,
+    "name": "WMYBE",
+    "dff": "WMYBE.dff",
+    "txd": "wmybe.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 155,
+    "name": "WMYPIZZ",
+    "dff": "WMYPIZZ.dff",
+    "txd": "wmypizz.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 156,
+    "name": "BMOBAR",
+    "dff": "BMOBAR.dff",
+    "txd": "bmobar.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 157,
+    "name": "CWFYHB",
+    "dff": "CWFYHB.dff",
+    "txd": "cwfyhb.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 158,
+    "name": "CWMOFR",
+    "dff": "CWMOFR.dff",
+    "txd": "cwmofr.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 159,
+    "name": "CWMOHB1",
+    "dff": "CWMOHB1.dff",
+    "txd": "cwmohb1.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 160,
+    "name": "CWMOHB2",
+    "dff": "CWMOHB2.dff",
+    "txd": "cwmohb2.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 161,
+    "name": "CWMYFR",
+    "dff": "CWMYFR.dff",
+    "txd": "cwmyfr.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 162,
+    "name": "CWMYHB1",
+    "dff": "CWMYHB1.dff",
+    "txd": "cwmyhb1.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 163,
+    "name": "BMYBOUN",
+    "dff": "BMYBOUN.dff",
+    "txd": "bmyboun.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 164,
+    "name": "WMYBOUN",
+    "dff": "WMYBOUN.dff",
+    "txd": "wmyboun.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 165,
+    "name": "WMOMIB",
+    "dff": "WMOMIB.dff",
+    "txd": "wmomib.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 166,
+    "name": "BMYMIB",
+    "dff": "BMYMIB.dff",
+    "txd": "bmymib.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 167,
+    "name": "WMYBELL",
+    "dff": "WMYBELL.dff",
+    "txd": "wmybell.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 168,
+    "name": "BMOCHIL",
+    "dff": "BMOCHIL.dff",
+    "txd": "bmochil.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 169,
+    "name": "SOFYRI",
+    "dff": "SOFYRI.dff",
+    "txd": "sofyri.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 170,
+    "name": "SOMYST",
+    "dff": "SOMYST.dff",
+    "txd": "somyst.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 171,
+    "name": "VWMYBJD",
+    "dff": "VWMYBJD.dff",
+    "txd": "vwmybjd.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 172,
+    "name": "VWFYCRP",
+    "dff": "VWFYCRP.dff",
+    "txd": "vwfycrp.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 173,
+    "name": "SFR1",
+    "dff": "SFR1.dff",
+    "txd": "SFR1.txd",
+    "type": "GANG4"
+  },
+  {
+    "id": 174,
+    "name": "SFR2",
+    "dff": "SFR2.dff",
+    "txd": "SFR2.txd",
+    "type": "GANG4"
+  },
+  {
+    "id": 175,
+    "name": "SFR3",
+    "dff": "SFR3.dff",
+    "txd": "SFR3.txd",
+    "type": "GANG4"
+  },
+  {
+    "id": 176,
+    "name": "BMYBAR",
+    "dff": "BMYBAR.dff",
+    "txd": "BMYBAR.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 177,
+    "name": "WMYBAR",
+    "dff": "WMYBAR.dff",
+    "txd": "WMYBAR.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 178,
+    "name": "WFYSEX",
+    "dff": "WFYSEX.dff",
+    "txd": "WFYSEX.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 179,
+    "name": "WMYAMMO",
+    "dff": "WMYAMMO.dff",
+    "txd": "WMYAMMO.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 180,
+    "name": "BMYTATT",
+    "dff": "BMYTATT.dff",
+    "txd": "BMYTATT.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 181,
+    "name": "VWMYCR",
+    "dff": "VWMYCR.dff",
+    "txd": "VWMYCR.txd",
+    "type": "CRIMINAL"
+  },
+  {
+    "id": 182,
+    "name": "VBMOCD",
+    "dff": "VBMOCD.dff",
+    "txd": "VBMOCD.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 183,
+    "name": "VBMYCR",
+    "dff": "VBMYCR.dff",
+    "txd": "VBMYCR.txd",
+    "type": "CRIMINAL"
+  },
+  {
+    "id": 184,
+    "name": "VHMYCR",
+    "dff": "VHMYCR.dff",
+    "txd": "VHMYCR.txd",
+    "type": "CRIMINAL"
+  },
+  {
+    "id": 185,
+    "name": "SBMYRI",
+    "dff": "SBMYRI.dff",
+    "txd": "SBMYRI.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 186,
+    "name": "SOMYRI",
+    "dff": "SOMYRI.dff",
+    "txd": "SOMYRI.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 187,
+    "name": "SOMYBU",
+    "dff": "SOMYBU.dff",
+    "txd": "SOMYBU.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 188,
+    "name": "SWMYST",
+    "dff": "SWMYST.dff",
+    "txd": "SWMYST.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 189,
+    "name": "WMYVA",
+    "dff": "WMYVA.dff",
+    "txd": "WMYVA.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 190,
+    "name": "COPGRL3",
+    "dff": "COPGRL3.dff",
+    "txd": "COPGRL3.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 191,
+    "name": "GUNGRL3",
+    "dff": "GUNGRL3.dff",
+    "txd": "GUNGRL3.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 192,
+    "name": "MECGRL3",
+    "dff": "MECGRL3.dff",
+    "txd": "MECGRL3.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 193,
+    "name": "NURGRL3",
+    "dff": "NURGRL3.dff",
+    "txd": "NURGRL3.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 194,
+    "name": "CROGRL3",
+    "dff": "CROGRL3.dff",
+    "txd": "CROGRL3.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 195,
+    "name": "GANGRL3",
+    "dff": "GANGRL3.dff",
+    "txd": "GANGRL3.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 196,
+    "name": "CWFOFR",
+    "dff": "CWFOFR.dff",
+    "txd": "CWFOFR.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 197,
+    "name": "CWFOHB",
+    "dff": "CWFOHB.dff",
+    "txd": "CWFOHB.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 198,
+    "name": "CWFYFR1",
+    "dff": "CWFYFR1.dff",
+    "txd": "CWFYFR1.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 199,
+    "name": "CWFYFR2",
+    "dff": "CWFYFR2.dff",
+    "txd": "CWFYFR2.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 200,
+    "name": "CWMYHB2",
+    "dff": "CWMYHB2.dff",
+    "txd": "CWMYHB2.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 201,
+    "name": "DWFYLC2",
+    "dff": "DWFYLC2.dff",
+    "txd": "DWFYLC2.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 202,
+    "name": "DWMYLC2",
+    "dff": "DWMYLC2.dff",
+    "txd": "DWMYLC2.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 203,
+    "name": "OMYKARA",
+    "dff": "OMYKARA.dff",
+    "txd": "OMYKARA.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 204,
+    "name": "WMYKARA",
+    "dff": "WMYKARA.dff",
+    "txd": "WMYKARA.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 205,
+    "name": "WFYBURG",
+    "dff": "WFYBURG.dff",
+    "txd": "WFYBURG.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 206,
+    "name": "VWMYCD",
+    "dff": "VWMYCD.dff",
+    "txd": "VWMYCD.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 207,
+    "name": "VHFYPRO",
+    "dff": "VHFYPRO.dff",
+    "txd": "VHFYPRO.txd",
+    "type": "PROSTITUTE"
+  },
+  {
+    "id": 209,
+    "name": "OMONOOD",
+    "dff": "OMONOOD.dff",
+    "txd": "OMONOOD.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 210,
+    "name": "OMOBOAT",
+    "dff": "OMOBOAT.dff",
+    "txd": "OMOBOAT.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 211,
+    "name": "WFYCLOT",
+    "dff": "WFYCLOT.dff",
+    "txd": "WFYCLOT.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 212,
+    "name": "VWMOTR1",
+    "dff": "VWMOTR1.dff",
+    "txd": "VWMOTR1.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 213,
+    "name": "VWMOTR2",
+    "dff": "VWMOTR2.dff",
+    "txd": "VWMOTR2.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 214,
+    "name": "VWFYWAI",
+    "dff": "VWFYWAI.dff",
+    "txd": "VWFYWAI.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 215,
+    "name": "SBFORI",
+    "dff": "SBFORI.dff",
+    "txd": "SBFORI.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 216,
+    "name": "SWFYRI",
+    "dff": "SWFYRI.dff",
+    "txd": "SWFYRI.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 217,
+    "name": "WMYCLOT",
+    "dff": "WMYCLOT.dff",
+    "txd": "WMYCLOT.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 218,
+    "name": "SBFOST",
+    "dff": "SBFOST.dff",
+    "txd": "SBFOST.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 219,
+    "name": "SBFYRI",
+    "dff": "SBFYRI.dff",
+    "txd": "SBFYRI.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 220,
+    "name": "SBMOCD",
+    "dff": "SBMOCD.dff",
+    "txd": "SBMOCD.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 221,
+    "name": "SBMORI",
+    "dff": "SBMORI.dff",
+    "txd": "SBMORI.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 222,
+    "name": "SBMOST",
+    "dff": "SBMOST.dff",
+    "txd": "SBMOST.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 223,
+    "name": "SHMYCR",
+    "dff": "SHMYCR.dff",
+    "txd": "SHMYCR.txd",
+    "type": "CRIMINAL"
+  },
+  {
+    "id": 224,
+    "name": "SOFORI",
+    "dff": "SOFORI.dff",
+    "txd": "SOFORI.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 225,
+    "name": "SOFOST",
+    "dff": "SOFOST.dff",
+    "txd": "SOFOST.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 226,
+    "name": "SOFYST",
+    "dff": "SOFYST.dff",
+    "txd": "SOFYST.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 227,
+    "name": "SOMOBU",
+    "dff": "SOMOBU.dff",
+    "txd": "SOMOBU.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 228,
+    "name": "SOMORI",
+    "dff": "SOMORI.dff",
+    "txd": "SOMORI.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 229,
+    "name": "SOMOST",
+    "dff": "SOMOST.dff",
+    "txd": "SOMOST.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 230,
+    "name": "SWMOTR5",
+    "dff": "SWMOTR5.dff",
+    "txd": "SWMOTR5.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 231,
+    "name": "SWFORI",
+    "dff": "SWFORI.dff",
+    "txd": "SWFORI.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 232,
+    "name": "SWFOST",
+    "dff": "SWFOST.dff",
+    "txd": "SWFOST.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 233,
+    "name": "SWFYST",
+    "dff": "SWFYST.dff",
+    "txd": "SWFYST.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 234,
+    "name": "SWMOCD",
+    "dff": "SWMOCD.dff",
+    "txd": "SWMOCD.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 235,
+    "name": "SWMORI",
+    "dff": "SWMORI.dff",
+    "txd": "SWMORI.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 236,
+    "name": "SWMOST",
+    "dff": "SWMOST.dff",
+    "txd": "SWMOST.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 237,
+    "name": "SHFYPRO",
+    "dff": "SHFYPRO.dff",
+    "txd": "SHFYPRO.txd",
+    "type": "PROSTITUTE"
+  },
+  {
+    "id": 238,
+    "name": "SBFYPRO",
+    "dff": "SBFYPRO.dff",
+    "txd": "SBFYPRO.txd",
+    "type": "PROSTITUTE"
+  },
+  {
+    "id": 239,
+    "name": "SWMOTR4",
+    "dff": "SWMOTR4.dff",
+    "txd": "SWMOTR4.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 240,
+    "name": "SWMYRI",
+    "dff": "SWMYRI.dff",
+    "txd": "SWMYRI.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 241,
+    "name": "SMYST",
+    "dff": "SMYST.dff",
+    "txd": "SMYST.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 242,
+    "name": "SMYST2",
+    "dff": "SMYST2.dff",
+    "txd": "SMYST2.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 243,
+    "name": "SFYPRO",
+    "dff": "SFYPRO.dff",
+    "txd": "SFYPRO.txd",
+    "type": "PROSTITUTE"
+  },
+  {
+    "id": 244,
+    "name": "VBFYST2",
+    "dff": "VBFYST2.dff",
+    "txd": "VBFYST2.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 245,
+    "name": "VBFYPRO",
+    "dff": "VBFYPRO.dff",
+    "txd": "VBFYPRO.txd",
+    "type": "PROSTITUTE"
+  },
+  {
+    "id": 246,
+    "name": "VHFYST3",
+    "dff": "VHFYST3.dff",
+    "txd": "VHFYST3.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 247,
+    "name": "BIKERA",
+    "dff": "BIKERA.dff",
+    "txd": "BIKERA.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 248,
+    "name": "BIKERB",
+    "dff": "BIKERB.dff",
+    "txd": "BIKERB.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 249,
+    "name": "BMYPIMP",
+    "dff": "BMYPIMP.dff",
+    "txd": "BMYPIMP.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 250,
+    "name": "SWMYCR",
+    "dff": "SWMYCR.dff",
+    "txd": "SWMYCR.txd",
+    "type": "CRIMINAL"
+  },
+  {
+    "id": 251,
+    "name": "WFYLG",
+    "dff": "WFYLG.dff",
+    "txd": "WFYLG.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 252,
+    "name": "WMYVA2",
+    "dff": "WMYVA2.dff",
+    "txd": "WMYVA2.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 253,
+    "name": "BMOSEC",
+    "dff": "BMOSEC.dff",
+    "txd": "BMOSEC.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 254,
+    "name": "BIKDRUG",
+    "dff": "BIKDRUG.dff",
+    "txd": "BIKDRUG.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 255,
+    "name": "WMYCH",
+    "dff": "WMYCH.dff",
+    "txd": "WMYCH.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 256,
+    "name": "SBFYSTR",
+    "dff": "SBFYSTR.dff",
+    "txd": "SBFYSTR.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 257,
+    "name": "SWFYSTR",
+    "dff": "SWFYSTR.dff",
+    "txd": "SWFYSTR.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 258,
+    "name": "HECK1",
+    "dff": "HECK1.dff",
+    "txd": "HECK1.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 259,
+    "name": "HECK2",
+    "dff": "HECK2.dff",
+    "txd": "HECK2.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 260,
+    "name": "BMYCON",
+    "dff": "BMYCON.dff",
+    "txd": "BMYCON.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 261,
+    "name": "WMYCD1",
+    "dff": "WMYCD1.dff",
+    "txd": "WMYCD1.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 262,
+    "name": "BMOCD",
+    "dff": "BMOCD.dff",
+    "txd": "BMOCD.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 263,
+    "name": "VWFYWA2",
+    "dff": "VWFYWA2.dff",
+    "txd": "VWFYWA2.txd",
+    "type": "CIVFEMALE"
+  },
+  {
+    "id": 264,
+    "name": "WMOICE",
+    "dff": "WMOICE.dff",
+    "txd": "WMOICE.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 274,
+    "name": "laemt1",
+    "dff": "laemt1.dff",
+    "txd": "laemt1.txd",
+    "type": "MEDIC"
+  },
+  {
+    "id": 275,
+    "name": "lvemt1",
+    "dff": "lvemt1.dff",
+    "txd": "lvemt1.txd",
+    "type": "MEDIC"
+  },
+  {
+    "id": 276,
+    "name": "sfemt1",
+    "dff": "sfemt1.dff",
+    "txd": "sfemt1.txd",
+    "type": "MEDIC"
+  },
+  {
+    "id": 277,
+    "name": "lafd1",
+    "dff": "lafd1.dff",
+    "txd": "lafd1.txd",
+    "type": "FIREMAN"
+  },
+  {
+    "id": 278,
+    "name": "lvfd1",
+    "dff": "lvfd1.dff",
+    "txd": "lvfd1.txd",
+    "type": "FIREMAN"
+  },
+  {
+    "id": 279,
+    "name": "sffd1",
+    "dff": "sffd1.dff",
+    "txd": "sffd1.txd",
+    "type": "FIREMAN"
+  },
+  {
+    "id": 280,
+    "name": "lapd1",
+    "dff": "lapd1.dff",
+    "txd": "lapd1.txd",
+    "type": "COP"
+  },
+  {
+    "id": 281,
+    "name": "sfpd1",
+    "dff": "sfpd1.dff",
+    "txd": "sfpd1.txd",
+    "type": "COP"
+  },
+  {
+    "id": 282,
+    "name": "lvpd1",
+    "dff": "lvpd1.dff",
+    "txd": "lvpd1.txd",
+    "type": "COP"
+  },
+  {
+    "id": 283,
+    "name": "csher",
+    "dff": "csher.dff",
+    "txd": "csher.txd",
+    "type": "COP"
+  },
+  {
+    "id": 284,
+    "name": "lapdm1",
+    "dff": "lapdm1.dff",
+    "txd": "lapdm1.txd",
+    "type": "COP"
+  },
+  {
+    "id": 285,
+    "name": "swat",
+    "dff": "swat.dff",
+    "txd": "swat.txd",
+    "type": "COP"
+  },
+  {
+    "id": 286,
+    "name": "fbi",
+    "dff": "fbi.dff",
+    "txd": "fbi.txd",
+    "type": "COP"
+  },
+  {
+    "id": 287,
+    "name": "army",
+    "dff": "army.dff",
+    "txd": "army.txd",
+    "type": "COP"
+  },
+  {
+    "id": 288,
+    "name": "dsher",
+    "dff": "dsher.dff",
+    "txd": "dsher.txd",
+    "type": "COP"
+  },
+  {
+    "id": 290,
+    "name": "special01",
+    "dff": "special01.dff",
+    "txd": "generic.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 291,
+    "name": "special02",
+    "dff": "special02.dff",
+    "txd": "generic.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 292,
+    "name": "special03",
+    "dff": "special03.dff",
+    "txd": "generic.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 293,
+    "name": "special04",
+    "dff": "special04.dff",
+    "txd": "generic.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 294,
+    "name": "special05",
+    "dff": "special05.dff",
+    "txd": "generic.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 295,
+    "name": "special06",
+    "dff": "special06.dff",
+    "txd": "generic.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 296,
+    "name": "special07",
+    "dff": "special07.dff",
+    "txd": "generic.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 297,
+    "name": "special08",
+    "dff": "special08.dff",
+    "txd": "generic.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 298,
+    "name": "special09",
+    "dff": "special09.dff",
+    "txd": "generic.txd",
+    "type": "CIVMALE"
+  },
+  {
+    "id": 299,
+    "name": "special10",
+    "dff": "special10.dff",
+    "txd": "generic.txd",
+    "type": "CIVMALE"
+  }
+]

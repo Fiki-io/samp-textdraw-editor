@@ -1,0 +1,222 @@
+[
+  {
+    "id": 0,
+    "name": "Fist",
+    "char": ""
+  },
+  {
+    "id": 1,
+    "name": "Brass Knuckles",
+    "char": "B"
+  },
+  {
+    "id": 2,
+    "name": "Golf Club",
+    "char": "c"
+  },
+  {
+    "id": 3,
+    "name": "Nightstick",
+    "char": "d"
+  },
+  {
+    "id": 4,
+    "name": "Knife",
+    "char": "b"
+  },
+  {
+    "id": 5,
+    "name": "Baseball Bat",
+    "char": "e"
+  },
+  {
+    "id": 6,
+    "name": "Shovel",
+    "char": "g"
+  },
+  {
+    "id": 7,
+    "name": "Pool Cue",
+    "char": "a"
+  },
+  {
+    "id": 8,
+    "name": "Katana",
+    "char": "f"
+  },
+  {
+    "id": 9,
+    "name": "Chainsaw",
+    "char": "1"
+  },
+  {
+    "id": 10,
+    "name": "Purple Dildo",
+    "char": "4"
+  },
+  {
+    "id": 11,
+    "name": "Dildo",
+    "char": "5"
+  },
+  {
+    "id": 12,
+    "name": "Vibrator",
+    "char": "6"
+  },
+  {
+    "id": 13,
+    "name": "Silver Vibrator",
+    "char": "7"
+  },
+  {
+    "id": 14,
+    "name": "Flowers",
+    "char": "8"
+  },
+  {
+    "id": 15,
+    "name": "Cane",
+    "char": "9"
+  },
+  {
+    "id": 16,
+    "name": "Grenade",
+    "char": "h"
+  },
+  {
+    "id": 17,
+    "name": "Tear Gas",
+    "char": "i"
+  },
+  {
+    "id": 18,
+    "name": "Molotov Cocktail",
+    "char": "j"
+  },
+  {
+    "id": 22,
+    "name": "9mm Pistol",
+    "char": "k"
+  },
+  {
+    "id": 23,
+    "name": "Silenced 9mm",
+    "char": "l"
+  },
+  {
+    "id": 24,
+    "name": "Desert Eagle",
+    "char": "m"
+  },
+  {
+    "id": 25,
+    "name": "Shotgun",
+    "char": "n"
+  },
+  {
+    "id": 26,
+    "name": "Sawnoff Shotgun",
+    "char": "o"
+  },
+  {
+    "id": 27,
+    "name": "Combat Shotgun",
+    "char": "p"
+  },
+  {
+    "id": 28,
+    "name": "Micro SMG / Uzi",
+    "char": "q"
+  },
+  {
+    "id": 29,
+    "name": "MP5",
+    "char": "r"
+  },
+  {
+    "id": 30,
+    "name": "AK-47",
+    "char": "s"
+  },
+  {
+    "id": 31,
+    "name": "M4",
+    "char": "t"
+  },
+  {
+    "id": 32,
+    "name": "Tec-9",
+    "char": "u"
+  },
+  {
+    "id": 33,
+    "name": "Country Rifle",
+    "char": "v"
+  },
+  {
+    "id": 34,
+    "name": "Sniper Rifle",
+    "char": "w"
+  },
+  {
+    "id": 35,
+    "name": "RPG",
+    "char": "x"
+  },
+  {
+    "id": 36,
+    "name": "Heat-Seeking Rocket",
+    "char": "y"
+  },
+  {
+    "id": 37,
+    "name": "Flamethrower",
+    "char": "z"
+  },
+  {
+    "id": 38,
+    "name": "Minigun",
+    "char": "2"
+  },
+  {
+    "id": 39,
+    "name": "Satchel Charge",
+    "char": "3"
+  },
+  {
+    "id": 40,
+    "name": "Detonator",
+    "char": "0"
+  },
+  {
+    "id": 41,
+    "name": "Spraycan",
+    "char": "/"
+  },
+  {
+    "id": 42,
+    "name": "Fire Extinguisher",
+    "char": "."
+  },
+  {
+    "id": 43,
+    "name": "Camera",
+    "char": ","
+  },
+  {
+    "id": 44,
+    "name": "Night Vision Goggles",
+    "char": "N"
+  },
+  {
+    "id": 45,
+    "name": "Thermal Goggles",
+    "char": "T"
+  },
+  {
+    "id": 46,
+    "name": "Parachute",
+    "char": "P"
+  }
+]

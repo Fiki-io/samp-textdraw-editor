@@ -1,0 +1,1010 @@
+[
+  {
+    "model_name": "infernus",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/infernus.dff",
+    "txd_file": "models_3d/infernus.txd"
+  },
+  {
+    "model_name": "turismo",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/turismo.dff",
+    "txd_file": "models_3d/turismo.txd"
+  },
+  {
+    "model_name": "bullet",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/bullet.dff",
+    "txd_file": "models_3d/bullet.txd"
+  },
+  {
+    "model_name": "cheetah",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/cheetah.dff",
+    "txd_file": "models_3d/cheetah.txd"
+  },
+  {
+    "model_name": "banshee",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/banshee.dff",
+    "txd_file": "models_3d/banshee.txd"
+  },
+  {
+    "model_name": "supergt",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/supergt.dff",
+    "txd_file": "models_3d/supergt.txd"
+  },
+  {
+    "model_name": "comet",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/comet.dff",
+    "txd_file": "models_3d/comet.txd"
+  },
+  {
+    "model_name": "zr350",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/zr350.dff",
+    "txd_file": "models_3d/zr350.txd"
+  },
+  {
+    "model_name": "buffalo",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/buffalo.dff",
+    "txd_file": "models_3d/buffalo.txd"
+  },
+  {
+    "model_name": "alpha",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/alpha.dff",
+    "txd_file": "models_3d/alpha.txd"
+  },
+  {
+    "model_name": "euros",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/euros.dff",
+    "txd_file": "models_3d/euros.txd"
+  },
+  {
+    "model_name": "phoenix",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/phoenix.dff",
+    "txd_file": "models_3d/phoenix.txd"
+  },
+  {
+    "model_name": "sultan",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/sultan.dff",
+    "txd_file": "models_3d/sultan.txd"
+  },
+  {
+    "model_name": "elegy",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/elegy.dff",
+    "txd_file": "models_3d/elegy.txd"
+  },
+  {
+    "model_name": "jester",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/jester.dff",
+    "txd_file": "models_3d/jester.txd"
+  },
+  {
+    "model_name": "flash",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/flash.dff",
+    "txd_file": "models_3d/flash.txd"
+  },
+  {
+    "model_name": "uranus",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/uranus.dff",
+    "txd_file": "models_3d/uranus.txd"
+  },
+  {
+    "model_name": "stratum",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/stratum.dff",
+    "txd_file": "models_3d/stratum.txd"
+  },
+  {
+    "model_name": "savanna",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/savanna.dff",
+    "txd_file": "models_3d/savanna.txd"
+  },
+  {
+    "model_name": "blade",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/blade.dff",
+    "txd_file": "models_3d/blade.txd"
+  },
+  {
+    "model_name": "slamvan",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/slamvan.dff",
+    "txd_file": "models_3d/slamvan.txd"
+  },
+  {
+    "model_name": "remingtn",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/remingtn.dff",
+    "txd_file": "models_3d/remingtn.txd"
+  },
+  {
+    "model_name": "tahoma",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/tahoma.dff",
+    "txd_file": "models_3d/tahoma.txd"
+  },
+  {
+    "model_name": "voodoo",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/voodoo.dff",
+    "txd_file": "models_3d/voodoo.txd"
+  },
+  {
+    "model_name": "broadway",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/broadway.dff",
+    "txd_file": "models_3d/broadway.txd"
+  },
+  {
+    "model_name": "tornado",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/tornado.dff",
+    "txd_file": "models_3d/tornado.txd"
+  },
+  {
+    "model_name": "admiral",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/admiral.dff",
+    "txd_file": "models_3d/admiral.txd"
+  },
+  {
+    "model_name": "premier",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/premier.dff",
+    "txd_file": "models_3d/premier.txd"
+  },
+  {
+    "model_name": "sentinel",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/sentinel.dff",
+    "txd_file": "models_3d/sentinel.txd"
+  },
+  {
+    "model_name": "washing",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/washing.dff",
+    "txd_file": "models_3d/washing.txd"
+  },
+  {
+    "model_name": "elegant",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/elegant.dff",
+    "txd_file": "models_3d/elegant.txd"
+  },
+  {
+    "model_name": "merit",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/merit.dff",
+    "txd_file": "models_3d/merit.txd"
+  },
+  {
+    "model_name": "sunrise",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/sunrise.dff",
+    "txd_file": "models_3d/sunrise.txd"
+  },
+  {
+    "model_name": "vincent",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/vincent.dff",
+    "txd_file": "models_3d/vincent.txd"
+  },
+  {
+    "model_name": "primo",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/primo.dff",
+    "txd_file": "models_3d/primo.txd"
+  },
+  {
+    "model_name": "clover",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/clover.dff",
+    "txd_file": "models_3d/clover.txd"
+  },
+  {
+    "model_name": "nrg500",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/nrg500.dff",
+    "txd_file": "models_3d/nrg500.txd"
+  },
+  {
+    "model_name": "fcr900",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/fcr900.dff",
+    "txd_file": "models_3d/fcr900.txd"
+  },
+  {
+    "model_name": "pcj600",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/pcj600.dff",
+    "txd_file": "models_3d/pcj600.txd"
+  },
+  {
+    "model_name": "bf400",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/bf400.dff",
+    "txd_file": "models_3d/bf400.txd"
+  },
+  {
+    "model_name": "sanchez",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/sanchez.dff",
+    "txd_file": "models_3d/sanchez.txd"
+  },
+  {
+    "model_name": "freeway",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/freeway.dff",
+    "txd_file": "models_3d/freeway.txd"
+  },
+  {
+    "model_name": "wayfarer",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/wayfarer.dff",
+    "txd_file": "models_3d/wayfarer.txd"
+  },
+  {
+    "model_name": "faggio",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/faggio.dff",
+    "txd_file": "models_3d/faggio.txd"
+  },
+  {
+    "model_name": "pizzaboy",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/pizzaboy.dff",
+    "txd_file": "models_3d/pizzaboy.txd"
+  },
+  {
+    "model_name": "copbike",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/copbike.dff",
+    "txd_file": "models_3d/copbike.txd"
+  },
+  {
+    "model_name": "quad",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/quad.dff",
+    "txd_file": "models_3d/quad.txd"
+  },
+  {
+    "model_name": "bmx",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/bmx.dff",
+    "txd_file": "models_3d/bmx.txd"
+  },
+  {
+    "model_name": "bike",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/bike.dff",
+    "txd_file": "models_3d/bike.txd"
+  },
+  {
+    "model_name": "mtbike",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/mtbike.dff",
+    "txd_file": "models_3d/mtbike.txd"
+  },
+  {
+    "model_name": "copcarla",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/copcarla.dff",
+    "txd_file": "models_3d/copcarla.txd"
+  },
+  {
+    "model_name": "copcarsf",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/copcarsf.dff",
+    "txd_file": "models_3d/copcarsf.txd"
+  },
+  {
+    "model_name": "copcavg",
+    "has_dff": false,
+    "has_txd": false,
+    "dff_file": null,
+    "txd_file": null
+  },
+  {
+    "model_name": "copcarru",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/copcarru.dff",
+    "txd_file": "models_3d/copcarru.txd"
+  },
+  {
+    "model_name": "fbiranch",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/fbiranch.dff",
+    "txd_file": "models_3d/fbiranch.txd"
+  },
+  {
+    "model_name": "ambulan",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/ambulan.dff",
+    "txd_file": "models_3d/ambulan.txd"
+  },
+  {
+    "model_name": "firetruk",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/firetruk.dff",
+    "txd_file": "models_3d/firetruk.txd"
+  },
+  {
+    "model_name": "taxi",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/taxi.dff",
+    "txd_file": "models_3d/taxi.txd"
+  },
+  {
+    "model_name": "cabbie",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/cabbie.dff",
+    "txd_file": "models_3d/cabbie.txd"
+  },
+  {
+    "model_name": "swatvan",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/swatvan.dff",
+    "txd_file": "models_3d/swatvan.txd"
+  },
+  {
+    "model_name": "enforcer",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/enforcer.dff",
+    "txd_file": "models_3d/enforcer.txd"
+  },
+  {
+    "model_name": "barracks",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/barracks.dff",
+    "txd_file": "models_3d/barracks.txd"
+  },
+  {
+    "model_name": "rhino",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/rhino.dff",
+    "txd_file": "models_3d/rhino.txd"
+  },
+  {
+    "model_name": "hydra",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/hydra.dff",
+    "txd_file": "models_3d/hydra.txd"
+  },
+  {
+    "model_name": "hunter",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/hunter.dff",
+    "txd_file": "models_3d/hunter.txd"
+  },
+  {
+    "model_name": "maverick",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/maverick.dff",
+    "txd_file": "models_3d/maverick.txd"
+  },
+  {
+    "model_name": "polmav",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/polmav.dff",
+    "txd_file": "models_3d/polmav.txd"
+  },
+  {
+    "model_name": "seaspar",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/seaspar.dff",
+    "txd_file": "models_3d/seaspar.txd"
+  },
+  {
+    "model_name": "rustler",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/rustler.dff",
+    "txd_file": "models_3d/rustler.txd"
+  },
+  {
+    "model_name": "shamal",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/shamal.dff",
+    "txd_file": "models_3d/shamal.txd"
+  },
+  {
+    "model_name": "stunt",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/stunt.dff",
+    "txd_file": "models_3d/stunt.txd"
+  },
+  {
+    "model_name": "dodo",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/dodo.dff",
+    "txd_file": "models_3d/dodo.txd"
+  },
+  {
+    "model_name": "cargobob",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/cargobob.dff",
+    "txd_file": "models_3d/cargobob.txd"
+  },
+  {
+    "model_name": "sandking",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/sandking.dff",
+    "txd_file": "models_3d/sandking.txd"
+  },
+  {
+    "model_name": "monster",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/monster.dff",
+    "txd_file": "models_3d/monster.txd"
+  },
+  {
+    "model_name": "bandito",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/bandito.dff",
+    "txd_file": "models_3d/bandito.txd"
+  },
+  {
+    "model_name": "bfinject",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/bfinject.dff",
+    "txd_file": "models_3d/bfinject.txd"
+  },
+  {
+    "model_name": "rancher",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/rancher.dff",
+    "txd_file": "models_3d/rancher.txd"
+  },
+  {
+    "model_name": "huntley",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/huntley.dff",
+    "txd_file": "models_3d/huntley.txd"
+  },
+  {
+    "model_name": "patriot",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/patriot.dff",
+    "txd_file": "models_3d/patriot.txd"
+  },
+  {
+    "model_name": "rdtrain",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/rdtrain.dff",
+    "txd_file": "models_3d/rdtrain.txd"
+  },
+  {
+    "model_name": "linerun",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/linerun.dff",
+    "txd_file": "models_3d/linerun.txd"
+  },
+  {
+    "model_name": "petro",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/petro.dff",
+    "txd_file": "models_3d/petro.txd"
+  },
+  {
+    "model_name": "flatbed",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/flatbed.dff",
+    "txd_file": "models_3d/flatbed.txd"
+  },
+  {
+    "model_name": "packer",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/packer.dff",
+    "txd_file": "models_3d/packer.txd"
+  },
+  {
+    "model_name": "towtruck",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/towtruck.dff",
+    "txd_file": "models_3d/towtruck.txd"
+  },
+  {
+    "model_name": "jetmax",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/jetmax.dff",
+    "txd_file": "models_3d/jetmax.txd"
+  },
+  {
+    "model_name": "squalo",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/squalo.dff",
+    "txd_file": "models_3d/squalo.txd"
+  },
+  {
+    "model_name": "speeder",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/speeder.dff",
+    "txd_file": "models_3d/speeder.txd"
+  },
+  {
+    "model_name": "tropic",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/tropic.dff",
+    "txd_file": "models_3d/tropic.txd"
+  },
+  {
+    "model_name": "dinghy",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/dinghy.dff",
+    "txd_file": "models_3d/dinghy.txd"
+  },
+  {
+    "model_name": "marquis",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/marquis.dff",
+    "txd_file": "models_3d/marquis.txd"
+  },
+  {
+    "model_name": "predator",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/predator.dff",
+    "txd_file": "models_3d/predator.txd"
+  },
+  {
+    "model_name": "kart",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/kart.dff",
+    "txd_file": "models_3d/kart.txd"
+  },
+  {
+    "model_name": "vortex",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/vortex.dff",
+    "txd_file": "models_3d/vortex.txd"
+  },
+  {
+    "model_name": "hotknife",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/hotknife.dff",
+    "txd_file": "models_3d/hotknife.txd"
+  },
+  {
+    "model_name": "hustler",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/hustler.dff",
+    "txd_file": "models_3d/hustler.txd"
+  },
+  {
+    "model_name": "romero",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/romero.dff",
+    "txd_file": "models_3d/romero.txd"
+  },
+  {
+    "model_name": "smoke",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/smoke.dff",
+    "txd_file": "models_3d/smoke.txd"
+  },
+  {
+    "model_name": "ryder",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/ryder.dff",
+    "txd_file": "models_3d/ryder.txd"
+  },
+  {
+    "model_name": "sweet",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/sweet.dff",
+    "txd_file": "models_3d/sweet.txd"
+  },
+  {
+    "model_name": "ballas1",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/ballas1.dff",
+    "txd_file": "models_3d/ballas1.txd"
+  },
+  {
+    "model_name": "ballas2",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/ballas2.dff",
+    "txd_file": "models_3d/ballas2.txd"
+  },
+  {
+    "model_name": "ballas3",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/ballas3.dff",
+    "txd_file": "models_3d/ballas3.txd"
+  },
+  {
+    "model_name": "fam1",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/fam1.dff",
+    "txd_file": "models_3d/fam1.txd"
+  },
+  {
+    "model_name": "fam2",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/fam2.dff",
+    "txd_file": "models_3d/fam2.txd"
+  },
+  {
+    "model_name": "fam3",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/fam3.dff",
+    "txd_file": "models_3d/fam3.txd"
+  },
+  {
+    "model_name": "vla1",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/vla1.dff",
+    "txd_file": "models_3d/vla1.txd"
+  },
+  {
+    "model_name": "vla2",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/vla2.dff",
+    "txd_file": "models_3d/vla2.txd"
+  },
+  {
+    "model_name": "vla3",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/vla3.dff",
+    "txd_file": "models_3d/vla3.txd"
+  },
+  {
+    "model_name": "lapd1",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/lapd1.dff",
+    "txd_file": "models_3d/lapd1.txd"
+  },
+  {
+    "model_name": "sfpd1",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/sfpd1.dff",
+    "txd_file": "models_3d/sfpd1.txd"
+  },
+  {
+    "model_name": "lvpd1",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/lvpd1.dff",
+    "txd_file": "models_3d/lvpd1.txd"
+  },
+  {
+    "model_name": "army",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/army.dff",
+    "txd_file": "models_3d/army.txd"
+  },
+  {
+    "model_name": "swat",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/swat.dff",
+    "txd_file": "models_3d/swat.txd"
+  },
+  {
+    "model_name": "fbi",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/fbi.dff",
+    "txd_file": "models_3d/fbi.txd"
+  },
+  {
+    "model_name": "bmycr",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/bmycr.dff",
+    "txd_file": "models_3d/bmycr.txd"
+  },
+  {
+    "model_name": "wmybmx",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/wmybmx.dff",
+    "txd_file": "models_3d/wmybmx.txd"
+  },
+  {
+    "model_name": "male01",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/male01.dff",
+    "txd_file": "models_3d/male01.txd"
+  },
+  {
+    "model_name": "wuzimu",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/wuzimu.dff",
+    "txd_file": "models_3d/wuzimu.txd"
+  },
+  {
+    "model_name": "maddogg",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/maddogg.dff",
+    "txd_file": "models_3d/maddogg.txd"
+  },
+  {
+    "model_name": "desert_eagle",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/desert_eagle.dff",
+    "txd_file": "models_3d/desert_eagle.txd"
+  },
+  {
+    "model_name": "colt45",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/colt45.dff",
+    "txd_file": "models_3d/colt45.txd"
+  },
+  {
+    "model_name": "silenced",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/silenced.dff",
+    "txd_file": "models_3d/silenced.txd"
+  },
+  {
+    "model_name": "chromegun",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/chromegun.dff",
+    "txd_file": "models_3d/chromegun.txd"
+  },
+  {
+    "model_name": "shotgspa",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/shotgspa.dff",
+    "txd_file": "models_3d/shotgspa.txd"
+  },
+  {
+    "model_name": "sawnoff",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/sawnoff.dff",
+    "txd_file": "models_3d/sawnoff.txd"
+  },
+  {
+    "model_name": "micro_uzi",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/micro_uzi.dff",
+    "txd_file": "models_3d/micro_uzi.txd"
+  },
+  {
+    "model_name": "mp5lng",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/mp5lng.dff",
+    "txd_file": "models_3d/mp5lng.txd"
+  },
+  {
+    "model_name": "ak47",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/ak47.dff",
+    "txd_file": "models_3d/ak47.txd"
+  },
+  {
+    "model_name": "m4",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/m4.dff",
+    "txd_file": "models_3d/m4.txd"
+  },
+  {
+    "model_name": "tec9",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/tec9.dff",
+    "txd_file": "models_3d/tec9.txd"
+  },
+  {
+    "model_name": "sniper",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/sniper.dff",
+    "txd_file": "models_3d/sniper.txd"
+  },
+  {
+    "model_name": "cuntgun",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/cuntgun.dff",
+    "txd_file": "models_3d/cuntgun.txd"
+  },
+  {
+    "model_name": "rocketla",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/rocketla.dff",
+    "txd_file": "models_3d/rocketla.txd"
+  },
+  {
+    "model_name": "heatseek",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/heatseek.dff",
+    "txd_file": "models_3d/heatseek.txd"
+  },
+  {
+    "model_name": "flame",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/flame.dff",
+    "txd_file": "models_3d/flame.txd"
+  },
+  {
+    "model_name": "minigun",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/minigun.dff",
+    "txd_file": "models_3d/minigun.txd"
+  },
+  {
+    "model_name": "katana",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/katana.dff",
+    "txd_file": "models_3d/katana.txd"
+  },
+  {
+    "model_name": "bat",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/bat.dff",
+    "txd_file": "models_3d/bat.txd"
+  },
+  {
+    "model_name": "knifecur",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/knifecur.dff",
+    "txd_file": "models_3d/knifecur.txd"
+  },
+  {
+    "model_name": "grenade",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/grenade.dff",
+    "txd_file": "models_3d/grenade.txd"
+  },
+  {
+    "model_name": "molotov",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/molotov.dff",
+    "txd_file": "models_3d/molotov.txd"
+  },
+  {
+    "model_name": "gun_para",
+    "has_dff": true,
+    "has_txd": true,
+    "dff_file": "models_3d/gun_para.dff",
+    "txd_file": "models_3d/gun_para.txd"
+  }
+]
