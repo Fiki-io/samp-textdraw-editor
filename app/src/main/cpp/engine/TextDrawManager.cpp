@@ -683,23 +683,47 @@ void TextDraw::get_bounds(float& out_x1, float& out_y1, float& out_x2, float& ou
         out_y1 = y;
         out_x2 = x + text_width;
         out_y2 = y + text_height;
-    } else if (use_box && text_width > 0.0f && text_height > 0.0f) {
+    } else if (use_box) {
+        // Authentic SA-MP box vertical calculation
+        int lines = 1;
+        for (size_t i = 0; i < text.size(); ++i) {
+            if (text[i] == '\n' || (text[i] == '~' && i + 2 < text.size() && (text[i+1] == 'n' || text[i+1] == 'N') && text[i+2] == '~')) {
+                lines++;
+            }
+        }
+        float lh = (letter_height > 0.0f) ? letter_height : 1.5f;
+        float box_h = lh * 10.5f * (float)lines;
+
+        out_y1 = y;
+        out_y2 = y + box_h;
+
+        // Horizontal calculation based on alignment
         if (alignment == TextDrawAlignment::CENTER) {
-            float hw = text_width * 0.5f;
-            out_x1 = x - hw;
-            out_y1 = y;
-            out_x2 = x + hw;
-            out_y2 = y + text_height;
+            float w = (text_width > 0.0f) ? text_width : 80.0f;
+            out_x1 = x - w * 0.5f;
+            out_x2 = x + w * 0.5f;
         } else if (alignment == TextDrawAlignment::RIGHT) {
-            out_x1 = text_width;
-            out_y1 = y;
-            out_x2 = x;
-            out_y2 = text_height;
-        } else {
-            out_x1 = x;
-            out_y1 = y;
-            out_x2 = text_width;
-            out_y2 = text_height;
+            if (text_width > 0.0f && text_width < x) {
+                out_x1 = text_width;
+                out_x2 = x;
+            } else if (text_width > 0.0f) {
+                out_x1 = x - text_width;
+                out_x2 = x;
+            } else {
+                out_x1 = x - 80.0f;
+                out_x2 = x;
+            }
+        } else { // LEFT
+            if (text_width > x) {
+                out_x1 = x;
+                out_x2 = text_width;
+            } else if (text_width > 0.0f) {
+                out_x1 = x;
+                out_x2 = x + text_width;
+            } else {
+                out_x1 = x;
+                out_x2 = x + 80.0f;
+            }
         }
     } else {
         ImVec2 sz = SampFontRenderer::get().measure_text_samp(font, text, letter_width, letter_height, proportional);

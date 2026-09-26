@@ -209,17 +209,57 @@ GLuint AssetManager::get_texture(const std::string& asset_path) {
 }
 
 GLuint AssetManager::get_sprite_texture(const std::string& txd_sprite) {
-    size_t colon = txd_sprite.find(':');
-    if (colon == std::string::npos) return 0;
+    if (txd_sprite.empty()) return 0;
     
-    std::string txd = txd_sprite.substr(0, colon);
-    std::string name = txd_sprite.substr(colon + 1);
+    std::string s = txd_sprite;
+    s.erase(0, s.find_first_not_of(" \t\r\n\""));
+    size_t last = s.find_last_not_of(" \t\r\n\"");
+    if (last != std::string::npos) s = s.substr(0, last + 1);
+    if (s.empty()) return 0;
+    
+    std::string txd = "";
+    std::string name = "";
+    
+    size_t colon = s.find(':');
+    if (colon != std::string::npos) {
+        txd = s.substr(0, colon);
+        name = s.substr(colon + 1);
+    } else {
+        name = s;
+        std::string lower_name = name;
+        std::transform(lower_name.begin(), lower_name.end(), lower_name.begin(), ::tolower);
+        for (const auto& pair : sprites_by_txd) {
+            for (const auto& sd : pair.second) {
+                std::string sd_low = sd.name;
+                std::transform(sd_low.begin(), sd_low.end(), sd_low.begin(), ::tolower);
+                if (sd_low == lower_name) {
+                    txd = pair.first;
+                    break;
+                }
+            }
+            if (!txd.empty()) break;
+        }
+    }
+    
+    txd.erase(0, txd.find_first_not_of(" \t\r\n"));
+    size_t l_txd = txd.find_last_not_of(" \t\r\n");
+    if (l_txd != std::string::npos) txd = txd.substr(0, l_txd + 1);
+    
+    name.erase(0, name.find_first_not_of(" \t\r\n"));
+    size_t l_name = name.find_last_not_of(" \t\r\n");
+    if (l_name != std::string::npos) name = name.substr(0, l_name + 1);
     
     std::transform(txd.begin(), txd.end(), txd.begin(), ::tolower);
     std::transform(name.begin(), name.end(), name.begin(), ::tolower);
     
-    std::string path = "sprites/" + txd + "/" + name + ".png";
-    return get_texture(path);
+    if (txd.empty() || name.empty()) return 0;
+    
+    std::string path_png = "sprites/" + txd + "/" + name + ".png";
+    GLuint tex = get_texture(path_png);
+    if (tex != 0) return tex;
+    
+    std::string path_webp = "sprites/" + txd + "/" + name + ".webp";
+    return get_texture(path_webp);
 }
 
 std::vector<uint8_t> AssetManager::load_model_dff(const std::string& dff_name) {

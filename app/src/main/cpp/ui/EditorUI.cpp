@@ -257,7 +257,7 @@ void EditorUI::render_canvas_overlay(TextDrawManager& manager, Viewport& viewpor
         float sh = viewport.samp_to_screen_scale_y(td.text_height);
         
         // A. Draw Box if enabled (using SA-MP TextDrawTextSize semantics)
-        if (td.use_box) {
+        if (td.use_box && td.font < 4) {
             uint32_t c = td.box_color;
             ImU32 im_col = IM_COL32((c >> 24) & 0xFF, (c >> 16) & 0xFF, (c >> 8) & 0xFF, c & 0xFF);
             float bx1, by1, bx2, by2;
@@ -281,6 +281,12 @@ void EditorUI::render_canvas_overlay(TextDrawManager& manager, Viewport& viewpor
                 draw_list->AddText(ImVec2(sx + 4, sy + 4), IM_COL32(255, 200, 200, 255), td.text.c_str());
             }
         } else if (td.font == 5) { // 3D Model Preview
+            // Authentic SA-MP 3D Model preview background box
+            uint32_t bg = td.background_color;
+            if ((bg & 0xFF) > 0) {
+                ImU32 im_bg = IM_COL32((bg >> 24) & 0xFF, (bg >> 16) & 0xFF, (bg >> 8) & 0xFF, bg & 0xFF);
+                draw_list->AddRectFilled(ImVec2(sx, sy), ImVec2(sx + sw, sy + sh), im_bg);
+            }
             GLuint tex = DffRenderer::get().render_to_texture(
                 td.preview_model, td.rot_x, td.rot_y, td.rot_z, td.zoom,
                 td.veh_color1, td.veh_color2
@@ -1279,12 +1285,73 @@ void EditorUI::render_export_modal(TextDrawManager& manager) {
     ImGui::End();
 }
 
-static uint32_t parse_samp_color_value(const std::string& str) {
-    std::string s = str;
-    s.erase(0, s.find_first_not_of(" \t\r\n"));
-    size_t last = s.find_last_not_of(" \t\r\n;)");
+static std::string trim_str(const std::string& str) {
+    size_t first = str.find_first_not_of(" \t\r\n");
+    if (first == std::string::npos) return "";
+    size_t last = str.find_last_not_of(" \t\r\n;)");
+    return (last == std::string::npos) ? str.substr(first) : str.substr(first, last - first + 1);
+}
+
+static std::string unquote_str(const std::string& str) {
+    std::string s = trim_str(str);
+    if (s.size() >= 2 && s.front() == '"' && s.back() == '"') {
+        s = s.substr(1, s.size() - 2);
+    }
+    return s;
+}
+
+static std::string strip_inline_comment(const std::string& line) {
+    bool in_quotes = false;
+    for (size_t i = 0; i < line.size(); ++i) {
+        if (line[i] == '"' && (i == 0 || line[i - 1] != '\\')) {
+            in_quotes = !in_quotes;
+        } else if (!in_quotes && line[i] == '/' && i + 1 < line.size() && line[i + 1] == '/') {
+            return line.substr(0, i);
+        }
+    }
+    return line;
+}
+
+static std::string normalize_pawn_var(const std::string& raw) {
+    std::string s = raw;
+    s.erase(std::remove_if(s.begin(), s.end(), [](char c) {
+        return c == ' ' || c == '\t' || c == '\r' || c == '\n';
+    }), s.end());
+    
+    if (s.rfind("new", 0) == 0) s = s.substr(3);
+    if (s.rfind("Text:", 0) == 0) s = s.substr(5);
+    else if (s.rfind("PlayerText:", 0) == 0) s = s.substr(11);
+    
+    static const std::vector<std::string> player_tokens = {
+        "[playerid]", "[PLAYERID]", "[i]", "[I]", "[max_players]", "[MAX_PLAYERS]",
+        "[targetid]", "[TARGETID]", "[player_id]", "[p]"
+    };
+    for (const auto& tok : player_tokens) {
+        size_t pos = 0;
+        while ((pos = s.find(tok, pos)) != std::string::npos) {
+            s.erase(pos, tok.size());
+        }
+    }
+    
+    size_t start = s.find_first_not_of("*&:");
+    if (start != std::string::npos) s = s.substr(start);
+    size_t last = s.find_last_not_of(";)");
     if (last != std::string::npos) s = s.substr(0, last + 1);
+    
+    return s;
+}
+
+static uint32_t parse_samp_color_value(const std::string& str, const std::unordered_map<std::string, uint32_t>& macro_map) {
+    std::string s = trim_str(str);
     if (s.empty()) return 0xFFFFFFFF;
+    
+    auto it = macro_map.find(s);
+    if (it != macro_map.end()) return it->second;
+    
+    std::string up = s;
+    std::transform(up.begin(), up.end(), up.begin(), ::toupper);
+    auto it2 = macro_map.find(up);
+    if (it2 != macro_map.end()) return it2->second;
     
     if (s.rfind("0x", 0) == 0 || s.rfind("0X", 0) == 0) {
         try {
@@ -1299,178 +1366,275 @@ static uint32_t parse_samp_color_value(const std::string& str) {
     }
 }
 
+static std::vector<std::string> extract_paren_args(const std::string& line, size_t open_p, size_t close_p) {
+    std::vector<std::string> args;
+    if (close_p <= open_p) return args;
+    std::string cur = "";
+    bool in_quotes = false;
+    for (size_t i = open_p + 1; i < close_p; ++i) {
+        char c = line[i];
+        if (c == '"' && (i == 0 || line[i - 1] != '\\')) {
+            in_quotes = !in_quotes;
+            cur += c;
+        } else if (c == ',' && !in_quotes) {
+            args.push_back(trim_str(cur));
+            cur.clear();
+        } else {
+            cur += c;
+        }
+    }
+    if (!cur.empty()) {
+        args.push_back(trim_str(cur));
+    }
+    return args;
+}
+
 static void parse_and_import_pawn(const char* code, TextDrawManager& manager) {
     if (!code || !*code) return;
     
-    std::stringstream ss(code);
-    std::string line;
-    std::unordered_map<std::string, TextDraw*> created_map;
+    std::unordered_map<std::string, uint32_t> macro_map = {
+        {"COLOR_WHITE", 0xFFFFFFFF},
+        {"COLOR_BLACK", 0x000000FF},
+        {"COLOR_RED", 0xFF0000FF},
+        {"COLOR_GREEN", 0x00FF00FF},
+        {"COLOR_BLUE", 0x0000FFFF},
+        {"COLOR_YELLOW", 0xFFFF00FF},
+        {"COLOR_ORANGE", 0xFFA500FF},
+        {"COLOR_GREY", 0xAFAFAFFF},
+        {"COLOR_GRAY", 0xAFAFAFFF},
+        {"COLOR_DARKGREY", 0x333333FF},
+        {"COLOR_DARKGRAY", 0x333333FF},
+        {"COLOR_LIGHTBLUE", 0x33CCFFAA},
+        {"COLOR_PURPLE", 0xC2A2DAAA},
+        {"COLOR_CYAN", 0x00FFFFFF},
+        {"COLOR_INVISIBLE", 0x00000000}
+    };
     
-    manager.save_undo_state();
-    
-    while (std::getline(ss, line)) {
-        size_t start = line.find_first_not_of(" \t\r\n");
-        if (start == std::string::npos) continue;
-        line = line.substr(start);
-        if (line.rfind("//", 0) == 0 || line.rfind("/*", 0) == 0) continue;
-        
-        size_t p_create = line.find("TextDrawCreate(");
-        size_t p_player = line.find("CreatePlayerTextDraw(");
-        
-        if (p_create != std::string::npos) {
-            size_t eq = line.find('=');
-            std::string var = "";
-            if (eq != std::string::npos && eq < p_create) {
-                var = line.substr(0, eq);
-                var.erase(var.find_last_not_of(" \t") + 1);
-                size_t v_start = var.find_last_of(" \t*:");
-                if (v_start != std::string::npos) var = var.substr(v_start + 1);
-            }
-            
-            float x = 320.0f, y = 240.0f;
-            std::string txt = "New Textdraw";
-            size_t q1 = line.find('"', p_create);
-            size_t q2 = line.rfind('"');
-            if (q1 != std::string::npos && q2 != std::string::npos && q2 > q1) {
-                txt = line.substr(q1 + 1, q2 - q1 - 1);
-                std::string coords = line.substr(p_create + 15, q1 - (p_create + 15));
-                sscanf(coords.c_str(), "%f, %f", &x, &y);
-            } else {
-                sscanf(line.c_str() + p_create + 15, "%f, %f", &x, &y);
-            }
-            
-            TextDraw* td = manager.create_text(x, y, txt);
-            if (td && !var.empty()) {
-                td->variable_name = var;
-                created_map[var] = td;
-            }
-        } else if (p_player != std::string::npos) {
-            size_t eq = line.find('=');
-            std::string var = "";
-            if (eq != std::string::npos && eq < p_player) {
-                var = line.substr(0, eq);
-                size_t brk = var.find('[');
-                if (brk != std::string::npos) var = var.substr(0, brk);
-                var.erase(var.find_last_not_of(" \t") + 1);
-                size_t v_start = var.find_last_of(" \t*:");
-                if (v_start != std::string::npos) var = var.substr(v_start + 1);
-            }
-            
-            float x = 320.0f, y = 240.0f;
-            std::string txt = "New Textdraw";
-            size_t q1 = line.find('"', p_player);
-            size_t q2 = line.rfind('"');
-            if (q1 != std::string::npos && q2 != std::string::npos && q2 > q1) {
-                txt = line.substr(q1 + 1, q2 - q1 - 1);
-                std::string args_before = line.substr(p_player + 21, q1 - (p_player + 21));
-                sscanf(args_before.c_str(), "%*[^,], %f, %f", &x, &y);
-            } else {
-                sscanf(line.c_str() + p_player + 21, "%*[^,], %f, %f", &x, &y);
-            }
-            
-            TextDraw* td = manager.create_text(x, y, txt);
-            if (td) {
-                td->is_player = true;
-                if (!var.empty()) {
-                    td->variable_name = var;
-                    created_map[var] = td;
+    // First pass: extract all #define constants
+    {
+        std::stringstream ss(code);
+        std::string raw_line;
+        while (std::getline(ss, raw_line)) {
+            std::string line = trim_str(strip_inline_comment(raw_line));
+            if (line.rfind("#define", 0) == 0) {
+                std::stringstream def_ss(line.substr(7));
+                std::string def_name, def_val;
+                if (def_ss >> def_name >> def_val) {
+                    if (def_val.rfind("0x", 0) == 0 || def_val.rfind("0X", 0) == 0) {
+                        try {
+                            macro_map[def_name] = (uint32_t)std::stoul(def_val, nullptr, 16);
+                        } catch (...) {}
+                    } else {
+                        try {
+                            macro_map[def_name] = (uint32_t)std::stoll(def_val);
+                        } catch (...) {}
+                    }
                 }
             }
         }
+    }
+    
+    std::stringstream ss(code);
+    std::string raw_line;
+    std::unordered_map<std::string, TextDraw*> created_map;
+    std::vector<TextDraw*> created_list;
+    
+    manager.save_undo_state();
+    
+    while (std::getline(ss, raw_line)) {
+        std::string line = trim_str(strip_inline_comment(raw_line));
+        if (line.empty()) continue;
+        if (line.rfind("/*", 0) == 0) continue;
         
-        for (auto& pair : created_map) {
-            const std::string& var = pair.first;
-            TextDraw* td = pair.second;
-            if (!td) continue;
-            
-            if (line.find(var) != std::string::npos) {
-                float f1 = 0, f2 = 0, f3 = 0, f4 = 0;
-                int i1 = 0, i2 = 0;
+        size_t p_create = line.find("TextDrawCreate");
+        size_t p_player = line.find("CreatePlayerTextDraw");
+        
+        if (p_create != std::string::npos && (p_player == std::string::npos || p_create < p_player)) {
+            size_t open_p = line.find('(', p_create);
+            size_t close_p = line.rfind(')');
+            if (open_p != std::string::npos && close_p != std::string::npos && close_p > open_p) {
+                size_t eq = line.find('=');
+                std::string var = "";
+                if (eq != std::string::npos && eq < open_p) {
+                    var = line.substr(0, eq);
+                }
+                var = normalize_pawn_var(var);
                 
-                if (line.find("LetterSize") != std::string::npos) {
-                    if (sscanf(line.c_str() + line.find("LetterSize"), "LetterSize(%*[^,], %f, %f)", &f1, &f2) == 2 ||
-                        sscanf(line.c_str() + line.find("LetterSize"), "LetterSize(%*[^,],%*[^,], %f, %f)", &f1, &f2) == 2) {
-                        td->letter_width = f1;
-                        td->letter_height = f2;
+                auto args = extract_paren_args(line, open_p, close_p);
+                float x = 320.0f, y = 240.0f;
+                std::string txt = "New Textdraw";
+                if (args.size() >= 2) {
+                    sscanf(args[0].c_str(), "%f", &x);
+                    sscanf(args[1].c_str(), "%f", &y);
+                }
+                if (args.size() >= 3) {
+                    txt = unquote_str(args[2]);
+                }
+                
+                TextDraw* td = manager.create_text(x, y, txt);
+                if (td) {
+                    td->is_player = false;
+                    if (!var.empty()) {
+                        td->variable_name = var;
+                        created_map[var] = td;
                     }
-                } else if (line.find("TextSize") != std::string::npos) {
-                    if (sscanf(line.c_str() + line.find("TextSize"), "TextSize(%*[^,], %f, %f)", &f1, &f2) == 2 ||
-                        sscanf(line.c_str() + line.find("TextSize"), "TextSize(%*[^,],%*[^,], %f, %f)", &f1, &f2) == 2) {
-                        td->text_width = f1;
-                        td->text_height = f2;
+                    created_list.push_back(td);
+                }
+            }
+            continue;
+        } else if (p_player != std::string::npos) {
+            size_t open_p = line.find('(', p_player);
+            size_t close_p = line.rfind(')');
+            if (open_p != std::string::npos && close_p != std::string::npos && close_p > open_p) {
+                size_t eq = line.find('=');
+                std::string var = "";
+                if (eq != std::string::npos && eq < open_p) {
+                    var = line.substr(0, eq);
+                }
+                var = normalize_pawn_var(var);
+                
+                auto args = extract_paren_args(line, open_p, close_p);
+                float x = 320.0f, y = 240.0f;
+                std::string txt = "New Textdraw";
+                if (args.size() >= 3) {
+                    sscanf(args[1].c_str(), "%f", &x);
+                    sscanf(args[2].c_str(), "%f", &y);
+                }
+                if (args.size() >= 4) {
+                    txt = unquote_str(args[3]);
+                }
+                
+                TextDraw* td = manager.create_text(x, y, txt);
+                if (td) {
+                    td->is_player = true;
+                    if (!var.empty()) {
+                        td->variable_name = var;
+                        created_map[var] = td;
                     }
-                } else if (line.find("Alignment") != std::string::npos) {
-                    if (sscanf(line.c_str() + line.find("Alignment"), "Alignment(%*[^,], %d)", &i1) == 1 ||
-                        sscanf(line.c_str() + line.find("Alignment"), "Alignment(%*[^,],%*[^,], %d)", &i1) == 1) {
-                        td->alignment = (TextDrawAlignment)i1;
-                    }
-                } else if (line.find("BackgroundColor") != std::string::npos) {
-                    size_t comma = line.find_last_of(',');
-                    size_t close = line.rfind(')');
-                    if (comma != std::string::npos && close != std::string::npos && close > comma) {
-                        td->background_color = parse_samp_color_value(line.substr(comma + 1, close - comma - 1));
-                    }
-                } else if (line.find("BoxColor") != std::string::npos) {
-                    size_t comma = line.find_last_of(',');
-                    size_t close = line.rfind(')');
-                    if (comma != std::string::npos && close != std::string::npos && close > comma) {
-                        td->box_color = parse_samp_color_value(line.substr(comma + 1, close - comma - 1));
-                    }
-                } else if (line.find("Color") != std::string::npos && line.find("VehCol") == std::string::npos) {
-                    size_t comma = line.find_last_of(',');
-                    size_t close = line.rfind(')');
-                    if (comma != std::string::npos && close != std::string::npos && close > comma) {
-                        td->color = parse_samp_color_value(line.substr(comma + 1, close - comma - 1));
-                    }
-                } else if (line.find("UseBox") != std::string::npos) {
-                    td->use_box = (line.find("1") != std::string::npos || line.find("true") != std::string::npos);
-                } else if (line.find("SetShadow") != std::string::npos) {
-                    if (sscanf(line.c_str() + line.find("SetShadow"), "SetShadow(%*[^,], %d)", &i1) == 1 ||
-                        sscanf(line.c_str() + line.find("SetShadow"), "SetShadow(%*[^,],%*[^,], %d)", &i1) == 1) {
-                        td->shadow = i1;
-                    }
-                } else if (line.find("SetOutline") != std::string::npos) {
-                    if (sscanf(line.c_str() + line.find("SetOutline"), "SetOutline(%*[^,], %d)", &i1) == 1 ||
-                        sscanf(line.c_str() + line.find("SetOutline"), "SetOutline(%*[^,],%*[^,], %d)", &i1) == 1) {
-                        td->outline = i1;
-                    }
-                } else if (line.find("Font") != std::string::npos) {
-                    if (sscanf(line.c_str() + line.find("Font"), "Font(%*[^,], %d)", &i1) == 1 ||
-                        sscanf(line.c_str() + line.find("Font"), "Font(%*[^,],%*[^,], %d)", &i1) == 1) {
-                        td->font = i1;
-                    }
-                } else if (line.find("SetProportional") != std::string::npos) {
-                    td->proportional = (line.find("1") != std::string::npos || line.find("true") != std::string::npos);
-                } else if (line.find("SetSelectable") != std::string::npos) {
-                    td->selectable = (line.find("1") != std::string::npos || line.find("true") != std::string::npos);
-                } else if (line.find("SetPreviewModel") != std::string::npos) {
-                    if (sscanf(line.c_str() + line.find("SetPreviewModel"), "SetPreviewModel(%*[^,], %d)", &i1) == 1 ||
-                        sscanf(line.c_str() + line.find("SetPreviewModel"), "SetPreviewModel(%*[^,],%*[^,], %d)", &i1) == 1) {
-                        td->font = 5;
-                        td->preview_model = i1;
-                        td->text = std::to_string(i1);
-                    }
-                } else if (line.find("SetPreviewRot") != std::string::npos) {
-                    if (sscanf(line.c_str() + line.find("SetPreviewRot"), "SetPreviewRot(%*[^,], %f, %f, %f, %f)", &f1, &f2, &f3, &f4) == 4 ||
-                        sscanf(line.c_str() + line.find("SetPreviewRot"), "SetPreviewRot(%*[^,],%*[^,], %f, %f, %f, %f)", &f1, &f2, &f3, &f4) == 4) {
-                        td->rot_x = f1;
-                        td->rot_y = f2;
-                        td->rot_z = f3;
-                        td->zoom = f4;
-                    }
-                } else if (line.find("SetPreviewVehCol") != std::string::npos) {
-                    if (sscanf(line.c_str() + line.find("SetPreviewVehCol"), "SetPreviewVehCol(%*[^,], %d, %d)", &i1, &i2) == 2 ||
-                        sscanf(line.c_str() + line.find("SetPreviewVehCol"), "SetPreviewVehCol(%*[^,],%*[^,], %d, %d)", &i1, &i2) == 2) {
-                        td->veh_color1 = i1;
-                        td->veh_color2 = i2;
-                    }
-                } else if (line.find("SetString") != std::string::npos) {
-                    size_t q1 = line.find('"');
-                    size_t q2 = line.rfind('"');
-                    if (q1 != std::string::npos && q2 != std::string::npos && q2 > q1) {
-                        td->text = line.substr(q1 + 1, q2 - q1 - 1);
+                    created_list.push_back(td);
+                }
+            }
+            continue;
+        }
+        
+        // Property setter lines
+        size_t open_p = line.find('(');
+        size_t close_p = line.rfind(')');
+        if (open_p != std::string::npos && close_p != std::string::npos && close_p > open_p) {
+            std::string fn_part = trim_str(line.substr(0, open_p));
+            auto args = extract_paren_args(line, open_p, close_p);
+            if (args.empty()) continue;
+            
+            bool is_player_fn = (fn_part.find("PlayerTextDraw") != std::string::npos);
+            bool is_global_fn = (fn_part.find("TextDraw") != std::string::npos && !is_player_fn);
+            
+            if (!is_player_fn && !is_global_fn) continue;
+            
+            std::string target_var = "";
+            size_t val_start_idx = 1;
+            if (is_player_fn) {
+                if (args.size() > 1) {
+                    target_var = normalize_pawn_var(args[1]);
+                    val_start_idx = 2;
+                }
+            } else {
+                target_var = normalize_pawn_var(args[0]);
+                val_start_idx = 1;
+            }
+            
+            TextDraw* td = nullptr;
+            if (!target_var.empty()) {
+                auto it = created_map.find(target_var);
+                if (it != created_map.end()) {
+                    td = it->second;
+                } else {
+                    for (auto& pair : created_map) {
+                        if (pair.first == target_var || normalize_pawn_var(pair.first) == target_var) {
+                            td = pair.second;
+                            break;
+                        }
                     }
                 }
+            } else if (!created_list.empty()) {
+                td = created_list.back();
+            }
+            
+            if (!td) continue;
+            
+            auto get_arg = [&](size_t idx) -> std::string {
+                return (idx < args.size()) ? args[idx] : "";
+            };
+            
+            float f1 = 0, f2 = 0, f3 = 0, f4 = 0;
+            int i1 = 0, i2 = 0;
+            
+            if (fn_part.find("LetterSize") != std::string::npos) {
+                if (sscanf(get_arg(val_start_idx).c_str(), "%f", &f1) == 1 &&
+                    sscanf(get_arg(val_start_idx + 1).c_str(), "%f", &f2) == 1) {
+                    td->letter_width = f1;
+                    td->letter_height = f2;
+                }
+            } else if (fn_part.find("TextSize") != std::string::npos) {
+                if (sscanf(get_arg(val_start_idx).c_str(), "%f", &f1) == 1 &&
+                    sscanf(get_arg(val_start_idx + 1).c_str(), "%f", &f2) == 1) {
+                    td->text_width = f1;
+                    td->text_height = f2;
+                }
+            } else if (fn_part.find("Alignment") != std::string::npos) {
+                if (sscanf(get_arg(val_start_idx).c_str(), "%d", &i1) == 1) {
+                    td->alignment = (TextDrawAlignment)i1;
+                }
+            } else if (fn_part.find("BackgroundColor") != std::string::npos) {
+                td->background_color = parse_samp_color_value(get_arg(val_start_idx), macro_map);
+            } else if (fn_part.find("BoxColor") != std::string::npos) {
+                td->box_color = parse_samp_color_value(get_arg(val_start_idx), macro_map);
+            } else if (fn_part.find("Color") != std::string::npos && fn_part.find("VehCol") == std::string::npos) {
+                td->color = parse_samp_color_value(get_arg(val_start_idx), macro_map);
+            } else if (fn_part.find("UseBox") != std::string::npos) {
+                std::string a = get_arg(val_start_idx);
+                td->use_box = (a.find("1") != std::string::npos || a.find("true") != std::string::npos);
+            } else if (fn_part.find("SetShadow") != std::string::npos) {
+                if (sscanf(get_arg(val_start_idx).c_str(), "%d", &i1) == 1) {
+                    td->shadow = i1;
+                }
+            } else if (fn_part.find("SetOutline") != std::string::npos) {
+                if (sscanf(get_arg(val_start_idx).c_str(), "%d", &i1) == 1) {
+                    td->outline = i1;
+                }
+            } else if (fn_part.find("Font") != std::string::npos) {
+                if (sscanf(get_arg(val_start_idx).c_str(), "%d", &i1) == 1) {
+                    td->font = i1;
+                }
+            } else if (fn_part.find("SetProportional") != std::string::npos) {
+                std::string a = get_arg(val_start_idx);
+                td->proportional = (a.find("1") != std::string::npos || a.find("true") != std::string::npos);
+            } else if (fn_part.find("SetSelectable") != std::string::npos) {
+                std::string a = get_arg(val_start_idx);
+                td->selectable = (a.find("1") != std::string::npos || a.find("true") != std::string::npos);
+            } else if (fn_part.find("SetPreviewModel") != std::string::npos) {
+                if (sscanf(get_arg(val_start_idx).c_str(), "%d", &i1) == 1) {
+                    td->font = 5;
+                    td->preview_model = i1;
+                    td->text = std::to_string(i1);
+                }
+            } else if (fn_part.find("SetPreviewRot") != std::string::npos) {
+                if (sscanf(get_arg(val_start_idx).c_str(), "%f", &f1) == 1 &&
+                    sscanf(get_arg(val_start_idx + 1).c_str(), "%f", &f2) == 1 &&
+                    sscanf(get_arg(val_start_idx + 2).c_str(), "%f", &f3) == 1 &&
+                    sscanf(get_arg(val_start_idx + 3).c_str(), "%f", &f4) == 1) {
+                    td->rot_x = f1;
+                    td->rot_y = f2;
+                    td->rot_z = f3;
+                    td->zoom = f4;
+                }
+            } else if (fn_part.find("SetPreviewVehCol") != std::string::npos) {
+                if (sscanf(get_arg(val_start_idx).c_str(), "%d", &i1) == 1 &&
+                    sscanf(get_arg(val_start_idx + 1).c_str(), "%d", &i2) == 1) {
+                    td->veh_color1 = i1;
+                    td->veh_color2 = i2;
+                }
+            } else if (fn_part.find("SetString") != std::string::npos) {
+                td->text = unquote_str(get_arg(val_start_idx));
             }
         }
     }
