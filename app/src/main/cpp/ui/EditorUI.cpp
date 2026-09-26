@@ -208,11 +208,16 @@ void EditorUI::render_canvas_overlay(TextDrawManager& manager, Viewport& viewpor
         float sw = viewport.samp_to_screen_scale_x(td.text_width);
         float sh = viewport.samp_to_screen_scale_y(td.text_height);
         
-        // A. Draw Box if enabled
+        // A. Draw Box if enabled (using SA-MP TextDrawTextSize semantics)
         if (td.use_box) {
             uint32_t c = td.box_color;
             ImU32 im_col = IM_COL32((c >> 24) & 0xFF, (c >> 16) & 0xFF, (c >> 8) & 0xFF, c & 0xFF);
-            draw_list->AddRectFilled(ImVec2(sx, sy), ImVec2(sx + sw, sy + sh), im_col);
+            float bx1, by1, bx2, by2;
+            td.get_bounds(bx1, by1, bx2, by2);
+            float sbx1, sby1, sbx2, sby2;
+            viewport.samp_to_screen(bx1, by1, sbx1, sby1);
+            viewport.samp_to_screen(bx2, by2, sbx2, sby2);
+            draw_list->AddRectFilled(ImVec2(sbx1, sby1), ImVec2(sbx2, sby2), im_col);
         }
         
         // B. Draw Content based on Font
@@ -241,8 +246,10 @@ void EditorUI::render_canvas_overlay(TextDrawManager& manager, Viewport& viewpor
                 draw_list->AddText(ImVec2(sx + 4, sy + 4), IM_COL32(255, 255, 255, 255), "3D Model");
             }
         } else { // Fonts 0, 1, 2, 3 (Text)
-            float font_scale = (td.letter_height * 0.9f) * (viewport.canvas_screen_h / 480.0f);
-            float font_size = 16.0f * font_scale;
+            // Scale font: SA-MP letter_height drives size. Factor calibrated to match in-game ratio.
+            float px_per_samp = viewport.canvas_screen_h / 480.0f;
+            float font_scale = td.letter_height * 1.1f * px_per_samp;
+            float font_size = std::max(6.0f, 14.0f * font_scale);
             uint32_t bg_c = td.background_color;
             ImU32 im_bg = IM_COL32((bg_c >> 24) & 0xFF, (bg_c >> 16) & 0xFF, (bg_c >> 8) & 0xFF, bg_c & 0xFF);
             
@@ -275,8 +282,10 @@ void EditorUI::render_canvas_overlay(TextDrawManager& manager, Viewport& viewpor
                 
                 float cur_x = sx;
                 if (td.alignment == TextDrawAlignment::CENTER) {
+                    // In SA-MP, 'x' is the CENTER point for centered text
                     cur_x = sx - line_width * 0.5f;
                 } else if (td.alignment == TextDrawAlignment::RIGHT) {
+                    // In SA-MP, 'x' is the RIGHT edge for right-aligned text
                     cur_x = sx - line_width;
                 }
                 
@@ -776,14 +785,29 @@ void EditorUI::render_inspector(TextDrawManager& manager, Viewport& viewport) {
             ImGui::Text("ID: %d", td->veh_color2);
         }
         
-        // TextSize
-        ImGui::DragFloat("TextSize W", &td->text_width, 1.0f, 0.0f, 640.0f, "%.1f");
-        ImGui::DragFloat("TextSize H", &td->text_height, 1.0f, 0.0f, 480.0f, "%.1f");
+        // TextSize - meaning depends on alignment (SA-MP rule)
+        if (td->font == 4 || td->font == 5) {
+            ImGui::DragFloat("TextSize W (width)", &td->text_width, 1.0f, 0.0f, 640.0f, "%.1f");
+            ImGui::DragFloat("TextSize H (height)", &td->text_height, 1.0f, 0.0f, 480.0f, "%.1f");
+        } else if (td->alignment == TextDrawAlignment::LEFT) {
+            ImGui::DragFloat("TextSize X (right edge)", &td->text_width, 1.0f, 0.0f, 640.0f, "%.1f");
+            ImGui::DragFloat("TextSize Y (bottom edge)", &td->text_height, 1.0f, 0.0f, 480.0f, "%.1f");
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("LEFT: TextDrawTextSize(td, X_right, Y_bottom) -- absolute coords");
+        } else if (td->alignment == TextDrawAlignment::CENTER) {
+            ImGui::DragFloat("TextSize X (box width)", &td->text_width, 1.0f, 0.0f, 640.0f, "%.1f");
+            ImGui::DragFloat("TextSize Y (box height)", &td->text_height, 1.0f, 0.0f, 480.0f, "%.1f");
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("CENTER: TextDrawTextSize(td, width, height) -- box size");
+        } else {
+            ImGui::DragFloat("TextSize X (left edge)", &td->text_width, 1.0f, 0.0f, 640.0f, "%.1f");
+            ImGui::DragFloat("TextSize Y (top edge)", &td->text_height, 1.0f, 0.0f, 480.0f, "%.1f");
+            if (ImGui::IsItemHovered()) ImGui::SetTooltip("RIGHT: TextDrawTextSize(td, X_left, Y_top) -- x is right edge");
+        }
         if (td->font >= 0 && td->font <= 3) {
             if (ImGui::Button("Auto-fit TextSize##Btn", ImVec2(-1, 30.0f * s))) {
                 td->auto_calculate_text_size();
             }
         }
+
         
         ImGui::Separator();
         

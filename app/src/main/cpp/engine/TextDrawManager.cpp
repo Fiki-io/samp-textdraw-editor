@@ -29,14 +29,17 @@ TextDraw* TextDrawManager::create_text(float x, float y, const std::string& text
     td.x = x;
     td.y = y;
     td.text = text;
-    td.letter_width = 0.45f;
-    td.letter_height = 1.6f;
-    td.text_width = 120.0f;
-    td.text_height = 20.0f;
+    td.letter_width = 0.30f;
+    td.letter_height = 1.50f;
+    // text_width/height = 0 means no TextDrawTextSize call (auto)
+    td.text_width = 0.0f;
+    td.text_height = 0.0f;
     td.color = 0xFFFFFFFF; // White
     td.shadow = 1;
-    td.outline = 0;
+    td.outline = 1;
+    td.background_color = 0x00000096; // Black 150-alpha (matches SA-MP default)
     td.use_box = false;
+    td.proportional = true;
     
     textdraws.push_back(td);
     update_z_indices();
@@ -54,12 +57,17 @@ TextDraw* TextDrawManager::create_box(float x, float y, float w, float h, uint32
     td.y = y;
     td.text = "_"; // SA-MP standard dummy text for box
     td.letter_width = 0.0f;
-    td.letter_height = (h / 8.5f); // Scale box height
-    td.text_width = w;
-    td.text_height = h;
+    td.letter_height = 0.0f;
+    // For LEFT alignment, TextDrawTextSize = absolute bottom-right corner
+    td.text_width = x + w;  // right edge in SA-MP coords
+    td.text_height = y + h; // bottom edge in SA-MP coords
     td.use_box = true;
     td.box_color = color;
     td.color = 0x00000000;
+    td.shadow = 0;
+    td.outline = 0;
+    td.background_color = 0x000000FF;
+    td.proportional = true;
     
     textdraws.push_back(td);
     update_z_indices();

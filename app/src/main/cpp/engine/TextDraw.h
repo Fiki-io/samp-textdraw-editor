@@ -71,7 +71,7 @@ struct TextDraw {
     int group_id = 0;
     bool is_grouped = false;
 
-    // Auto-calculate TextSize for Font 0-3
+    // Auto-calculate TextSize for Font 0-3 clickable textdraws
     void auto_calculate_text_size() {
         if (font >= 0 && font <= 3) {
             int char_count = 0;
@@ -83,20 +83,67 @@ struct TextDraw {
                 char_count++;
             }
             if (char_count < 1) char_count = 1;
-            text_width = std::max(12.0f, (float)char_count * (letter_width * 20.0f));
-            text_height = std::max(8.0f, letter_height * 20.0f);
+            float est_w = std::max(12.0f, (float)char_count * (letter_width * 20.0f));
+            float est_h = std::max(8.0f, letter_height * 20.0f);
+            // SA-MP: TextDrawTextSize for LEFT = absolute bottom-right corner
+            if (alignment == TextDrawAlignment::LEFT) {
+                text_width  = x + est_w;
+                text_height = y + est_h;
+            } else if (alignment == TextDrawAlignment::CENTER) {
+                // For center: X = total width, Y = unused (set to height)
+                text_width  = est_w;
+                text_height = est_h;
+            } else {
+                // For RIGHT: textsize = top-left corner of box
+                text_width  = x - est_w;
+                text_height = y;
+            }
         }
     }
 
-    // Calculated bounding box on 640x480 canvas
+    // Helper: compute screen-space bounding box (in SA-MP 640x480 coords)
+    // for rendering boxes, selections, and hit-testing.
+    // Matches SA-MP TextDrawTextSize semantics:
+    //   LEFT  : textsize = (right, bottom) absolute coords
+    //   CENTER: x = center, textsize.x = box width, textsize.y = box height
+    //   RIGHT : textsize = (left, top) of box, x = right edge
+    //   Font4/5 : textsize = (width_offset, height_offset) from origin
     void get_bounds(float& out_x1, float& out_y1, float& out_x2, float& out_y2) const {
-        if (font == 4 || font == 5 || use_box) {
+        if (font == 4 || font == 5) {
+            // Sprite / 3D model: textsize = width/height offset
             out_x1 = x;
             out_y1 = y;
             out_x2 = x + text_width;
             out_y2 = y + text_height;
+        } else if (use_box && text_width > 0.0f && text_height > 0.0f) {
+            // Box mode: textsize semantics per alignment
+            if (alignment == TextDrawAlignment::CENTER) {
+                // x = center, textsize.x = total width
+                float hw = text_width * 0.5f;
+                out_x1 = x - hw;
+                out_y1 = y;
+                out_x2 = x + hw;
+                out_y2 = y + text_height;
+            } else if (alignment == TextDrawAlignment::RIGHT) {
+                // textsize = (left, top), x = right edge
+                out_x1 = text_width;
+                out_y1 = text_height;
+                out_x2 = x;
+                out_y2 = text_height + (x - text_width) * 0.3f; // approx height
+                // Prefer direct: textsize.(x,y) is top-left, x is right
+                out_x1 = text_width;
+                out_y1 = y;
+                out_x2 = x;
+                out_y2 = text_height;
+            } else {
+                // LEFT: textsize = (right, bottom) absolute coords
+                out_x1 = x;
+                out_y1 = y;
+                out_x2 = text_width;
+                out_y2 = text_height;
+            }
         } else {
-            // Text bounds estimated from letter size and string length
+            // No box: estimate from letter size and text length
             int char_count = 0;
             for (size_t i = 0; i < text.size(); ++i) {
                 if (text[i] == '~' && i + 2 < text.size() && text[i + 2] == '~') {
