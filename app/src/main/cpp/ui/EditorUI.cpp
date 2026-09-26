@@ -246,10 +246,16 @@ void EditorUI::render_canvas_overlay(TextDrawManager& manager, Viewport& viewpor
                 draw_list->AddText(ImVec2(sx + 4, sy + 4), IM_COL32(255, 255, 255, 255), "3D Model");
             }
         } else { // Fonts 0, 1, 2, 3 (Text)
-            // Scale font: SA-MP letter_height drives size. Factor calibrated to match in-game ratio.
+            // SA-MP calibration:
+            // 1.0 letter_height unit ≈ 9.3px at native 640×480 canvas
+            // This was empirically derived from NexTDE reference (letter_height=1.5 → ~14px tall in-game)
             float px_per_samp = viewport.canvas_screen_h / 480.0f;
-            float font_scale = td.letter_height * 1.1f * px_per_samp;
-            float font_size = std::max(6.0f, 14.0f * font_scale);
+            float font_size = std::max(4.0f, td.letter_height * 9.3f * px_per_samp);
+            
+            // SA-MP line spacing: each ~n~ line is spaced by letter_height units in SA-MP coords
+            // In SA-MP: vertical gap between lines ≈ letter_height * 15px at native res
+            float line_height = td.letter_height * 15.0f * px_per_samp;
+            
             uint32_t bg_c = td.background_color;
             ImU32 im_bg = IM_COL32((bg_c >> 24) & 0xFF, (bg_c >> 16) & 0xFF, (bg_c >> 8) & 0xFF, bg_c & 0xFF);
             
@@ -269,7 +275,6 @@ void EditorUI::render_canvas_overlay(TextDrawManager& manager, Viewport& viewpor
             }
             lines.push_back(current_line);
             
-            float line_height = font_size * 1.15f;
             float cur_y = sy;
             
             for (const auto& line : lines) {
