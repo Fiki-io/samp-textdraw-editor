@@ -43,6 +43,10 @@ public:
     bool enable_grid = true;
     float grid_step = 1.0f; // 0.1, 0.5, 1.0, 5.0, 10.0
     
+    bool show_hud_overlay = false;
+    bool show_center_guides = true;
+    bool show_safe_zone = false;
+
     float pan_x = 0.0f;
     float pan_y = 0.0f;
     float zoom = 1.0f;

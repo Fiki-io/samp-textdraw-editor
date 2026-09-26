@@ -67,6 +67,27 @@ struct TextDraw {
     bool is_locked = false;
     int z_index = 0;
     
+    // Grouping
+    int group_id = 0;
+    bool is_grouped = false;
+
+    // Auto-calculate TextSize for Font 0-3
+    void auto_calculate_text_size() {
+        if (font >= 0 && font <= 3) {
+            int char_count = 0;
+            for (size_t i = 0; i < text.size(); ++i) {
+                if (text[i] == '~' && i + 2 < text.size() && text[i + 2] == '~') {
+                    i += 2;
+                    continue;
+                }
+                char_count++;
+            }
+            if (char_count < 1) char_count = 1;
+            text_width = std::max(12.0f, (float)char_count * (letter_width * 20.0f));
+            text_height = std::max(8.0f, letter_height * 20.0f);
+        }
+    }
+
     // Calculated bounding box on 640x480 canvas
     void get_bounds(float& out_x1, float& out_y1, float& out_x2, float& out_y2) const {
         if (font == 4 || font == 5 || use_box) {
@@ -76,7 +97,16 @@ struct TextDraw {
             out_y2 = y + text_height;
         } else {
             // Text bounds estimated from letter size and string length
-            float w = text.length() * (letter_width * 20.0f);
+            int char_count = 0;
+            for (size_t i = 0; i < text.size(); ++i) {
+                if (text[i] == '~' && i + 2 < text.size() && text[i + 2] == '~') {
+                    i += 2;
+                    continue;
+                }
+                char_count++;
+            }
+            if (char_count < 1) char_count = 1;
+            float w = (float)char_count * (letter_width * 20.0f);
             float h = letter_height * 20.0f;
             if (alignment == TextDrawAlignment::CENTER) {
                 out_x1 = x - w * 0.5f;

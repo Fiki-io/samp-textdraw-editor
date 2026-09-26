@@ -258,7 +258,10 @@ Java_com_textdraw_editor_NativeBridge_nativeTouchEvent(JNIEnv* env, jobject thiz
         
         TextDraw* hit = g_manager.hit_test(samp_x, samp_y);
         if (hit) {
-            g_manager.select_single(hit->id);
+            g_manager.save_undo_state();
+            if (!g_manager.is_selected(hit->id)) {
+                g_manager.select_single(hit->id);
+            }
             g_is_dragging_textdraw = true;
             g_is_panning = false;
         } else {

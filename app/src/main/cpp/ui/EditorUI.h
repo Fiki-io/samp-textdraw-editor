@@ -36,10 +36,13 @@ private:
     void render_bottom_toolbar(TextDrawManager& manager, Viewport& viewport);
     void render_dpad_widget(TextDrawManager& manager, Viewport& viewport);
     
-    // Modals
+    // Modals & Panels
     void render_file_modal(TextDrawManager& manager);
     void render_edit_modal(TextDrawManager& manager);
     void render_view_modal(Viewport& viewport);
+    void render_layers_panel(TextDrawManager& manager);
+    void render_group_modal(TextDrawManager& manager);
+    void render_trash_modal(TextDrawManager& manager);
     void render_sprite_picker(TextDrawManager& manager);
     void render_model_picker(TextDrawManager& manager);
     void render_export_modal(TextDrawManager& manager);
@@ -51,6 +54,9 @@ private:
     bool show_file_modal = false;
     bool show_edit_modal = false;
     bool show_view_modal = false;
+    bool show_layers_panel = false;
+    bool show_group_modal = false;
+    bool show_trash_modal = false;
     bool show_new_project_confirm = false;
     bool show_sprite_picker = false;
     bool show_model_picker = false;
@@ -62,10 +68,14 @@ private:
     
     char sprite_search_filter[64] = "";
     char model_search_filter[64] = "";
+    char layer_search_filter[64] = "";
     char import_buffer[16384] = "";
     char project_name_buf[64] = "my_textdraw_project";
     std::string storage_path = "";
     std::string export_code_buffer;
+    
+    bool export_only_selected = false;
+    bool export_wrap_functions = true;
     
     bool dpad_expanded = true;
     float dpad_step = 1.0f;

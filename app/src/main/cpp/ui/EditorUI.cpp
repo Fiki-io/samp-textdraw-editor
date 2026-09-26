@@ -97,10 +97,13 @@ void EditorUI::render(TextDrawManager& manager, Viewport& viewport) {
     render_bottom_toolbar(manager, viewport);
     render_dpad_widget(manager, viewport);
     
-    // Modals
+    // Modals & Panels
     if (show_file_modal) render_file_modal(manager);
     if (show_edit_modal) render_edit_modal(manager);
     if (show_view_modal) render_view_modal(viewport);
+    if (show_layers_panel) render_layers_panel(manager);
+    if (show_group_modal) render_group_modal(manager);
+    if (show_trash_modal) render_trash_modal(manager);
     if (show_sprite_picker) render_sprite_picker(manager);
     if (show_model_picker) render_model_picker(manager);
     if (show_export_modal) render_export_modal(manager);
@@ -137,6 +140,60 @@ void EditorUI::render_canvas_overlay(TextDrawManager& manager, Viewport& viewpor
             draw_list->AddLine(ImVec2(sx1, sy), ImVec2(sx2, sy), grid_col);
         }
     }
+
+    // Center Crosshair Guides
+    if (viewport.show_center_guides) {
+        float cx_s, cy_s;
+        viewport.samp_to_screen(320.0f, 240.0f, cx_s, cy_s);
+        draw_list->AddLine(ImVec2(cx_s, c_y1), ImVec2(cx_s, c_y2), IM_COL32(0, 230, 255, 45), 1.0f);
+        draw_list->AddLine(ImVec2(c_x1, cy_s), ImVec2(c_x2, cy_s), IM_COL32(0, 230, 255, 45), 1.0f);
+    }
+
+    // Safe Zone Guides (5% margin)
+    if (viewport.show_safe_zone) {
+        float sz_x1, sz_y1, sz_x2, sz_y2;
+        viewport.samp_to_screen(32.0f, 24.0f, sz_x1, sz_y1);
+        viewport.samp_to_screen(608.0f, 456.0f, sz_x2, sz_y2);
+        draw_list->AddRect(ImVec2(sz_x1, sz_y1), ImVec2(sz_x2, sz_y2), IM_COL32(255, 100, 100, 70), 0.0f, 0, 1.0f);
+    }
+
+    // GTA SA HUD Template Reference Overlay
+    if (viewport.show_hud_overlay) {
+        // Radar circle at bottom left (GTA SA default: x=55..140, y=345..430)
+        float r_sx, r_sy;
+        viewport.samp_to_screen(55.0f, 345.0f, r_sx, r_sy);
+        float r_sw = viewport.samp_to_screen_scale_x(85.0f);
+        float r_sh = viewport.samp_to_screen_scale_y(85.0f);
+        draw_list->AddCircle(ImVec2(r_sx + r_sw * 0.5f, r_sy + r_sh * 0.5f), r_sw * 0.5f, IM_COL32(100, 200, 255, 90), 32, 1.5f);
+        draw_list->AddText(ImVec2(r_sx + r_sw * 0.5f - 4, r_sy + 4), IM_COL32(255, 100, 100, 140), "N");
+        draw_list->AddText(ImVec2(r_sx + 10, r_sy + r_sh * 0.5f - 6), IM_COL32(150, 180, 200, 120), "RADAR HUD");
+
+        // Top-Right Weapon Box
+        float w_sx, w_sy;
+        viewport.samp_to_screen(545.0f, 22.0f, w_sx, w_sy);
+        float w_sw = viewport.samp_to_screen_scale_x(65.0f);
+        float w_sh = viewport.samp_to_screen_scale_y(55.0f);
+        draw_list->AddRect(ImVec2(w_sx, w_sy), ImVec2(w_sx + w_sw, w_sy + w_sh), IM_COL32(255, 200, 100, 90), 2.0f, 0, 1.5f);
+        draw_list->AddText(ImVec2(w_sx + 8, w_sy + 18), IM_COL32(255, 200, 100, 120), "WEAPON");
+
+        // Health & Armor bars
+        float h_sx, h_sy;
+        viewport.samp_to_screen(545.0f, 82.0f, h_sx, h_sy);
+        float h_sw = viewport.samp_to_screen_scale_x(65.0f);
+        float h_sh = viewport.samp_to_screen_scale_y(9.0f);
+        draw_list->AddRectFilled(ImVec2(h_sx, h_sy), ImVec2(h_sx + h_sw, h_sy + h_sh), IM_COL32(220, 50, 50, 70));
+        draw_list->AddRect(ImVec2(h_sx, h_sy), ImVec2(h_sx + h_sw, h_sy + h_sh), IM_COL32(220, 50, 50, 140));
+
+        float a_sx, a_sy;
+        viewport.samp_to_screen(545.0f, 94.0f, a_sx, a_sy);
+        draw_list->AddRectFilled(ImVec2(a_sx, a_sy), ImVec2(a_sx + h_sw, a_sy + h_sh), IM_COL32(220, 220, 220, 70));
+        draw_list->AddRect(ImVec2(a_sx, a_sy), ImVec2(a_sx + h_sw, a_sy + h_sh), IM_COL32(220, 220, 220, 140));
+
+        // Money Counter
+        float m_sx, m_sy;
+        viewport.samp_to_screen(530.0f, 108.0f, m_sx, m_sy);
+        draw_list->AddText(ImVec2(m_sx, m_sy), IM_COL32(60, 180, 80, 130), "$00099999");
+    }
     
     // Border around 640x480
     draw_list->AddRect(ImVec2(c_x1, c_y1), ImVec2(c_x2, c_y2), IM_COL32(241, 168, 10, 180), 0.0f, 0, 1.5f);
@@ -153,7 +210,6 @@ void EditorUI::render_canvas_overlay(TextDrawManager& manager, Viewport& viewpor
         
         // A. Draw Box if enabled
         if (td.use_box) {
-            // Box Color in RGBA -> ABGR for ImGui
             uint32_t c = td.box_color;
             ImU32 im_col = IM_COL32((c >> 24) & 0xFF, (c >> 16) & 0xFF, (c >> 8) & 0xFF, c & 0xFF);
             draw_list->AddRectFilled(ImVec2(sx, sy), ImVec2(sx + sw, sy + sh), im_col);
@@ -168,7 +224,6 @@ void EditorUI::render_canvas_overlay(TextDrawManager& manager, Viewport& viewpor
                 draw_list->AddImage((ImTextureID)(intptr_t)tex, ImVec2(sx, sy), ImVec2(sx + sw, sy + sh),
                                    ImVec2(0, 0), ImVec2(1, 1), im_tint);
             } else {
-                // Placeholder preview
                 draw_list->AddRect(ImVec2(sx, sy), ImVec2(sx + sw, sy + sh), IM_COL32(255, 100, 100, 200));
                 draw_list->AddText(ImVec2(sx + 4, sy + 4), IM_COL32(255, 200, 200, 255), td.text.c_str());
             }
@@ -178,7 +233,6 @@ void EditorUI::render_canvas_overlay(TextDrawManager& manager, Viewport& viewpor
                 td.veh_color1, td.veh_color2
             );
             if (tex != 0) {
-                // UVs flipped vertically for OpenGL FBO texture
                 draw_list->AddImage((ImTextureID)(intptr_t)tex,
                                    ImVec2(sx, sy), ImVec2(sx + sw, sy + sh),
                                    ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f));
@@ -192,68 +246,92 @@ void EditorUI::render_canvas_overlay(TextDrawManager& manager, Viewport& viewpor
             uint32_t bg_c = td.background_color;
             ImU32 im_bg = IM_COL32((bg_c >> 24) & 0xFF, (bg_c >> 16) & 0xFF, (bg_c >> 8) & 0xFF, bg_c & 0xFF);
             
-            // Parse SA-MP formatting tags (~r~, ~g~, ~b~, ~w~, ~y~, ~n~)
+            // Parse SA-MP formatting tags (~r~, ~g~, ~b~, ~w~, ~y~, ~p~, ~l~, ~s~, ~h~, ~n~)
             auto spans = SampColorParser::parse(td.text, td.color);
             
-            float cur_x = sx;
-            float cur_y = sy;
-            float line_height = font_size * 1.15f;
-            
+            // Group spans by lines
+            std::vector<std::vector<TextSpan>> lines;
+            std::vector<TextSpan> current_line;
             for (const auto& span : spans) {
                 if (span.is_newline) {
-                    cur_x = sx;
-                    cur_y += line_height;
-                    continue;
+                    lines.push_back(current_line);
+                    current_line.clear();
+                } else if (!span.text.empty()) {
+                    current_line.push_back(span);
                 }
-                if (span.text.empty()) continue;
-                
-                uint32_t c = span.color;
-                ImU32 im_col = IM_COL32((c >> 24) & 0xFF, (c >> 16) & 0xFF, (c >> 8) & 0xFF, c & 0xFF);
-                
-                // Shadow
-                if (td.shadow > 0) {
-                    float sh_off = (float)td.shadow * 1.5f;
-                    draw_list->AddText(nullptr, font_size, ImVec2(cur_x + sh_off, cur_y + sh_off), im_bg, span.text.c_str());
-                }
-                // Outline
-                if (td.outline > 0) {
-                    float o = (float)td.outline;
-                    draw_list->AddText(nullptr, font_size, ImVec2(cur_x - o, cur_y), im_bg, span.text.c_str());
-                    draw_list->AddText(nullptr, font_size, ImVec2(cur_x + o, cur_y), im_bg, span.text.c_str());
-                    draw_list->AddText(nullptr, font_size, ImVec2(cur_x, cur_y - o), im_bg, span.text.c_str());
-                    draw_list->AddText(nullptr, font_size, ImVec2(cur_x, cur_y + o), im_bg, span.text.c_str());
+            }
+            lines.push_back(current_line);
+            
+            float line_height = font_size * 1.15f;
+            float cur_y = sy;
+            
+            for (const auto& line : lines) {
+                // Calculate total line width for accurate SA-MP alignment
+                float line_width = 0.0f;
+                for (const auto& span : line) {
+                    ImVec2 sz = ImGui::GetFont()->CalcTextSizeA(font_size, FLT_MAX, 0.0f, span.text.c_str());
+                    line_width += sz.x;
                 }
                 
-                draw_list->AddText(nullptr, font_size, ImVec2(cur_x, cur_y), im_col, span.text.c_str());
+                float cur_x = sx;
+                if (td.alignment == TextDrawAlignment::CENTER) {
+                    cur_x = sx - line_width * 0.5f;
+                } else if (td.alignment == TextDrawAlignment::RIGHT) {
+                    cur_x = sx - line_width;
+                }
                 
-                // Advance cursor X
-                ImVec2 span_size = ImGui::GetFont()->CalcTextSizeA(font_size, FLT_MAX, 0.0f, span.text.c_str());
-                cur_x += span_size.x;
+                for (const auto& span : line) {
+                    uint32_t c = span.color;
+                    ImU32 im_col = IM_COL32((c >> 24) & 0xFF, (c >> 16) & 0xFF, (c >> 8) & 0xFF, c & 0xFF);
+                    
+                    // Shadow
+                    if (td.shadow > 0) {
+                        float sh_off = (float)td.shadow * 1.5f;
+                        draw_list->AddText(nullptr, font_size, ImVec2(cur_x + sh_off, cur_y + sh_off), im_bg, span.text.c_str());
+                    }
+                    // Outline
+                    if (td.outline > 0) {
+                        float o = (float)td.outline;
+                        draw_list->AddText(nullptr, font_size, ImVec2(cur_x - o, cur_y), im_bg, span.text.c_str());
+                        draw_list->AddText(nullptr, font_size, ImVec2(cur_x + o, cur_y), im_bg, span.text.c_str());
+                        draw_list->AddText(nullptr, font_size, ImVec2(cur_x, cur_y - o), im_bg, span.text.c_str());
+                        draw_list->AddText(nullptr, font_size, ImVec2(cur_x, cur_y + o), im_bg, span.text.c_str());
+                    }
+                    
+                    draw_list->AddText(nullptr, font_size, ImVec2(cur_x, cur_y), im_col, span.text.c_str());
+                    
+                    ImVec2 span_size = ImGui::GetFont()->CalcTextSizeA(font_size, FLT_MAX, 0.0f, span.text.c_str());
+                    cur_x += span_size.x;
+                }
+                
+                cur_y += line_height;
             }
         }
         
         // C. Selection Bounding Box & Handles
-        if (td.is_selected) {
+        if (td.is_selected || td.is_grouped) {
             float x1, y1, x2, y2;
             td.get_bounds(x1, y1, x2, y2);
             float b_sx1, b_sy1, b_sx2, b_sy2;
             viewport.samp_to_screen(x1, y1, b_sx1, b_sy1);
             viewport.samp_to_screen(x2, y2, b_sx2, b_sy2);
             
-            // Neon cyan border
-            draw_list->AddRect(ImVec2(b_sx1, b_sy1), ImVec2(b_sx2, b_sy2), IM_COL32(0, 230, 255, 255), 2.0f, 0, 1.5f);
+            ImU32 border_col = td.is_selected ? IM_COL32(0, 230, 255, 255) : IM_COL32(255, 180, 20, 180);
+            draw_list->AddRect(ImVec2(b_sx1, b_sy1), ImVec2(b_sx2, b_sy2), border_col, 2.0f, 0, td.is_selected ? 1.5f : 1.0f);
             
-            // Corner handles
-            const float h_size = 5.0f;
-            draw_list->AddRectFilled(ImVec2(b_sx1 - h_size, b_sy1 - h_size), ImVec2(b_sx1 + h_size, b_sy1 + h_size), IM_COL32(0, 230, 255, 255));
-            draw_list->AddRectFilled(ImVec2(b_sx2 - h_size, b_sy1 - h_size), ImVec2(b_sx2 + h_size, b_sy1 + h_size), IM_COL32(0, 230, 255, 255));
-            draw_list->AddRectFilled(ImVec2(b_sx1 - h_size, b_sy2 - h_size), ImVec2(b_sx1 + h_size, b_sy2 + h_size), IM_COL32(0, 230, 255, 255));
-            draw_list->AddRectFilled(ImVec2(b_sx2 - h_size, b_sy2 - h_size), ImVec2(b_sx2 + h_size, b_sy2 + h_size), IM_COL32(0, 230, 255, 255));
-            
-            // Coordinate tag
-            char tag[64];
-            snprintf(tag, sizeof(tag), "X:%.1f Y:%.1f", td.x, td.y);
-            draw_list->AddText(ImVec2(b_sx1, b_sy1 - 16.0f), IM_COL32(0, 230, 255, 255), tag);
+            if (td.is_selected) {
+                // Corner handles
+                const float h_size = 5.0f;
+                draw_list->AddRectFilled(ImVec2(b_sx1 - h_size, b_sy1 - h_size), ImVec2(b_sx1 + h_size, b_sy1 + h_size), border_col);
+                draw_list->AddRectFilled(ImVec2(b_sx2 - h_size, b_sy1 - h_size), ImVec2(b_sx2 + h_size, b_sy1 + h_size), border_col);
+                draw_list->AddRectFilled(ImVec2(b_sx1 - h_size, b_sy2 - h_size), ImVec2(b_sx1 + h_size, b_sy2 + h_size), border_col);
+                draw_list->AddRectFilled(ImVec2(b_sx2 - h_size, b_sy2 - h_size), ImVec2(b_sx2 + h_size, b_sy2 + h_size), border_col);
+                
+                // Coordinate & name tag
+                char tag[96];
+                snprintf(tag, sizeof(tag), "%s (%.1f, %.1f)", td.variable_name.c_str(), td.x, td.y);
+                draw_list->AddText(ImVec2(b_sx1, b_sy1 - 16.0f), border_col, tag);
+            }
         }
     }
 }
@@ -263,7 +341,7 @@ void EditorUI::render_top_bar(TextDrawManager& manager, Viewport& viewport) {
         ImGui::TextColored(ImVec4(0.95f, 0.72f, 0.15f, 1.0f), "GTA SA-MP");
         ImGui::Separator();
         
-        // Touch-safe top buttons (no auto-dropdown that triggers accidental touch clicks)
+        // Touch-safe top buttons
         if (ImGui::Button("FILE")) {
             show_file_modal = true;
         }
@@ -272,6 +350,45 @@ void EditorUI::render_top_bar(TextDrawManager& manager, Viewport& viewport) {
         }
         if (ImGui::Button("VIEW")) {
             show_view_modal = true;
+        }
+        
+        ImGui::Separator();
+        
+        // Layers Panel Toggle Button
+        size_t total_tds = manager.get_all_textdraws().size();
+        std::string layers_label = "LAYERS (" + std::to_string(total_tds) + ")";
+        if (show_layers_panel) {
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.30f, 0.55f, 0.85f, 0.90f));
+        }
+        if (ImGui::Button(layers_label.c_str())) {
+            show_layers_panel = !show_layers_panel;
+        }
+        if (show_layers_panel) {
+            ImGui::PopStyleColor();
+        }
+        
+        // Group Action Button
+        int sel_count = manager.get_selected_count();
+        std::string grp_label = "GROUP" + (sel_count > 1 ? (" (" + std::to_string(sel_count) + ")") : "");
+        if (sel_count > 1) {
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.90f, 0.55f, 0.12f, 0.90f));
+        }
+        if (ImGui::Button(grp_label.c_str())) {
+            show_group_modal = true;
+        }
+        if (sel_count > 1) {
+            ImGui::PopStyleColor();
+        }
+        
+        // Trash (Recycle Bin) Button
+        size_t trash_count = manager.get_trash_count();
+        if (trash_count > 0) {
+            std::string trash_label = "TRASH (" + std::to_string(trash_count) + ")";
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.75f, 0.20f, 0.20f, 0.90f));
+            if (ImGui::Button(trash_label.c_str())) {
+                show_trash_modal = true;
+            }
+            ImGui::PopStyleColor();
         }
         
         ImGui::Separator();
@@ -415,8 +532,8 @@ void EditorUI::render_edit_modal(TextDrawManager& manager) {
 void EditorUI::render_view_modal(Viewport& viewport) {
     ImGuiIO& io = ImGui::GetIO();
     float s = std::clamp(ui_scale, 1.0f, 1.35f);
-    float w = std::min(io.DisplaySize.x * 0.88f, 360.0f * s);
-    float h = std::min(io.DisplaySize.y * 0.88f, 290.0f * s);
+    float w = std::min(io.DisplaySize.x * 0.90f, 380.0f * s);
+    float h = std::min(io.DisplaySize.y * 0.90f, 380.0f * s);
     
     ImGui::SetNextWindowSize(ImVec2(w, h), ImGuiCond_Always);
     ImGui::SetNextWindowPos(ImVec2((io.DisplaySize.x - w) * 0.5f, (io.DisplaySize.y - h) * 0.5f), ImGuiCond_Always);
@@ -435,6 +552,9 @@ void EditorUI::render_view_modal(Viewport& viewport) {
         }
         ImGui::Spacing();
         ImGui::Checkbox("Tampilkan Grid Lines", &viewport.enable_grid);
+        ImGui::Checkbox("GTA SA HUD Template Overlay", &viewport.show_hud_overlay);
+        ImGui::Checkbox("Center Crosshair Guides (320x240)", &viewport.show_center_guides);
+        ImGui::Checkbox("Screen Safe Zone Frame", &viewport.show_safe_zone);
         ImGui::Spacing();
         if (ImGui::Button("Reset Zoom & Pan", b_size)) {
             viewport.reset_view();
@@ -450,7 +570,7 @@ void EditorUI::render_view_modal(Viewport& viewport) {
 void EditorUI::render_bottom_toolbar(TextDrawManager& manager, Viewport& viewport) {
     ImGuiIO& io = ImGui::GetIO();
     float s = std::max(1.0f, ui_scale / 1.35f);
-    float bar_w = std::min(io.DisplaySize.x - 20.0f, 760.0f * s);
+    float bar_w = std::min(io.DisplaySize.x - 20.0f, 820.0f * s);
     float bar_h = 56.0f * s;
     
     ImGui::SetNextWindowPos(ImVec2((io.DisplaySize.x - bar_w) * 0.5f, io.DisplaySize.y - bar_h - 10.0f));
@@ -460,9 +580,9 @@ void EditorUI::render_bottom_toolbar(TextDrawManager& manager, Viewport& viewpor
                              ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar;
                              
     if (ImGui::Begin("##BottomToolbar", nullptr, flags)) {
-        ImVec2 b_small(82.0f * s, 40.0f * s);
-        ImVec2 b_med(98.0f * s, 40.0f * s);
-        ImVec2 b_large(116.0f * s, 40.0f * s);
+        ImVec2 b_small(78.0f * s, 40.0f * s);
+        ImVec2 b_med(94.0f * s, 40.0f * s);
+        ImVec2 b_large(112.0f * s, 40.0f * s);
 
         if (ImGui::Button("+ TEXT", b_small)) {
             manager.create_text(320.0f, 240.0f, "New Textdraw");
@@ -483,13 +603,24 @@ void EditorUI::render_bottom_toolbar(TextDrawManager& manager, Viewport& viewpor
         ImGui::TextDisabled("|");
         ImGui::SameLine();
         
+        if (ImGui::Button("LAYERS", b_med)) {
+            show_layers_panel = !show_layers_panel;
+        }
+        ImGui::SameLine();
+        
+        int sel_count = manager.get_selected_count();
+        if (ImGui::Button("GROUP", b_small)) {
+            show_group_modal = true;
+        }
+        ImGui::SameLine();
+        
         bool has_sel = (manager.get_active_textdraw() != nullptr);
         if (!has_sel) ImGui::BeginDisabled();
         if (ImGui::Button("CLONE", b_small)) {
             manager.duplicate_selected();
         }
         ImGui::SameLine();
-        if (ImGui::Button("DEL", ImVec2(65.0f * s, 40.0f * s))) {
+        if (ImGui::Button("DEL", ImVec2(60.0f * s, 40.0f * s))) {
             manager.delete_selected();
         }
         if (!has_sel) ImGui::EndDisabled();
@@ -522,6 +653,19 @@ void EditorUI::render_inspector(TextDrawManager& manager, Viewport& viewport) {
             android_show_text_dialog("Edit Variable Name", td->variable_name.c_str(), 2);
         }
         ImGui::Checkbox("Player TextDraw (PlayerText:)", &td->is_player);
+        
+        // Grouping ID
+        ImGui::SetNextItemWidth(80.0f * s);
+        if (ImGui::InputInt("Group ID", &td->group_id)) {
+            if (td->group_id < 0) td->group_id = 0;
+            td->is_grouped = (td->group_id > 0);
+        }
+        ImGui::SameLine();
+        if (td->is_grouped) {
+            ImGui::TextColored(ImVec4(0.95f, 0.72f, 0.15f, 1.0f), "[Grouped]");
+        } else {
+            ImGui::TextDisabled("[No Group]");
+        }
         
         ImGui::Separator();
         
@@ -556,6 +700,27 @@ void EditorUI::render_inspector(TextDrawManager& manager, Viewport& viewport) {
             if (ImGui::Button("EDIT##Text", ImVec2(58.0f * s, 0))) {
                 android_show_text_dialog("Edit Text Content", td->text.c_str(), 1);
             }
+            
+            // SA-MP Color Tag Quick Insert Chips
+            ImGui::Text("Color Tags:");
+            const auto& samp_tags = SampColorParser::get_available_tags();
+            for (size_t ti = 0; ti < samp_tags.size(); ++ti) {
+                const auto& tag_def = samp_tags[ti];
+                ImGui::PushID((int)ti);
+                uint32_t tc = tag_def.color_preview;
+                ImVec4 btn_col(((tc >> 24) & 0xFF) / 255.0f, ((tc >> 16) & 0xFF) / 255.0f, ((tc >> 8) & 0xFF) / 255.0f, 0.85f);
+                ImGui::PushStyleColor(ImGuiCol_Button, btn_col);
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.08f, 0.08f, 0.10f, 1.0f));
+                if (ImGui::SmallButton(tag_def.tag.c_str())) {
+                    td->text += tag_def.tag;
+                }
+                ImGui::PopStyleColor(2);
+                if ((ti + 1) % 7 != 0 && ti + 1 < samp_tags.size()) {
+                    ImGui::SameLine();
+                }
+                ImGui::PopID();
+            }
+            
             ImGui::DragFloat("Letter W", &td->letter_width, 0.01f, 0.0f, 5.0f, "%.3f");
             ImGui::DragFloat("Letter H", &td->letter_height, 0.05f, 0.0f, 10.0f, "%.2f");
             
@@ -614,6 +779,11 @@ void EditorUI::render_inspector(TextDrawManager& manager, Viewport& viewport) {
         // TextSize
         ImGui::DragFloat("TextSize W", &td->text_width, 1.0f, 0.0f, 640.0f, "%.1f");
         ImGui::DragFloat("TextSize H", &td->text_height, 1.0f, 0.0f, 480.0f, "%.1f");
+        if (td->font >= 0 && td->font <= 3) {
+            if (ImGui::Button("Auto-fit TextSize##Btn", ImVec2(-1, 30.0f * s))) {
+                td->auto_calculate_text_size();
+            }
+        }
         
         ImGui::Separator();
         
@@ -632,6 +802,20 @@ void EditorUI::render_inspector(TextDrawManager& manager, Viewport& viewport) {
                         ((uint32_t)(col_rgba[1] * 255.0f) << 16) |
                         ((uint32_t)(col_rgba[2] * 255.0f) << 8)  |
                         ((uint32_t)(col_rgba[3] * 255.0f));
+        }
+
+        // Shadow / Outline Background Color
+        float bg_rgba[4] = {
+            ((td->background_color >> 24) & 0xFF) / 255.0f,
+            ((td->background_color >> 16) & 0xFF) / 255.0f,
+            ((td->background_color >> 8) & 0xFF) / 255.0f,
+            (td->background_color & 0xFF) / 255.0f
+        };
+        if (ImGui::ColorEdit4("Shadow/Outline Col", bg_rgba)) {
+            td->background_color = ((uint32_t)(bg_rgba[0] * 255.0f) << 24) |
+                                   ((uint32_t)(bg_rgba[1] * 255.0f) << 16) |
+                                   ((uint32_t)(bg_rgba[2] * 255.0f) << 8)  |
+                                   ((uint32_t)(bg_rgba[3] * 255.0f));
         }
         
         ImGui::Checkbox("Use Box", &td->use_box);
@@ -987,27 +1171,35 @@ void EditorUI::open_export_modal() {
 void EditorUI::render_export_modal(TextDrawManager& manager) {
     ImGuiIO& io = ImGui::GetIO();
     float s = std::clamp(ui_scale, 1.0f, 1.35f);
-    float w = std::min(io.DisplaySize.x * 0.92f, 640.0f * s);
-    float h = std::min(io.DisplaySize.y * 0.90f, 460.0f * s);
+    float w = std::min(io.DisplaySize.x * 0.94f, 660.0f * s);
+    float h = std::min(io.DisplaySize.y * 0.92f, 480.0f * s);
     
     ImGui::SetNextWindowSize(ImVec2(w, h), ImGuiCond_Always);
     ImGui::SetNextWindowPos(ImVec2((io.DisplaySize.x - w) * 0.5f, (io.DisplaySize.y - h) * 0.5f), ImGuiCond_Always);
     
     if (ImGui::Begin("Export Pawn Code", &show_export_modal, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse)) {
         if (export_code_buffer.empty() || ImGui::Button("Perbarui Kode", ImVec2(120.0f * s, 32.0f * s))) {
-            export_code_buffer = PawnExporter::export_pawn(manager.get_all_textdraws());
+            export_code_buffer = PawnExporter::export_pawn(manager.get_all_textdraws(), export_wrap_functions, export_only_selected);
         }
         ImGui::SameLine();
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.85f, 0.65f, 0.15f, 0.90f));
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.10f, 0.10f, 0.12f, 1.00f));
-        if (ImGui::Button("📋 Salin ke Clipboard", ImVec2(160.0f * s, 32.0f * s))) {
+        if (ImGui::Button("Salin ke Clipboard", ImVec2(150.0f * s, 32.0f * s))) {
             ImGui::SetClipboardText(export_code_buffer.c_str());
         }
         ImGui::PopStyleColor(2);
         
+        bool changed = false;
+        if (ImGui::Checkbox("Hanya Yang Dipilih (Group)", &export_only_selected)) changed = true;
+        ImGui::SameLine();
+        if (ImGui::Checkbox("Bungkus OnGameModeInit / OnPlayerConnect", &export_wrap_functions)) changed = true;
+        if (changed) {
+            export_code_buffer = PawnExporter::export_pawn(manager.get_all_textdraws(), export_wrap_functions, export_only_selected);
+        }
+        
         ImGui::Separator();
         
-        float out_h = h - 135.0f * s;
+        float out_h = h - 165.0f * s;
         ImGui::InputTextMultiline("##PawnOutput", const_cast<char*>(export_code_buffer.c_str()),
                                   export_code_buffer.size() + 1, ImVec2(-1, out_h),
                                   ImGuiInputTextFlags_ReadOnly);
@@ -1018,6 +1210,26 @@ void EditorUI::render_export_modal(TextDrawManager& manager) {
         }
     }
     ImGui::End();
+}
+
+static uint32_t parse_samp_color_value(const std::string& str) {
+    std::string s = str;
+    s.erase(0, s.find_first_not_of(" \t\r\n"));
+    size_t last = s.find_last_not_of(" \t\r\n;)");
+    if (last != std::string::npos) s = s.substr(0, last + 1);
+    if (s.empty()) return 0xFFFFFFFF;
+    
+    if (s.rfind("0x", 0) == 0 || s.rfind("0X", 0) == 0) {
+        try {
+            return (uint32_t)std::stoul(s, nullptr, 16);
+        } catch (...) { return 0xFFFFFFFF; }
+    }
+    try {
+        long long val = std::stoll(s);
+        return (uint32_t)val;
+    } catch (...) {
+        return 0xFFFFFFFF;
+    }
 }
 
 static void parse_and_import_pawn(const char* code, TextDrawManager& manager) {
@@ -1033,6 +1245,7 @@ static void parse_and_import_pawn(const char* code, TextDrawManager& manager) {
         size_t start = line.find_first_not_of(" \t\r\n");
         if (start == std::string::npos) continue;
         line = line.substr(start);
+        if (line.rfind("//", 0) == 0 || line.rfind("/*", 0) == 0) continue;
         
         size_t p_create = line.find("TextDrawCreate(");
         size_t p_player = line.find("CreatePlayerTextDraw(");
@@ -1043,19 +1256,26 @@ static void parse_and_import_pawn(const char* code, TextDrawManager& manager) {
             if (eq != std::string::npos && eq < p_create) {
                 var = line.substr(0, eq);
                 var.erase(var.find_last_not_of(" \t") + 1);
-                size_t v_start = var.find_last_of(" \t");
+                size_t v_start = var.find_last_of(" \t*:");
                 if (v_start != std::string::npos) var = var.substr(v_start + 1);
             }
             
             float x = 320.0f, y = 240.0f;
-            char txt[512] = "";
-            const char* args = line.c_str() + p_create + 15;
-            if (sscanf(args, "%f, %f, \"%[^\"]\"", &x, &y, txt) >= 2) {
-                TextDraw* td = manager.create_text(x, y, txt);
-                if (td && !var.empty()) {
-                    td->variable_name = var;
-                    created_map[var] = td;
-                }
+            std::string txt = "New Textdraw";
+            size_t q1 = line.find('"', p_create);
+            size_t q2 = line.rfind('"');
+            if (q1 != std::string::npos && q2 != std::string::npos && q2 > q1) {
+                txt = line.substr(q1 + 1, q2 - q1 - 1);
+                std::string coords = line.substr(p_create + 15, q1 - (p_create + 15));
+                sscanf(coords.c_str(), "%f, %f", &x, &y);
+            } else {
+                sscanf(line.c_str() + p_create + 15, "%f, %f", &x, &y);
+            }
+            
+            TextDraw* td = manager.create_text(x, y, txt);
+            if (td && !var.empty()) {
+                td->variable_name = var;
+                created_map[var] = td;
             }
         } else if (p_player != std::string::npos) {
             size_t eq = line.find('=');
@@ -1065,22 +1285,28 @@ static void parse_and_import_pawn(const char* code, TextDrawManager& manager) {
                 size_t brk = var.find('[');
                 if (brk != std::string::npos) var = var.substr(0, brk);
                 var.erase(var.find_last_not_of(" \t") + 1);
-                size_t v_start = var.find_last_of(" \t");
+                size_t v_start = var.find_last_of(" \t*:");
                 if (v_start != std::string::npos) var = var.substr(v_start + 1);
             }
             
             float x = 320.0f, y = 240.0f;
-            char txt[512] = "";
-            const char* args = line.c_str() + p_player + 21;
-            char pid_dummy[64];
-            if (sscanf(args, "%[^,], %f, %f, \"%[^\"]\"", pid_dummy, &x, &y, txt) >= 3) {
-                TextDraw* td = manager.create_text(x, y, txt);
-                if (td) {
-                    td->is_player = true;
-                    if (!var.empty()) {
-                        td->variable_name = var;
-                        created_map[var] = td;
-                    }
+            std::string txt = "New Textdraw";
+            size_t q1 = line.find('"', p_player);
+            size_t q2 = line.rfind('"');
+            if (q1 != std::string::npos && q2 != std::string::npos && q2 > q1) {
+                txt = line.substr(q1 + 1, q2 - q1 - 1);
+                std::string args_before = line.substr(p_player + 21, q1 - (p_player + 21));
+                sscanf(args_before.c_str(), "%*[^,], %f, %f", &x, &y);
+            } else {
+                sscanf(line.c_str() + p_player + 21, "%*[^,], %f, %f", &x, &y);
+            }
+            
+            TextDraw* td = manager.create_text(x, y, txt);
+            if (td) {
+                td->is_player = true;
+                if (!var.empty()) {
+                    td->variable_name = var;
+                    created_map[var] = td;
                 }
             }
         }
@@ -1093,78 +1319,362 @@ static void parse_and_import_pawn(const char* code, TextDrawManager& manager) {
             if (line.find(var) != std::string::npos) {
                 float f1 = 0, f2 = 0, f3 = 0, f4 = 0;
                 int i1 = 0, i2 = 0;
-                unsigned int u1 = 0;
                 
                 if (line.find("LetterSize") != std::string::npos) {
-                    if (sscanf(line.c_str() + line.find("LetterSize"), "LetterSize(%*[^,], %f, %f)", &f1, &f2) == 2) {
+                    if (sscanf(line.c_str() + line.find("LetterSize"), "LetterSize(%*[^,], %f, %f)", &f1, &f2) == 2 ||
+                        sscanf(line.c_str() + line.find("LetterSize"), "LetterSize(%*[^,],%*[^,], %f, %f)", &f1, &f2) == 2) {
                         td->letter_width = f1;
                         td->letter_height = f2;
                     }
                 } else if (line.find("TextSize") != std::string::npos) {
-                    if (sscanf(line.c_str() + line.find("TextSize"), "TextSize(%*[^,], %f, %f)", &f1, &f2) == 2) {
+                    if (sscanf(line.c_str() + line.find("TextSize"), "TextSize(%*[^,], %f, %f)", &f1, &f2) == 2 ||
+                        sscanf(line.c_str() + line.find("TextSize"), "TextSize(%*[^,],%*[^,], %f, %f)", &f1, &f2) == 2) {
                         td->text_width = f1;
                         td->text_height = f2;
                     }
                 } else if (line.find("Alignment") != std::string::npos) {
-                    if (sscanf(line.c_str() + line.find("Alignment"), "Alignment(%*[^,], %d)", &i1) == 1) {
+                    if (sscanf(line.c_str() + line.find("Alignment"), "Alignment(%*[^,], %d)", &i1) == 1 ||
+                        sscanf(line.c_str() + line.find("Alignment"), "Alignment(%*[^,],%*[^,], %d)", &i1) == 1) {
                         td->alignment = (TextDrawAlignment)i1;
                     }
-                } else if (line.find("Color") != std::string::npos && line.find("BoxColor") == std::string::npos && line.find("VehCol") == std::string::npos) {
-                    if (sscanf(line.c_str() + line.find("Color"), "Color(%*[^,], 0x%X)", &u1) == 1 ||
-                        sscanf(line.c_str() + line.find("Color"), "Color(%*[^,], %u)", &u1) == 1) {
-                        td->color = u1;
-                    }
-                } else if (line.find("UseBox") != std::string::npos) {
-                    if (sscanf(line.c_str() + line.find("UseBox"), "UseBox(%*[^,], %d)", &i1) == 1) {
-                        td->use_box = (i1 != 0);
+                } else if (line.find("BackgroundColor") != std::string::npos) {
+                    size_t comma = line.find_last_of(',');
+                    size_t close = line.rfind(')');
+                    if (comma != std::string::npos && close != std::string::npos && close > comma) {
+                        td->background_color = parse_samp_color_value(line.substr(comma + 1, close - comma - 1));
                     }
                 } else if (line.find("BoxColor") != std::string::npos) {
-                    if (sscanf(line.c_str() + line.find("BoxColor"), "BoxColor(%*[^,], 0x%X)", &u1) == 1 ||
-                        sscanf(line.c_str() + line.find("BoxColor"), "BoxColor(%*[^,], %u)", &u1) == 1) {
-                        td->box_color = u1;
+                    size_t comma = line.find_last_of(',');
+                    size_t close = line.rfind(')');
+                    if (comma != std::string::npos && close != std::string::npos && close > comma) {
+                        td->box_color = parse_samp_color_value(line.substr(comma + 1, close - comma - 1));
                     }
+                } else if (line.find("Color") != std::string::npos && line.find("VehCol") == std::string::npos) {
+                    size_t comma = line.find_last_of(',');
+                    size_t close = line.rfind(')');
+                    if (comma != std::string::npos && close != std::string::npos && close > comma) {
+                        td->color = parse_samp_color_value(line.substr(comma + 1, close - comma - 1));
+                    }
+                } else if (line.find("UseBox") != std::string::npos) {
+                    td->use_box = (line.find("1") != std::string::npos || line.find("true") != std::string::npos);
                 } else if (line.find("SetShadow") != std::string::npos) {
-                    if (sscanf(line.c_str() + line.find("SetShadow"), "SetShadow(%*[^,], %d)", &i1) == 1) {
+                    if (sscanf(line.c_str() + line.find("SetShadow"), "SetShadow(%*[^,], %d)", &i1) == 1 ||
+                        sscanf(line.c_str() + line.find("SetShadow"), "SetShadow(%*[^,],%*[^,], %d)", &i1) == 1) {
                         td->shadow = i1;
                     }
                 } else if (line.find("SetOutline") != std::string::npos) {
-                    if (sscanf(line.c_str() + line.find("SetOutline"), "SetOutline(%*[^,], %d)", &i1) == 1) {
+                    if (sscanf(line.c_str() + line.find("SetOutline"), "SetOutline(%*[^,], %d)", &i1) == 1 ||
+                        sscanf(line.c_str() + line.find("SetOutline"), "SetOutline(%*[^,],%*[^,], %d)", &i1) == 1) {
                         td->outline = i1;
                     }
                 } else if (line.find("Font") != std::string::npos) {
-                    if (sscanf(line.c_str() + line.find("Font"), "Font(%*[^,], %d)", &i1) == 1) {
+                    if (sscanf(line.c_str() + line.find("Font"), "Font(%*[^,], %d)", &i1) == 1 ||
+                        sscanf(line.c_str() + line.find("Font"), "Font(%*[^,],%*[^,], %d)", &i1) == 1) {
                         td->font = i1;
                     }
                 } else if (line.find("SetProportional") != std::string::npos) {
-                    if (sscanf(line.c_str() + line.find("SetProportional"), "SetProportional(%*[^,], %d)", &i1) == 1) {
-                        td->proportional = (i1 != 0);
-                    }
+                    td->proportional = (line.find("1") != std::string::npos || line.find("true") != std::string::npos);
                 } else if (line.find("SetSelectable") != std::string::npos) {
-                    if (sscanf(line.c_str() + line.find("SetSelectable"), "SetSelectable(%*[^,], %d)", &i1) == 1) {
-                        td->selectable = (i1 != 0);
-                    }
+                    td->selectable = (line.find("1") != std::string::npos || line.find("true") != std::string::npos);
                 } else if (line.find("SetPreviewModel") != std::string::npos) {
-                    if (sscanf(line.c_str() + line.find("SetPreviewModel"), "SetPreviewModel(%*[^,], %d)", &i1) == 1) {
+                    if (sscanf(line.c_str() + line.find("SetPreviewModel"), "SetPreviewModel(%*[^,], %d)", &i1) == 1 ||
+                        sscanf(line.c_str() + line.find("SetPreviewModel"), "SetPreviewModel(%*[^,],%*[^,], %d)", &i1) == 1) {
                         td->font = 5;
                         td->preview_model = i1;
                         td->text = std::to_string(i1);
                     }
                 } else if (line.find("SetPreviewRot") != std::string::npos) {
-                    if (sscanf(line.c_str() + line.find("SetPreviewRot"), "SetPreviewRot(%*[^,], %f, %f, %f, %f)", &f1, &f2, &f3, &f4) == 4) {
+                    if (sscanf(line.c_str() + line.find("SetPreviewRot"), "SetPreviewRot(%*[^,], %f, %f, %f, %f)", &f1, &f2, &f3, &f4) == 4 ||
+                        sscanf(line.c_str() + line.find("SetPreviewRot"), "SetPreviewRot(%*[^,],%*[^,], %f, %f, %f, %f)", &f1, &f2, &f3, &f4) == 4) {
                         td->rot_x = f1;
                         td->rot_y = f2;
                         td->rot_z = f3;
                         td->zoom = f4;
                     }
                 } else if (line.find("SetPreviewVehCol") != std::string::npos) {
-                    if (sscanf(line.c_str() + line.find("SetPreviewVehCol"), "SetPreviewVehCol(%*[^,], %d, %d)", &i1, &i2) == 2) {
+                    if (sscanf(line.c_str() + line.find("SetPreviewVehCol"), "SetPreviewVehCol(%*[^,], %d, %d)", &i1, &i2) == 2 ||
+                        sscanf(line.c_str() + line.find("SetPreviewVehCol"), "SetPreviewVehCol(%*[^,],%*[^,], %d, %d)", &i1, &i2) == 2) {
                         td->veh_color1 = i1;
                         td->veh_color2 = i2;
+                    }
+                } else if (line.find("SetString") != std::string::npos) {
+                    size_t q1 = line.find('"');
+                    size_t q2 = line.rfind('"');
+                    if (q1 != std::string::npos && q2 != std::string::npos && q2 > q1) {
+                        td->text = line.substr(q1 + 1, q2 - q1 - 1);
                     }
                 }
             }
         }
     }
+}
+
+void EditorUI::render_layers_panel(TextDrawManager& manager) {
+    ImGuiIO& io = ImGui::GetIO();
+    float s = std::clamp(ui_scale, 1.0f, 1.35f);
+    float w = std::min(io.DisplaySize.x * 0.90f, 440.0f * s);
+    float h = std::min(io.DisplaySize.y * 0.88f, 520.0f * s);
+    
+    ImGui::SetNextWindowSize(ImVec2(w, h), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowPos(ImVec2(12.0f * s, 42.0f * s), ImGuiCond_FirstUseEver);
+    
+    if (ImGui::Begin("Layers & TextDraw List", &show_layers_panel)) {
+        if (ImGui::Button("Semua##All", ImVec2(70.0f * s, 28.0f * s))) manager.select_all();
+        ImGui::SameLine();
+        if (ImGui::Button("Batal##Clear", ImVec2(70.0f * s, 28.0f * s))) manager.clear_selection();
+        ImGui::SameLine();
+        if (ImGui::Button("Invert##Inv", ImVec2(60.0f * s, 28.0f * s))) manager.invert_selection();
+        ImGui::SameLine();
+        if (ImGui::Button("Group Menu##Grp", ImVec2(105.0f * s, 28.0f * s))) show_group_modal = true;
+        
+        ImGui::SetNextItemWidth(-1);
+        ImGui::InputTextWithHint("##LayerSearch", "Cari Variable atau Teks...", layer_search_filter, sizeof(layer_search_filter));
+        
+        std::string filter = layer_search_filter;
+        std::transform(filter.begin(), filter.end(), filter.begin(), ::tolower);
+        
+        ImGui::Separator();
+        
+        if (ImGui::BeginChild("##LayersListChild", ImVec2(0, -38.0f * s), true)) {
+            auto& list = manager.get_all_textdraws();
+            for (int i = (int)list.size() - 1; i >= 0; --i) {
+                auto& td = list[i];
+                
+                if (!filter.empty()) {
+                    std::string var_low = td.variable_name;
+                    std::transform(var_low.begin(), var_low.end(), var_low.begin(), ::tolower);
+                    std::string txt_low = td.text;
+                    std::transform(txt_low.begin(), txt_low.end(), txt_low.begin(), ::tolower);
+                    if (var_low.find(filter) == std::string::npos && txt_low.find(filter) == std::string::npos) {
+                        continue;
+                    }
+                }
+                
+                ImGui::PushID(td.id);
+                
+                bool sel = td.is_selected;
+                if (ImGui::Checkbox("##Sel", &sel)) {
+                    manager.toggle_selection(td.id);
+                }
+                ImGui::SameLine();
+                
+                if (ImGui::SmallButton(td.is_visible ? "V" : "-")) {
+                    td.is_visible = !td.is_visible;
+                }
+                ImGui::SameLine();
+                
+                if (ImGui::SmallButton(td.is_locked ? "L" : "U")) {
+                    td.is_locked = !td.is_locked;
+                }
+                ImGui::SameLine();
+                
+                const char* type_str = "TXT";
+                ImVec4 badge_col = ImVec4(0.35f, 0.75f, 1.0f, 1.0f);
+                if (td.use_box) { type_str = "BOX"; badge_col = ImVec4(0.85f, 0.45f, 1.0f, 1.0f); }
+                else if (td.font == 4) { type_str = "SPR"; badge_col = ImVec4(0.45f, 0.90f, 0.55f, 1.0f); }
+                else if (td.font == 5) { type_str = "3D"; badge_col = ImVec4(1.0f, 0.75f, 0.25f, 1.0f); }
+                
+                ImGui::TextColored(badge_col, "[%s]", type_str);
+                ImGui::SameLine();
+                
+                char label[128];
+                std::string prev_txt = td.text.size() > 14 ? (td.text.substr(0, 14) + "..") : td.text;
+                snprintf(label, sizeof(label), "%s (%s)", td.variable_name.c_str(), prev_txt.c_str());
+                
+                float avail = ImGui::GetContentRegionAvail().x - 65.0f * s;
+                if (ImGui::Selectable(label, td.is_selected, 0, ImVec2(avail > 80.0f ? avail : 80.0f, 0))) {
+                    manager.select_single(td.id);
+                }
+                ImGui::SameLine();
+                
+                if (ImGui::SmallButton("^") && i < (int)list.size() - 1) {
+                    manager.move_layer(i, i + 1);
+                }
+                ImGui::SameLine();
+                if (ImGui::SmallButton("v") && i > 0) {
+                    manager.move_layer(i, i - 1);
+                }
+                
+                ImGui::PopID();
+            }
+        }
+        ImGui::EndChild();
+        
+        ImGui::Text("Total: %zu | Dipilih: %d", manager.get_all_textdraws().size(), manager.get_selected_count());
+        ImGui::SameLine(ImGui::GetWindowWidth() - 95.0f * s);
+        if (ImGui::Button("Tutup##Layers", ImVec2(85.0f * s, 26.0f * s))) {
+            show_layers_panel = false;
+        }
+    }
+    ImGui::End();
+}
+
+void EditorUI::render_group_modal(TextDrawManager& manager) {
+    ImGuiIO& io = ImGui::GetIO();
+    float s = std::clamp(ui_scale, 1.0f, 1.35f);
+    float w = std::min(io.DisplaySize.x * 0.92f, 490.0f * s);
+    float h = std::min(io.DisplaySize.y * 0.90f, 490.0f * s);
+    
+    ImGui::SetNextWindowSize(ImVec2(w, h), ImGuiCond_Always);
+    ImGui::SetNextWindowPos(ImVec2((io.DisplaySize.x - w) * 0.5f, (io.DisplaySize.y - h) * 0.5f), ImGuiCond_Always);
+    
+    if (ImGui::Begin("Group Operations & Tools (Gruplama)", &show_group_modal, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse)) {
+        int sel_count = manager.get_selected_count();
+        ImGui::TextColored(ImVec4(0.95f, 0.72f, 0.15f, 1.0f), "TextDraw Terpilih: %d / %zu", sel_count, manager.get_all_textdraws().size());
+        ImGui::Separator();
+        
+        if (sel_count == 0) {
+            ImGui::TextWrapped("Pilih 2 atau lebih TextDraw di panel LAYERS atau di layar untuk menggunakan fitur grouping.");
+            ImGui::Spacing();
+            if (ImGui::Button("Pilih Semua TextDraw", ImVec2(-1, 36.0f * s))) {
+                manager.select_all();
+            }
+        } else {
+            // Group Move
+            ImGui::TextColored(ImVec4(0.35f, 0.75f, 1.0f, 1.0f), "1. Geser Grup (Move Together):");
+            float b_size = 38.0f * s;
+            ImGui::SetCursorPosX((w - b_size) * 0.5f - 8.0f * s);
+            if (ImGui::Button("^##GUp", ImVec2(b_size, b_size))) {
+                manager.move_selected(0.0f, -dpad_step, 0.0f);
+            }
+            ImGui::SetCursorPosX((w - b_size * 3) * 0.5f - 8.0f * s);
+            if (ImGui::Button("<##GL", ImVec2(b_size, b_size))) {
+                manager.move_selected(-dpad_step, 0.0f, 0.0f);
+            }
+            ImGui::SameLine();
+            ImGui::Button(std::to_string((int)dpad_step).c_str(), ImVec2(b_size, b_size));
+            ImGui::SameLine();
+            if (ImGui::Button(">##GR", ImVec2(b_size, b_size))) {
+                manager.move_selected(dpad_step, 0.0f, 0.0f);
+            }
+            ImGui::SetCursorPosX((w - b_size) * 0.5f - 8.0f * s);
+            if (ImGui::Button("v##GDn", ImVec2(b_size, b_size))) {
+                manager.move_selected(0.0f, dpad_step, 0.0f);
+            }
+            
+            ImGui::Separator();
+            
+            // Alignment
+            ImGui::TextColored(ImVec4(0.35f, 0.75f, 1.0f, 1.0f), "2. Perataan Grup (Group Alignment):");
+            ImVec2 ab_size(105.0f * s, 32.0f * s);
+            if (ImGui::Button("Rata Kiri", ab_size)) manager.align_selected_left();
+            ImGui::SameLine();
+            if (ImGui::Button("Rata Tengah H", ab_size)) manager.align_selected_center_h();
+            ImGui::SameLine();
+            if (ImGui::Button("Rata Kanan", ab_size)) manager.align_selected_right();
+            
+            if (ImGui::Button("Rata Atas", ab_size)) manager.align_selected_top();
+            ImGui::SameLine();
+            if (ImGui::Button("Rata Tengah V", ab_size)) manager.align_selected_center_v();
+            ImGui::SameLine();
+            if (ImGui::Button("Rata Bawah", ab_size)) manager.align_selected_bottom();
+            
+            ImGui::Separator();
+            
+            // Group Colors
+            ImGui::TextColored(ImVec4(0.35f, 0.75f, 1.0f, 1.0f), "3. Warna Grup Serentak:");
+            static float grp_col[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+            ImGui::ColorEdit4("##GrpColorPicker", grp_col);
+            uint32_t col_uint = ((uint32_t)(grp_col[0] * 255.0f) << 24) |
+                                ((uint32_t)(grp_col[1] * 255.0f) << 16) |
+                                ((uint32_t)(grp_col[2] * 255.0f) << 8)  |
+                                ((uint32_t)(grp_col[3] * 255.0f));
+            if (ImGui::Button("Terapkan ke Text Color", ImVec2(145.0f * s, 30.0f * s))) {
+                manager.set_selected_color(col_uint, 0);
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Terapkan ke Box Color", ImVec2(145.0f * s, 30.0f * s))) {
+                manager.set_selected_color(col_uint, 1);
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Terapkan ke Shadow Col", ImVec2(145.0f * s, 30.0f * s))) {
+                manager.set_selected_color(col_uint, 2);
+            }
+            
+            ImGui::Separator();
+            
+            // Group Actions
+            ImGui::TextColored(ImVec4(0.35f, 0.75f, 1.0f, 1.0f), "4. Operasi Batch:");
+            if (ImGui::Button("Auto-fit Ukuran Teks Semua", ImVec2(180.0f * s, 32.0f * s))) {
+                manager.auto_fit_selected_text_size();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Duplikasi Grup", ImVec2(120.0f * s, 32.0f * s))) {
+                manager.duplicate_selected();
+            }
+            ImGui::SameLine();
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.75f, 0.20f, 0.20f, 0.90f));
+            if (ImGui::Button("Hapus Grup", ImVec2(100.0f * s, 32.0f * s))) {
+                manager.delete_selected();
+            }
+            ImGui::PopStyleColor();
+        }
+        
+        ImGui::Separator();
+        if (ImGui::Button("Tutup", ImVec2(100.0f * s, 32.0f * s))) {
+            show_group_modal = false;
+        }
+    }
+    ImGui::End();
+}
+
+void EditorUI::render_trash_modal(TextDrawManager& manager) {
+    ImGuiIO& io = ImGui::GetIO();
+    float s = std::clamp(ui_scale, 1.0f, 1.35f);
+    float w = std::min(io.DisplaySize.x * 0.92f, 520.0f * s);
+    float h = std::min(io.DisplaySize.y * 0.88f, 440.0f * s);
+    
+    ImGui::SetNextWindowSize(ImVec2(w, h), ImGuiCond_Always);
+    ImGui::SetNextWindowPos(ImVec2((io.DisplaySize.x - w) * 0.5f, (io.DisplaySize.y - h) * 0.5f), ImGuiCond_Always);
+    
+    if (ImGui::Begin("Tong Sampah / Recycle Bin (Silinenler)", &show_trash_modal, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse)) {
+        const auto& trash = manager.get_trash();
+        ImGui::Text("Jumlah TextDraw Terhapus: %zu", trash.size());
+        ImGui::Separator();
+        
+        if (trash.empty()) {
+            ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "Tong sampah kosong. Tidak ada TextDraw yang baru saja dihapus.");
+        } else {
+            if (ImGui::Button("Pulihkan Semua (Restore All)", ImVec2(190.0f * s, 34.0f * s))) {
+                manager.restore_all_deleted();
+            }
+            ImGui::SameLine();
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.75f, 0.20f, 0.20f, 0.90f));
+            if (ImGui::Button("Kosongkan Sampah", ImVec2(140.0f * s, 34.0f * s))) {
+                manager.empty_trash();
+            }
+            ImGui::PopStyleColor();
+            
+            ImGui::Separator();
+            
+            float list_h = h - 145.0f * s;
+            if (ImGui::BeginChild("##TrashListChild", ImVec2(0, list_h), true)) {
+                for (size_t i = 0; i < trash.size(); ++i) {
+                    const auto& item = trash[i];
+                    ImGui::PushID((int)i);
+                    
+                    std::string prev = item.textdraw.text.size() > 18 ? (item.textdraw.text.substr(0, 18) + "..") : item.textdraw.text;
+                    ImGui::Text("[%s] %s (\"%s\")", item.time_str.c_str(), item.textdraw.variable_name.c_str(), prev.c_str());
+                    ImGui::SameLine(ImGui::GetContentRegionAvail().x - 85.0f * s);
+                    
+                    if (ImGui::Button("Pulihkan", ImVec2(80.0f * s, 26.0f * s))) {
+                        manager.restore_deleted(i);
+                        ImGui::PopID();
+                        break;
+                    }
+                    ImGui::PopID();
+                    ImGui::Separator();
+                }
+            }
+            ImGui::EndChild();
+        }
+        
+        ImGui::Separator();
+        if (ImGui::Button("Tutup", ImVec2(100.0f * s, 32.0f * s))) {
+            show_trash_modal = false;
+        }
+    }
+    ImGui::End();
 }
 
 void EditorUI::open_import_modal() {

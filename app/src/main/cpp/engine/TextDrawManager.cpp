@@ -135,11 +135,68 @@ void TextDrawManager::select_single(int id) {
     }
 }
 
+void TextDrawManager::toggle_selection(int id) {
+    for (auto& td : textdraws) {
+        if (td.id == id) {
+            td.is_selected = !td.is_selected;
+            if (td.is_selected) {
+                active_id = id;
+            } else if (active_id == id) {
+                active_id = -1;
+                for (auto& other : textdraws) {
+                    if (other.is_selected) {
+                        active_id = other.id;
+                        break;
+                    }
+                }
+            }
+            break;
+        }
+    }
+}
+
+void TextDrawManager::select_all() {
+    for (auto& td : textdraws) {
+        td.is_selected = true;
+    }
+    if (!textdraws.empty()) active_id = textdraws.back().id;
+}
+
 void TextDrawManager::clear_selection() {
     active_id = -1;
     for (auto& td : textdraws) {
         td.is_selected = false;
     }
+}
+
+void TextDrawManager::invert_selection() {
+    active_id = -1;
+    for (auto& td : textdraws) {
+        td.is_selected = !td.is_selected;
+        if (td.is_selected) active_id = td.id;
+    }
+}
+
+int TextDrawManager::get_selected_count() const {
+    int count = 0;
+    for (const auto& td : textdraws) {
+        if (td.is_selected) count++;
+    }
+    return count;
+}
+
+bool TextDrawManager::is_selected(int id) const {
+    for (const auto& td : textdraws) {
+        if (td.id == id) return td.is_selected;
+    }
+    return false;
+}
+
+TextDraw* TextDrawManager::get_textdraw_by_id(int id) {
+    for (auto& td : textdraws) {
+        if (td.id == id) return &td;
+    }
+    return nullptr;
 }
 
 TextDraw* TextDrawManager::get_active_textdraw() {
@@ -218,6 +275,20 @@ void TextDrawManager::duplicate_selected() {
 
 void TextDrawManager::delete_selected() {
     save_undo_state();
+    time_t now = time(nullptr);
+    char time_buf[32] = "12:00:00";
+    tm* ltm = localtime(&now);
+    if (ltm) strftime(time_buf, sizeof(time_buf), "%H:%M:%S", ltm);
+    
+    for (const auto& td : textdraws) {
+        if (td.is_selected && !td.is_locked) {
+            trash_bin.push_back({td, std::string(time_buf)});
+            if (trash_bin.size() > 60) {
+                trash_bin.erase(trash_bin.begin());
+            }
+        }
+    }
+    
     textdraws.erase(
         std::remove_if(textdraws.begin(), textdraws.end(), [](const TextDraw& td) {
             return td.is_selected && !td.is_locked;
@@ -226,6 +297,155 @@ void TextDrawManager::delete_selected() {
     );
     active_id = -1;
     update_z_indices();
+}
+
+void TextDrawManager::set_selected_group(int group_id) {
+    save_undo_state();
+    for (auto& td : textdraws) {
+        if (td.is_selected) {
+            td.group_id = group_id;
+            td.is_grouped = (group_id > 0);
+        }
+    }
+}
+
+void TextDrawManager::select_by_group(int group_id) {
+    active_id = -1;
+    for (auto& td : textdraws) {
+        td.is_selected = (td.group_id == group_id && group_id > 0);
+        if (td.is_selected) active_id = td.id;
+    }
+}
+
+void TextDrawManager::set_selected_color(uint32_t color, int color_target) {
+    save_undo_state();
+    for (auto& td : textdraws) {
+        if (td.is_selected && !td.is_locked) {
+            if (color_target == 0) td.color = color;
+            else if (color_target == 1) td.box_color = color;
+            else if (color_target == 2) td.background_color = color;
+        }
+    }
+}
+
+void TextDrawManager::set_selected_visibility(bool visible) {
+    save_undo_state();
+    for (auto& td : textdraws) {
+        if (td.is_selected) td.is_visible = visible;
+    }
+}
+
+void TextDrawManager::set_selected_locked(bool locked) {
+    save_undo_state();
+    for (auto& td : textdraws) {
+        if (td.is_selected) td.is_locked = locked;
+    }
+}
+
+void TextDrawManager::auto_fit_selected_text_size() {
+    save_undo_state();
+    for (auto& td : textdraws) {
+        if (td.is_selected) {
+            td.auto_calculate_text_size();
+        }
+    }
+}
+
+void TextDrawManager::align_selected_left() {
+    auto selected = get_selected_textdraws();
+    if (selected.size() < 2) return;
+    save_undo_state();
+    float min_x = 9999.0f;
+    for (auto* td : selected) if (td->x < min_x) min_x = td->x;
+    for (auto* td : selected) if (!td->is_locked) td->x = min_x;
+}
+
+void TextDrawManager::align_selected_center_h() {
+    auto selected = get_selected_textdraws();
+    if (selected.size() < 2) return;
+    save_undo_state();
+    float sum_x = 0.0f;
+    for (auto* td : selected) sum_x += td->x;
+    float avg_x = sum_x / (float)selected.size();
+    for (auto* td : selected) if (!td->is_locked) td->x = avg_x;
+}
+
+void TextDrawManager::align_selected_right() {
+    auto selected = get_selected_textdraws();
+    if (selected.size() < 2) return;
+    save_undo_state();
+    float max_x = -9999.0f;
+    for (auto* td : selected) if (td->x > max_x) max_x = td->x;
+    for (auto* td : selected) if (!td->is_locked) td->x = max_x;
+}
+
+void TextDrawManager::align_selected_top() {
+    auto selected = get_selected_textdraws();
+    if (selected.size() < 2) return;
+    save_undo_state();
+    float min_y = 9999.0f;
+    for (auto* td : selected) if (td->y < min_y) min_y = td->y;
+    for (auto* td : selected) if (!td->is_locked) td->y = min_y;
+}
+
+void TextDrawManager::align_selected_center_v() {
+    auto selected = get_selected_textdraws();
+    if (selected.size() < 2) return;
+    save_undo_state();
+    float sum_y = 0.0f;
+    for (auto* td : selected) sum_y += td->y;
+    float avg_y = sum_y / (float)selected.size();
+    for (auto* td : selected) if (!td->is_locked) td->y = avg_y;
+}
+
+void TextDrawManager::align_selected_bottom() {
+    auto selected = get_selected_textdraws();
+    if (selected.size() < 2) return;
+    save_undo_state();
+    float max_y = -9999.0f;
+    for (auto* td : selected) if (td->y > max_y) max_y = td->y;
+    for (auto* td : selected) if (!td->is_locked) td->y = max_y;
+}
+
+void TextDrawManager::move_layer(int from_idx, int to_idx) {
+    if (from_idx < 0 || from_idx >= (int)textdraws.size()) return;
+    if (to_idx < 0 || to_idx >= (int)textdraws.size()) return;
+    if (from_idx == to_idx) return;
+    save_undo_state();
+    TextDraw td = textdraws[from_idx];
+    textdraws.erase(textdraws.begin() + from_idx);
+    textdraws.insert(textdraws.begin() + to_idx, td);
+    update_z_indices();
+}
+
+void TextDrawManager::restore_deleted(size_t index) {
+    if (index >= trash_bin.size()) return;
+    save_undo_state();
+    TextDraw td = trash_bin[index].textdraw;
+    td.id = next_id++;
+    td.is_selected = true;
+    trash_bin.erase(trash_bin.begin() + index);
+    textdraws.push_back(td);
+    active_id = td.id;
+    update_z_indices();
+}
+
+void TextDrawManager::restore_all_deleted() {
+    if (trash_bin.empty()) return;
+    save_undo_state();
+    for (auto& item : trash_bin) {
+        TextDraw td = item.textdraw;
+        td.id = next_id++;
+        td.is_selected = true;
+        textdraws.push_back(td);
+        active_id = td.id;
+    }
+    trash_bin.clear();
+    update_z_indices();
+}
+
+void TextDrawManager::empty_trash() {
+    trash_bin.clear();
 }
 
 void TextDrawManager::bring_to_front() {
@@ -350,6 +570,8 @@ std::string TextDrawManager::serialize_project_to_json(const std::string& projec
         item["zoom"] = td.zoom;
         item["veh_color1"] = td.veh_color1;
         item["veh_color2"] = td.veh_color2;
+        item["group_id"] = td.group_id;
+        item["is_grouped"] = td.is_grouped;
         td_array.push_back(item);
     }
     root["textdraws"] = td_array;
@@ -398,6 +620,8 @@ bool TextDrawManager::deserialize_project_from_json(const std::string& json_str)
             td.zoom = item.value("zoom", 1.0f);
             td.veh_color1 = item.value("veh_color1", 1);
             td.veh_color2 = item.value("veh_color2", 1);
+            td.group_id = item.value("group_id", 0);
+            td.is_grouped = item.value("is_grouped", false);
             
             textdraws.push_back(td);
         }
