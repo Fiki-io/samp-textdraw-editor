@@ -14,8 +14,9 @@ object NativeBridge {
     external fun nativeTouchEvent(action: Int, x: Float, y: Float, pointerCount: Int)
     external fun nativePinchZoom(scaleFactor: Float)
     external fun nativeInputCharacters(text: String)
-    external fun nativeInputKey(keyCode: Int)
+    external fun nativeInputKey(keyCode: Int, isDown: Boolean)
     external fun nativeSetDialogText(fieldId: Int, text: String)
     external fun nativeExportPawn(): String
     external fun nativeImportPawn(code: String)
+    external fun nativeOnBackPressed(): Boolean
 }

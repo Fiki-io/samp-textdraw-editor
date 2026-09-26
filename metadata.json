@@ -1,0 +1,6 @@
+{
+  "name": "SA-MP TextDraw Editor",
+  "description": "SA-MP TextDraw Editor for Android - create and edit SA-MP textdraws natively",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

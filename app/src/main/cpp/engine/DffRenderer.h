@@ -39,7 +39,7 @@ private:
     GLint u_color2_loc = -1;
     GLint u_light_dir_loc = -1;
 
-    static const int FBO_COUNT = 4;
+    static const int FBO_COUNT = 16;
     static const int FBO_SIZE = 256;
     GLuint fbos[FBO_COUNT] = {0};
     GLuint fbo_textures[FBO_COUNT] = {0};

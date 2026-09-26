@@ -29,6 +29,7 @@ set(ENGINE_SOURCES
     engine/TextDrawManager.cpp
     engine/Viewport.cpp
     engine/AssetManager.cpp
+    engine/SampFontRenderer.cpp
     engine/DffRenderer.cpp
     engine/PawnExporter.cpp
     ui/EditorUI.cpp

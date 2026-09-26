@@ -106,6 +106,46 @@ void android_show_text_dialog(const char* title, const char* initial_text, int f
     }
 }
 
+void android_share_text(const char* text, const char* title) {
+    if (!g_vm || !text) return;
+    JNIEnv* env = nullptr;
+    if (g_vm->AttachCurrentThread(&env, nullptr) != JNI_OK || !env) return;
+    
+    jclass main_cls = env->FindClass("com/textdraw/editor/MainActivity");
+    if (main_cls) {
+        jmethodID mid = env->GetStaticMethodID(main_cls, "shareText", "(Ljava/lang/String;Ljava/lang/String;)V");
+        if (mid) {
+            jstring j_txt = env->NewStringUTF(text);
+            jstring j_title = env->NewStringUTF(title ? title : "Share Pawn Code");
+            env->CallStaticVoidMethod(main_cls, mid, j_txt, j_title);
+            env->DeleteLocalRef(j_txt);
+            env->DeleteLocalRef(j_title);
+        }
+        env->DeleteLocalRef(main_cls);
+    }
+}
+
+bool android_save_pawn_file(const char* filename, const char* content) {
+    if (!g_vm || !content) return false;
+    JNIEnv* env = nullptr;
+    if (g_vm->AttachCurrentThread(&env, nullptr) != JNI_OK || !env) return false;
+    
+    jclass main_cls = env->FindClass("com/textdraw/editor/MainActivity");
+    jboolean res = JNI_FALSE;
+    if (main_cls) {
+        jmethodID mid = env->GetStaticMethodID(main_cls, "savePawnFile", "(Ljava/lang/String;Ljava/lang/String;)Z");
+        if (mid) {
+            jstring j_fn = env->NewStringUTF(filename ? filename : "textdraws");
+            jstring j_cnt = env->NewStringUTF(content);
+            res = env->CallStaticBooleanMethod(main_cls, mid, j_fn, j_cnt);
+            env->DeleteLocalRef(j_fn);
+            env->DeleteLocalRef(j_cnt);
+        }
+        env->DeleteLocalRef(main_cls);
+    }
+    return (res == JNI_TRUE);
+}
+
 static bool is_touch_over_ui(float x, float y) {
     ImGuiContext* g = ImGui::GetCurrentContext();
     if (!g) return false;
@@ -153,13 +193,10 @@ Java_com_textdraw_editor_NativeBridge_nativeInit(JNIEnv* env, jobject thiz, jobj
         }
     }
     
-    // Add default sample textdraws so canvas is never blank
-    g_manager.create_box(160.0f, 180.0f, 320.0f, 120.0f, 0x000000B0);
-    g_manager.create_text(200.0f, 195.0f, "SAN ANDREAS");
-    g_manager.create_sprite(380.0f, 190.0f, 64.0f, 64.0f, "ld_beat:chit");
-    g_manager.create_preview_model(210.0f, 220.0f, 75.0f, 60.0f, 411); // Infernus
+    // Start with a clean empty canvas so user creates their own TextDraws
+    g_manager.clear_all();
     
-    LOGI("nativeInit completed with sample textdraws and storage: %s", g_storage_path.c_str());
+    LOGI("nativeInit completed with empty canvas and storage: %s", g_storage_path.c_str());
 }
 
 JNIEXPORT void JNICALL
@@ -170,6 +207,7 @@ Java_com_textdraw_editor_NativeBridge_nativeSurfaceCreated(JNIEnv* env, jobject 
     
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.ConfigInputTrickleEventQueue = false; // Process all keyboard events without dropping rapid backspaces
     io.IniFilename = nullptr; // Avoid writing imgui.ini on Android root
     
     // Connect Android system clipboard to ImGui
@@ -258,6 +296,22 @@ Java_com_textdraw_editor_NativeBridge_nativeTouchEvent(JNIEnv* env, jobject thiz
         
         TextDraw* hit = g_manager.hit_test(samp_x, samp_y);
         if (hit) {
+            static int s_last_tap_id = -1;
+            static double s_last_tap_time = 0.0;
+            double cur_time = ImGui::GetTime();
+            if (s_last_tap_id == hit->id && (cur_time - s_last_tap_time) < 0.35) {
+                // Double-tap detected on canvas: open quick edit dialog!
+                if (hit->font <= 3) {
+                    android_show_text_dialog("Edit TextDraw Teks", hit->text.c_str(), 1);
+                } else if (hit->font == 4) {
+                    android_show_text_dialog("Edit Nama Sprite (TXD:Sprite)", hit->text.c_str(), 3);
+                }
+                s_last_tap_id = -1;
+            } else {
+                s_last_tap_id = hit->id;
+                s_last_tap_time = cur_time;
+            }
+
             g_manager.save_undo_state();
             if (!g_manager.is_selected(hit->id)) {
                 g_manager.select_single(hit->id);
@@ -316,11 +370,28 @@ Java_com_textdraw_editor_NativeBridge_nativeInputCharacters(JNIEnv* env, jobject
 }
 
 JNIEXPORT void JNICALL
-Java_com_textdraw_editor_NativeBridge_nativeInputKey(JNIEnv* env, jobject thiz, jint keycode) {
+Java_com_textdraw_editor_NativeBridge_nativeInputKey(JNIEnv* env, jobject thiz, jint keycode, jboolean is_down) {
     ImGuiIO& io = ImGui::GetIO();
-    if (keycode == 67) { // Android KEYCODE_DEL (Backspace)
-        io.AddKeyEvent(ImGuiKey_Backspace, true);
-        io.AddKeyEvent(ImGuiKey_Backspace, false);
+    ImGuiKey imgui_key = ImGuiKey_None;
+
+    switch (keycode) {
+        case 67: imgui_key = ImGuiKey_Backspace; break;   // KEYCODE_DEL
+        case 112: imgui_key = ImGuiKey_Delete; break;     // KEYCODE_FORWARD_DEL
+        case 66: imgui_key = ImGuiKey_Enter; break;      // KEYCODE_ENTER
+        case 21: imgui_key = ImGuiKey_LeftArrow; break;  // KEYCODE_DPAD_LEFT
+        case 22: imgui_key = ImGuiKey_RightArrow; break; // KEYCODE_DPAD_RIGHT
+        case 19: imgui_key = ImGuiKey_UpArrow; break;    // KEYCODE_DPAD_UP
+        case 20: imgui_key = ImGuiKey_DownArrow; break;  // KEYCODE_DPAD_DOWN
+        case 122: imgui_key = ImGuiKey_Home; break;      // KEYCODE_MOVE_HOME
+        case 123: imgui_key = ImGuiKey_End; break;       // KEYCODE_MOVE_END
+        case 111: imgui_key = ImGuiKey_Escape; break;    // KEYCODE_ESCAPE
+        case 61: imgui_key = ImGuiKey_Tab; break;        // KEYCODE_TAB
+        case 62: imgui_key = ImGuiKey_Space; break;      // KEYCODE_SPACE
+        default: break;
+    }
+
+    if (imgui_key != ImGuiKey_None) {
+        io.AddKeyEvent(imgui_key, is_down == JNI_TRUE);
     }
 }
 
@@ -347,6 +418,11 @@ Java_com_textdraw_editor_NativeBridge_nativeImportPawn(JNIEnv* env, jobject thiz
         EditorUI::get().set_import_code(native_str);
         env->ReleaseStringUTFChars(code_str, native_str);
     }
+}
+
+JNIEXPORT jboolean JNICALL
+Java_com_textdraw_editor_NativeBridge_nativeOnBackPressed(JNIEnv* env, jobject thiz) {
+    return (jboolean)EditorUI::get().handle_back_press(g_manager);
 }
 
 } // extern "C"

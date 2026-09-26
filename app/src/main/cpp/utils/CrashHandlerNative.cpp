@@ -16,6 +16,7 @@
 #include <cstdlib>
 
 #define LOG_TAG "TextDraw_CrashNative"
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
 static std::string s_package_name = "com.textdraw.editor";
@@ -141,7 +142,7 @@ void init(const std::string& package_name, const std::string& files_dir) {
     sigaction(SIGFPE,  &sa, nullptr);
     sigaction(SIGILL,  &sa, nullptr);
 
-    LOGE("Native crash signal handlers installed successfully.");
+    LOGI("Native crash signal handlers installed successfully.");
 }
 
 } // namespace CrashHandlerNative

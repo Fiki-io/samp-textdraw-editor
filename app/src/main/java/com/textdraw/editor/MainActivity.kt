@@ -23,15 +23,22 @@ class MainActivity : Activity() {
         instance = WeakReference(this)
 
         try {
-            // Keep screen on while editing
+            // Keep screen on while editing and configure edge-to-edge layout
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-
-            // Initialize GL Surface and set content view first so DecorView is created
-            glSurfaceView = EditorGLSurfaceView(this)
-            setContentView(glSurfaceView)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                window.attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+            }
+            window.setFlags(
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+            )
 
             // Hide status & navigation bars for immersive widescreen
             hideSystemUI()
+
+            // Initialize GL Surface and set content view
+            glSurfaceView = EditorGLSurfaceView(this)
+            setContentView(glSurfaceView)
 
             // Ensure projects directory exists in app storage
             val projectsDir = File(getExternalFilesDir(null), "projects")
@@ -97,8 +104,78 @@ class MainActivity : Activity() {
         }
     }
 
+    private var lastBackPressTime = 0L
+
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        if (!::glSurfaceView.isInitialized) {
+            super.onBackPressed()
+            return
+        }
+
+        // Ask native engine if any modal, picker, or active selection is open
+        val future = java.util.concurrent.FutureTask {
+            NativeBridge.nativeOnBackPressed()
+        }
+        glSurfaceView.queueEvent(future)
+        val handled = try {
+            future.get(300, java.util.concurrent.TimeUnit.MILLISECONDS) ?: false
+        } catch (_: Throwable) {
+            false
+        }
+
+        if (handled) {
+            // A dialog/picker or active selection was closed safely
+            return
+        }
+
+        // Double-tap back within 2 seconds to exit to prevent accidental loss of work
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastBackPressTime < 2000L) {
+            super.onBackPressed()
+        } else {
+            lastBackPressTime = currentTime
+            Toast.makeText(this, "Tekan sekali lagi untuk keluar", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     companion object {
         private var instance: WeakReference<MainActivity>? = null
+
+        @JvmStatic
+        fun shareText(text: String, title: String) {
+            instance?.get()?.let { activity ->
+                activity.runOnUiThread {
+                    val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                        type = "text/plain"
+                        putExtra(android.content.Intent.EXTRA_SUBJECT, title)
+                        putExtra(android.content.Intent.EXTRA_TEXT, text)
+                    }
+                    activity.startActivity(android.content.Intent.createChooser(intent, title))
+                }
+            }
+        }
+
+        @JvmStatic
+        fun savePawnFile(filename: String, content: String): Boolean {
+            val activity = instance?.get() ?: return false
+            return try {
+                val cleanName = if (filename.endsWith(".pwn", ignoreCase = true)) filename else "$filename.pwn"
+                val projectsDir = File(activity.getExternalFilesDir(null), "projects")
+                if (!projectsDir.exists()) projectsDir.mkdirs()
+                val file = File(projectsDir, cleanName)
+                file.writeText(content)
+                activity.runOnUiThread {
+                    Toast.makeText(activity, "Berhasil disimpan ke: ${file.name} di storage!", Toast.LENGTH_LONG).show()
+                }
+                true
+            } catch (t: Throwable) {
+                activity.runOnUiThread {
+                    Toast.makeText(activity, "Gagal menyimpan file .pwn: ${t.message}", Toast.LENGTH_SHORT).show()
+                }
+                false
+            }
+        }
 
         @JvmStatic
         fun copyToClipboard(text: String) {
@@ -155,26 +232,35 @@ class MainActivity : Activity() {
         fun setKeyboardVisible(visible: Boolean) {
             instance?.get()?.let { activity ->
                 activity.runOnUiThread {
-                    val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as? android.view.inputmethod.InputMethodManager ?: return@runOnUiThread
                     if (activity.isFinishing) return@runOnUiThread
+                    val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as? android.view.inputmethod.InputMethodManager ?: return@runOnUiThread
+                    val view = activity.glSurfaceView
+
                     if (visible) {
-                        activity.glSurfaceView.isFocusable = true
-                        activity.glSurfaceView.isFocusableInTouchMode = true
-                        activity.glSurfaceView.requestFocus()
+                        view.isFocusable = true
+                        view.isFocusableInTouchMode = true
+                        view.requestFocus()
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                            try {
-                                activity.window?.decorView?.windowInsetsController?.show(WindowInsets.Type.ime())
-                            } catch (_: Throwable) {}
+                            val controller = activity.window?.insetsController
+                            if (controller != null) {
+                                controller.show(WindowInsets.Type.ime())
+                            } else {
+                                imm.showSoftInput(view, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
+                            }
+                        } else {
+                            imm.showSoftInput(view, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
                         }
-                        imm.showSoftInput(activity.glSurfaceView, android.view.inputmethod.InputMethodManager.SHOW_FORCED)
-                        imm.toggleSoftInput(android.view.inputmethod.InputMethodManager.SHOW_FORCED, android.view.inputmethod.InputMethodManager.HIDE_IMPLICIT_ONLY)
                     } else {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                            try {
-                                activity.window?.decorView?.windowInsetsController?.hide(WindowInsets.Type.ime())
-                            } catch (_: Throwable) {}
+                            val controller = activity.window?.insetsController
+                            if (controller != null) {
+                                controller.hide(WindowInsets.Type.ime())
+                            } else {
+                                imm.hideSoftInputFromWindow(view.windowToken, 0)
+                            }
+                        } else {
+                            imm.hideSoftInputFromWindow(view.windowToken, 0)
                         }
-                        imm.hideSoftInputFromWindow(activity.glSurfaceView.windowToken, 0)
                     }
                 }
             }
@@ -186,39 +272,149 @@ class MainActivity : Activity() {
                 activity.runOnUiThread {
                     if (activity.isFinishing) return@runOnUiThread
                     val isMultiline = (fieldId == 1 || fieldId == 5)
+                    val dp = activity.resources.displayMetrics.density
+
+                    val root = android.widget.LinearLayout(activity).apply {
+                        orientation = android.widget.LinearLayout.VERTICAL
+                        setPadding((16 * dp).toInt(), (12 * dp).toInt(), (16 * dp).toInt(), (8 * dp).toInt())
+                        setBackgroundColor(android.graphics.Color.parseColor("#1C1E24"))
+                    }
+
+                    // Top quick action row: Paste & Clear All
+                    val actionRow = android.widget.LinearLayout(activity).apply {
+                        orientation = android.widget.LinearLayout.HORIZONTAL
+                        gravity = android.view.Gravity.CENTER_VERTICAL
+                        layoutParams = android.widget.LinearLayout.LayoutParams(
+                            android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                            android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+                        ).apply { bottomMargin = (8 * dp).toInt() }
+                    }
+
+                    val titleView = android.widget.TextView(activity).apply {
+                        text = title
+                        textSize = 15f
+                        setTextColor(android.graphics.Color.parseColor("#FFBF00"))
+                        typeface = android.graphics.Typeface.DEFAULT_BOLD
+                        layoutParams = android.widget.LinearLayout.LayoutParams(
+                            0,
+                            android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
+                            1f
+                        )
+                    }
+                    actionRow.addView(titleView)
+
+                    val btnPaste = android.widget.Button(activity, null, android.R.attr.buttonStyleSmall).apply {
+                        text = "Tempel"
+                        textSize = 11f
+                        setTextColor(android.graphics.Color.WHITE)
+                        setBackgroundColor(android.graphics.Color.parseColor("#2C313C"))
+                    }
+                    actionRow.addView(btnPaste)
+
+                    val btnClear = android.widget.Button(activity, null, android.R.attr.buttonStyleSmall).apply {
+                        text = "Hapus"
+                        textSize = 11f
+                        setTextColor(android.graphics.Color.parseColor("#E74C3C"))
+                        setBackgroundColor(android.graphics.Color.parseColor("#2C313C"))
+                        layoutParams = android.widget.LinearLayout.LayoutParams(
+                            android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
+                            android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+                        ).apply { leftMargin = (6 * dp).toInt() }
+                    }
+                    actionRow.addView(btnClear)
+                    root.addView(actionRow)
+
                     val input = android.widget.EditText(activity).apply {
                         setText(initialText)
                         setSelection(text.length)
                         setTextColor(android.graphics.Color.WHITE)
-                        setBackgroundColor(android.graphics.Color.parseColor("#22242A"))
-                        setPadding(32, 24, 32, 24)
+                        setHintTextColor(android.graphics.Color.parseColor("#7F8C8D"))
+                        hint = if (fieldId == 1) "Ketik teks TextDraw di sini..." else "Ketik di sini..."
+                        textSize = 15f
+                        setBackgroundColor(android.graphics.Color.parseColor("#141619"))
+                        setPadding((12 * dp).toInt(), (12 * dp).toInt(), (12 * dp).toInt(), (12 * dp).toInt())
                         if (isMultiline) {
                             isSingleLine = false
-                            minLines = 4
-                            maxLines = 10
+                            minLines = 3
+                            maxLines = 8
                             gravity = android.view.Gravity.TOP or android.view.Gravity.START
                         } else {
                             isSingleLine = true
                         }
                     }
-                    val container = android.widget.FrameLayout(activity).apply {
-                        setPadding(40, 20, 40, 10)
-                        addView(input)
+
+                    // SA-MP color tag chips toolbar for text editing (fieldId == 1)
+                    if (fieldId == 1) {
+                        val scroll = android.widget.HorizontalScrollView(activity).apply {
+                            isHorizontalScrollBarEnabled = false
+                            layoutParams = android.widget.LinearLayout.LayoutParams(
+                                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                                android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+                            ).apply { bottomMargin = (8 * dp).toInt() }
+                        }
+                        val tagLayout = android.widget.LinearLayout(activity).apply {
+                            orientation = android.widget.LinearLayout.HORIZONTAL
+                        }
+
+                        val tags = listOf(
+                            Pair("~r~ Merah", "~r~"),
+                            Pair("~g~ Hijau", "~g~"),
+                            Pair("~b~ Biru", "~b~"),
+                            Pair("~y~ Kuning", "~y~"),
+                            Pair("~w~ Putih", "~w~"),
+                            Pair("~p~ Ungu", "~p~"),
+                            Pair("~l~ Hitam", "~l~"),
+                            Pair("~n~ [Enter]", "~n~"),
+                            Pair("~<~ Panah Kiri", "~<~"),
+                            Pair("~>~ Panah Kanan", "~>~"),
+                            Pair("~u~ Panah Atas", "~u~"),
+                            Pair("~d~ Panah Bawah", "~d~")
+                        )
+
+                        for ((label, tag) in tags) {
+                            val tagBtn = android.widget.TextView(activity).apply {
+                                text = label
+                                textSize = 11f
+                                setTextColor(android.graphics.Color.WHITE)
+                                setBackgroundColor(android.graphics.Color.parseColor("#272B34"))
+                                setPadding((10 * dp).toInt(), (6 * dp).toInt(), (10 * dp).toInt(), (6 * dp).toInt())
+                                layoutParams = android.widget.LinearLayout.LayoutParams(
+                                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT,
+                                    android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+                                ).apply { rightMargin = (6 * dp).toInt() }
+                                setOnClickListener {
+                                    val start = Math.max(input.selectionStart, 0)
+                                    val end = Math.max(input.selectionEnd, 0)
+                                    input.text.replace(Math.min(start, end), Math.max(start, end), tag, 0, tag.length)
+                                }
+                            }
+                            tagLayout.addView(tagBtn)
+                        }
+                        scroll.addView(tagLayout)
+                        root.addView(scroll)
                     }
+
+                    btnPaste.setOnClickListener {
+                        val clipText = getFromClipboard()
+                        if (clipText.isNotEmpty()) {
+                            val start = Math.max(input.selectionStart, 0)
+                            val end = Math.max(input.selectionEnd, 0)
+                            input.text.replace(Math.min(start, end), Math.max(start, end), clipText, 0, clipText.length)
+                        }
+                    }
+
+                    btnClear.setOnClickListener {
+                        input.setText("")
+                    }
+
+                    root.addView(input)
+
                     val dialog = android.app.AlertDialog.Builder(activity, android.R.style.Theme_DeviceDefault_Dialog_Alert)
-                        .setTitle(title)
-                        .setView(container)
+                        .setView(root)
                         .setPositiveButton("Simpan") { _, _ ->
                             val result = input.text.toString()
                             activity.glSurfaceView.queueEvent {
                                 NativeBridge.nativeSetDialogText(fieldId, result)
-                            }
-                        }
-                        .setNeutralButton("Tempel Clipboard") { _, _ ->
-                            val clipText = getFromClipboard()
-                            if (clipText.isNotEmpty()) {
-                                input.setText(clipText)
-                                input.setSelection(input.text.length)
                             }
                         }
                         .setNegativeButton("Batal", null)

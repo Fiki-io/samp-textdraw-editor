@@ -1,4 +1,5 @@
 #include "TextDrawManager.h"
+#include "SampFontRenderer.h"
 #include <algorithm>
 #include <cmath>
 
@@ -656,5 +657,66 @@ bool TextDrawManager::load_project_from_file(const std::string& file_path) {
     if (!ifs.is_open()) return false;
     std::string str((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
     return deserialize_project_from_json(str);
+}
+
+void TextDraw::auto_calculate_text_size() {
+    if (font >= 0 && font <= 3) {
+        ImVec2 sz = SampFontRenderer::get().measure_text_samp(font, text, letter_width, letter_height, proportional);
+        float est_w = std::max(8.0f, sz.x);
+        float est_h = std::max(6.0f, sz.y);
+        if (alignment == TextDrawAlignment::LEFT) {
+            text_width = x + est_w;
+            text_height = y + est_h;
+        } else if (alignment == TextDrawAlignment::CENTER) {
+            text_width = est_w;
+            text_height = est_h;
+        } else {
+            text_width = x - est_w;
+            text_height = y;
+        }
+    }
+}
+
+void TextDraw::get_bounds(float& out_x1, float& out_y1, float& out_x2, float& out_y2) const {
+    if (font == 4 || font == 5) {
+        out_x1 = x;
+        out_y1 = y;
+        out_x2 = x + text_width;
+        out_y2 = y + text_height;
+    } else if (use_box && text_width > 0.0f && text_height > 0.0f) {
+        if (alignment == TextDrawAlignment::CENTER) {
+            float hw = text_width * 0.5f;
+            out_x1 = x - hw;
+            out_y1 = y;
+            out_x2 = x + hw;
+            out_y2 = y + text_height;
+        } else if (alignment == TextDrawAlignment::RIGHT) {
+            out_x1 = text_width;
+            out_y1 = y;
+            out_x2 = x;
+            out_y2 = text_height;
+        } else {
+            out_x1 = x;
+            out_y1 = y;
+            out_x2 = text_width;
+            out_y2 = text_height;
+        }
+    } else {
+        ImVec2 sz = SampFontRenderer::get().measure_text_samp(font, text, letter_width, letter_height, proportional);
+        float w = std::max(4.0f, sz.x);
+        float h = std::max(4.0f, sz.y);
+        if (alignment == TextDrawAlignment::CENTER) {
+            out_x1 = x - w * 0.5f;
+            out_x2 = x + w * 0.5f;
+        } else if (alignment == TextDrawAlignment::RIGHT) {
+            out_x1 = x - w;
+            out_x2 = x;
+        } else {
+            out_x1 = x;
+            out_x2 = x + w;
+        }
+        out_y1 = y;
+        out_y2 = y + h;
+    }
 }
 

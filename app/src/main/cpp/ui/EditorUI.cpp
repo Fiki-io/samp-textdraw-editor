@@ -2,11 +2,13 @@
 #include "../engine/AssetManager.h"
 #include "../engine/DffRenderer.h"
 #include "../engine/PawnExporter.h"
+#include "../engine/SampFontRenderer.h"
 #include "../utils/SampColorParser.h"
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
 #include <dirent.h>
+#include <unistd.h>
 
 EditorUI& EditorUI::get() {
     static EditorUI instance;
@@ -15,6 +17,8 @@ EditorUI& EditorUI::get() {
 
 extern void android_show_text_dialog(const char* title, const char* initial_text, int field_id);
 extern std::string android_get_clipboard();
+extern void android_share_text(const char* text, const char* title);
+extern bool android_save_pawn_file(const char* filename, const char* content);
 
 void EditorUI::init() {
     apply_gtasa_theme();
@@ -94,8 +98,19 @@ void EditorUI::render(TextDrawManager& manager, Viewport& viewport) {
     // UI Chrome
     render_top_bar(manager, viewport);
     render_inspector(manager, viewport);
-    render_bottom_toolbar(manager, viewport);
-    render_dpad_widget(manager, viewport);
+
+    bool any_modal_open = show_file_modal || show_edit_modal || show_view_modal ||
+                          show_sprite_picker || show_model_picker || show_export_modal ||
+                          show_import_modal || show_save_project_modal || show_load_project_modal ||
+                          show_group_modal || show_trash_modal || show_carcols_picker;
+
+    if (!any_modal_open) {
+        render_bottom_toolbar(manager, viewport);
+        render_dpad_widget(manager, viewport);
+    } else {
+        // Dark backdrop behind modal to focus user attention and prevent background confusion
+        bg_draw_list->AddRectFilled(ImVec2(0, 0), io.DisplaySize, IM_COL32(0, 0, 0, 160));
+    }
     
     // Modals & Panels
     if (show_file_modal) render_file_modal(manager);
@@ -111,6 +126,27 @@ void EditorUI::render(TextDrawManager& manager, Viewport& viewport) {
     if (show_save_project_modal) render_save_project_modal(manager);
     if (show_load_project_modal) render_load_project_modal(manager);
     if (show_carcols_picker) render_carcols_palette_modal(manager.get_active_textdraw(), color_target_box, color_target_veh_col);
+}
+
+bool EditorUI::handle_back_press(TextDrawManager& manager) {
+    if (show_sprite_picker) { show_sprite_picker = false; return true; }
+    if (show_model_picker) { show_model_picker = false; return true; }
+    if (show_export_modal) { show_export_modal = false; return true; }
+    if (show_import_modal) { show_import_modal = false; return true; }
+    if (show_save_project_modal) { show_save_project_modal = false; return true; }
+    if (show_load_project_modal) { show_load_project_modal = false; return true; }
+    if (show_file_modal) { show_file_modal = false; return true; }
+    if (show_edit_modal) { show_edit_modal = false; return true; }
+    if (show_view_modal) { show_view_modal = false; return true; }
+    if (show_group_modal) { show_group_modal = false; return true; }
+    if (show_trash_modal) { show_trash_modal = false; return true; }
+    if (show_carcols_picker) { show_carcols_picker = false; return true; }
+    if (show_layers_panel) { show_layers_panel = false; return true; }
+    if (manager.get_active_textdraw() != nullptr) {
+        manager.clear_selection();
+        return true;
+    }
+    return false;
 }
 
 void EditorUI::render_canvas_overlay(TextDrawManager& manager, Viewport& viewport, ImDrawList* draw_list) {
@@ -198,8 +234,20 @@ void EditorUI::render_canvas_overlay(TextDrawManager& manager, Viewport& viewpor
     // Border around 640x480
     draw_list->AddRect(ImVec2(c_x1, c_y1), ImVec2(c_x2, c_y2), IM_COL32(241, 168, 10, 180), 0.0f, 0, 1.5f);
     
-    // 2. Render all TextDraws in Z-order
+    // Empty canvas friendly helper hint
     const auto& list = manager.get_all_textdraws();
+    if (list.empty()) {
+        float cx, cy;
+        viewport.samp_to_screen(320.0f, 240.0f, cx, cy);
+        const char* hint1 = "Kanvas Kosong (SA-MP 640x480)";
+        const char* hint2 = "Gunakan tombol di bawah (+ TEXT, + BOX, + SPRITE, + 3D MODEL) untuk mulai membuat";
+        ImVec2 sz1 = ImGui::CalcTextSize(hint1);
+        ImVec2 sz2 = ImGui::CalcTextSize(hint2);
+        draw_list->AddText(ImVec2(cx - sz1.x * 0.5f, cy - 20.0f), IM_COL32(255, 200, 50, 140), hint1);
+        draw_list->AddText(ImVec2(cx - sz2.x * 0.5f, cy + 4.0f), IM_COL32(180, 190, 200, 100), hint2);
+    }
+    
+    // 2. Render all TextDraws in Z-order
     for (const auto& td : list) {
         if (!td.is_visible) continue;
         
@@ -245,81 +293,23 @@ void EditorUI::render_canvas_overlay(TextDrawManager& manager, Viewport& viewpor
                 draw_list->AddRect(ImVec2(sx, sy), ImVec2(sx + sw, sy + sh), IM_COL32(255, 180, 50, 200));
                 draw_list->AddText(ImVec2(sx + 4, sy + 4), IM_COL32(255, 255, 255, 255), "3D Model");
             }
-        } else { // Fonts 0, 1, 2, 3 (Text)
-            // SA-MP calibration:
-            // 1.0 letter_height unit ≈ 9.3px at native 640×480 canvas
-            // This was empirically derived from NexTDE reference (letter_height=1.5 → ~14px tall in-game)
-            float px_per_samp = viewport.canvas_screen_h / 480.0f;
-            float font_size = std::max(4.0f, td.letter_height * 9.3f * px_per_samp);
-            
-            // SA-MP line spacing: each ~n~ line is spaced by letter_height units in SA-MP coords
-            // In SA-MP: vertical gap between lines ≈ letter_height * 15px at native res
-            float line_height = td.letter_height * 15.0f * px_per_samp;
-            
-            uint32_t bg_c = td.background_color;
-            ImU32 im_bg = IM_COL32((bg_c >> 24) & 0xFF, (bg_c >> 16) & 0xFF, (bg_c >> 8) & 0xFF, bg_c & 0xFF);
-            
-            // Parse SA-MP formatting tags (~r~, ~g~, ~b~, ~w~, ~y~, ~p~, ~l~, ~s~, ~h~, ~n~)
-            auto spans = SampColorParser::parse(td.text, td.color);
-            
-            // Group spans by lines
-            std::vector<std::vector<TextSpan>> lines;
-            std::vector<TextSpan> current_line;
-            for (const auto& span : spans) {
-                if (span.is_newline) {
-                    lines.push_back(current_line);
-                    current_line.clear();
-                } else if (!span.text.empty()) {
-                    current_line.push_back(span);
-                }
-            }
-            lines.push_back(current_line);
-            
-            float cur_y = sy;
-            
-            for (const auto& line : lines) {
-                // Calculate total line width for accurate SA-MP alignment
-                float line_width = 0.0f;
-                for (const auto& span : line) {
-                    ImVec2 sz = ImGui::GetFont()->CalcTextSizeA(font_size, FLT_MAX, 0.0f, span.text.c_str());
-                    line_width += sz.x;
-                }
-                
-                float cur_x = sx;
-                if (td.alignment == TextDrawAlignment::CENTER) {
-                    // In SA-MP, 'x' is the CENTER point for centered text
-                    cur_x = sx - line_width * 0.5f;
-                } else if (td.alignment == TextDrawAlignment::RIGHT) {
-                    // In SA-MP, 'x' is the RIGHT edge for right-aligned text
-                    cur_x = sx - line_width;
-                }
-                
-                for (const auto& span : line) {
-                    uint32_t c = span.color;
-                    ImU32 im_col = IM_COL32((c >> 24) & 0xFF, (c >> 16) & 0xFF, (c >> 8) & 0xFF, c & 0xFF);
-                    
-                    // Shadow
-                    if (td.shadow > 0) {
-                        float sh_off = (float)td.shadow * 1.5f;
-                        draw_list->AddText(nullptr, font_size, ImVec2(cur_x + sh_off, cur_y + sh_off), im_bg, span.text.c_str());
-                    }
-                    // Outline
-                    if (td.outline > 0) {
-                        float o = (float)td.outline;
-                        draw_list->AddText(nullptr, font_size, ImVec2(cur_x - o, cur_y), im_bg, span.text.c_str());
-                        draw_list->AddText(nullptr, font_size, ImVec2(cur_x + o, cur_y), im_bg, span.text.c_str());
-                        draw_list->AddText(nullptr, font_size, ImVec2(cur_x, cur_y - o), im_bg, span.text.c_str());
-                        draw_list->AddText(nullptr, font_size, ImVec2(cur_x, cur_y + o), im_bg, span.text.c_str());
-                    }
-                    
-                    draw_list->AddText(nullptr, font_size, ImVec2(cur_x, cur_y), im_col, span.text.c_str());
-                    
-                    ImVec2 span_size = ImGui::GetFont()->CalcTextSizeA(font_size, FLT_MAX, 0.0f, span.text.c_str());
-                    cur_x += span_size.x;
-                }
-                
-                cur_y += line_height;
-            }
+        } else { // Fonts 0, 1, 2, 3 (Authentic GTA SA Fonts: Diploma, Chalet, Futura, Pricedown)
+            SampFontRenderer::get().render_textdraw(
+                td.font,
+                td.text,
+                td.x,
+                td.y,
+                td.letter_width,
+                td.letter_height,
+                td.color,
+                td.background_color,
+                td.shadow,
+                td.outline,
+                td.proportional,
+                td.alignment,
+                viewport,
+                draw_list
+            );
         }
         
         // C. Selection Bounding Box & Handles
@@ -364,6 +354,9 @@ void EditorUI::render_top_bar(TextDrawManager& manager, Viewport& viewport) {
         }
         if (ImGui::Button("VIEW")) {
             show_view_modal = true;
+        }
+        if (ImGui::Button("FIT VIEW")) {
+            viewport.reset_view();
         }
         
         ImGui::Separator();
@@ -688,6 +681,20 @@ void EditorUI::render_inspector(TextDrawManager& manager, Viewport& viewport) {
         ImGui::DragFloat("X", &td->x, dpad_step, 0.0f, 640.0f, "%.2f");
         ImGui::DragFloat("Y", &td->y, dpad_step, 0.0f, 480.0f, "%.2f");
         
+        ImGui::TextDisabled("Quick Align:");
+        if (ImGui::Button("Tengah X (320)")) {
+            td->x = 320.0f;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Tengah Y (240)")) {
+            td->y = 240.0f;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Pusat (320, 240)")) {
+            td->x = 320.0f;
+            td->y = 240.0f;
+        }
+        
         ImGui::Separator();
         
         // Font Selector
@@ -714,6 +721,13 @@ void EditorUI::render_inspector(TextDrawManager& manager, Viewport& viewport) {
             if (ImGui::Button("EDIT##Text", ImVec2(58.0f * s, 0))) {
                 android_show_text_dialog("Edit Text Content", td->text.c_str(), 1);
             }
+
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.85f, 0.65f, 0.12f, 0.85f));
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.08f, 0.08f, 0.10f, 1.0f));
+            if (ImGui::Button("✏️ Edit Teks Lengkap (Keyboard + Tag Warna)", ImVec2(-1, 30.0f * s))) {
+                android_show_text_dialog("Edit Text Content", td->text.c_str(), 1);
+            }
+            ImGui::PopStyleColor(2);
             
             // SA-MP Color Tag Quick Insert Chips
             ImGui::Text("Color Tags:");
@@ -747,12 +761,16 @@ void EditorUI::render_inspector(TextDrawManager& manager, Viewport& viewport) {
         } else if (td->font == 4) { // Sprite
             char sprite_buf[128];
             strncpy(sprite_buf, td->text.c_str(), sizeof(sprite_buf));
-            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 75.0f * s);
+            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 132.0f * s);
             if (ImGui::InputText("Sprite Name", sprite_buf, sizeof(sprite_buf))) {
                 td->text = sprite_buf;
             }
             ImGui::SameLine();
-            if (ImGui::Button("Browse##Sprite", ImVec2(70.0f * s, 0))) {
+            if (ImGui::Button("EDIT##Sprite", ImVec2(54.0f * s, 0))) {
+                android_show_text_dialog("Edit Nama Sprite (TXD:Sprite)", td->text.c_str(), 3);
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Browse##Sprite", ImVec2(68.0f * s, 0))) {
                 show_sprite_picker = true;
             }
         } else if (td->font == 5) { // 3D Model Preview
@@ -939,17 +957,17 @@ void EditorUI::render_dpad_widget(TextDrawManager& manager, Viewport& viewport) 
 void EditorUI::render_sprite_picker(TextDrawManager& manager) {
     ImGuiIO& io = ImGui::GetIO();
     float s = std::clamp(ui_scale, 1.0f, 1.35f);
-    float w = std::min(io.DisplaySize.x * 0.92f, 620.0f * s);
-    float h = std::min(io.DisplaySize.y * 0.90f, 450.0f * s);
+    float w = std::min(io.DisplaySize.x * 0.90f, 620.0f * s);
+    float h = std::min(io.DisplaySize.y * 0.82f, 410.0f * s);
     
     ImGui::SetNextWindowSize(ImVec2(w, h), ImGuiCond_Always);
     ImGui::SetNextWindowPos(ImVec2((io.DisplaySize.x - w) * 0.5f, (io.DisplaySize.y - h) * 0.5f), ImGuiCond_Always);
     
     if (ImGui::Begin("Browse GTA SA Sprites (591 Sprites)", &show_sprite_picker, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse)) {
-        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 75.0f * s);
-        ImGui::InputText("Filter##Sprite", sprite_search_filter, sizeof(sprite_search_filter));
+        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 85.0f * s);
+        ImGui::InputTextWithHint("##FilterSprite", "Cari nama sprite atau TXD...", sprite_search_filter, sizeof(sprite_search_filter));
         ImGui::SameLine();
-        if (ImGui::Button("KETIK##Sprite", ImVec2(70.0f * s, 0))) {
+        if (ImGui::Button("KETIK##Sprite", ImVec2(80.0f * s, 0))) {
             android_show_text_dialog("Filter Sprite", sprite_search_filter, 3);
         }
         
@@ -1006,17 +1024,17 @@ void EditorUI::render_sprite_picker(TextDrawManager& manager) {
 void EditorUI::render_model_picker(TextDrawManager& manager) {
     ImGuiIO& io = ImGui::GetIO();
     float s = std::clamp(ui_scale, 1.0f, 1.35f);
-    float w = std::min(io.DisplaySize.x * 0.92f, 620.0f * s);
-    float h = std::min(io.DisplaySize.y * 0.90f, 450.0f * s);
+    float w = std::min(io.DisplaySize.x * 0.90f, 620.0f * s);
+    float h = std::min(io.DisplaySize.y * 0.82f, 410.0f * s);
     
     ImGui::SetNextWindowSize(ImVec2(w, h), ImGuiCond_Always);
     ImGui::SetNextWindowPos(ImVec2((io.DisplaySize.x - w) * 0.5f, (io.DisplaySize.y - h) * 0.5f), ImGuiCond_Always);
     
     if (ImGui::Begin("Browse 3D Preview Models", &show_model_picker, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse)) {
-        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 75.0f * s);
-        ImGui::InputText("Filter##Model", model_search_filter, sizeof(model_search_filter));
+        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - 85.0f * s);
+        ImGui::InputTextWithHint("##FilterModel", "Cari nama atau ID model...", model_search_filter, sizeof(model_search_filter));
         ImGui::SameLine();
-        if (ImGui::Button("KETIK##Model", ImVec2(70.0f * s, 0))) {
+        if (ImGui::Button("KETIK##Model", ImVec2(80.0f * s, 0))) {
             android_show_text_dialog("Filter 3D Model", model_search_filter, 4);
         }
         
@@ -1036,7 +1054,7 @@ void EditorUI::render_model_picker(TextDrawManager& manager) {
                         std::transform(low.begin(), low.end(), low.begin(), ::tolower);
                         if (!filter.empty() && low.find(filter) == std::string::npos) continue;
                         
-                        if (ImGui::Selectable(label.c_str(), false, ImGuiSelectableFlags_None, ImVec2(-1, 30.0f * s))) {
+                        if (ImGui::Selectable(label.c_str(), false, ImGuiSelectableFlags_None, ImVec2(0, 32.0f * s))) {
                             TextDraw* td = manager.get_active_textdraw();
                             if (td) {
                                 td->font = 5;
@@ -1065,7 +1083,7 @@ void EditorUI::render_model_picker(TextDrawManager& manager) {
                         std::transform(low.begin(), low.end(), low.begin(), ::tolower);
                         if (!filter.empty() && low.find(filter) == std::string::npos) continue;
                         
-                        if (ImGui::Selectable(label.c_str(), false, ImGuiSelectableFlags_None, ImVec2(-1, 30.0f * s))) {
+                        if (ImGui::Selectable(label.c_str(), false, ImGuiSelectableFlags_None, ImVec2(0, 32.0f * s))) {
                             TextDraw* td = manager.get_active_textdraw();
                             if (td) {
                                 td->font = 5;
@@ -1103,7 +1121,7 @@ void EditorUI::render_model_picker(TextDrawManager& manager) {
                         std::transform(low.begin(), low.end(), low.begin(), ::tolower);
                         if (!filter.empty() && low.find(filter) == std::string::npos) continue;
                         
-                        if (ImGui::Selectable(label.c_str(), false, ImGuiSelectableFlags_None, ImVec2(-1, 30.0f * s))) {
+                        if (ImGui::Selectable(label.c_str(), false, ImGuiSelectableFlags_None, ImVec2(0, 32.0f * s))) {
                             TextDraw* td = manager.get_active_textdraw();
                             if (td) {
                                 td->font = 5;
@@ -1207,16 +1225,36 @@ void EditorUI::render_export_modal(TextDrawManager& manager) {
     ImGui::SetNextWindowPos(ImVec2((io.DisplaySize.x - w) * 0.5f, (io.DisplaySize.y - h) * 0.5f), ImGuiCond_Always);
     
     if (ImGui::Begin("Export Pawn Code", &show_export_modal, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse)) {
-        if (export_code_buffer.empty() || ImGui::Button("Perbarui Kode", ImVec2(120.0f * s, 32.0f * s))) {
+        if (export_code_buffer.empty() || ImGui::Button("Perbarui Kode", ImVec2(110.0f * s, 32.0f * s))) {
             export_code_buffer = PawnExporter::export_pawn(manager.get_all_textdraws(), export_wrap_functions, export_only_selected);
         }
         ImGui::SameLine();
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.85f, 0.65f, 0.15f, 0.90f));
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.10f, 0.10f, 0.12f, 1.00f));
-        if (ImGui::Button("Salin ke Clipboard", ImVec2(150.0f * s, 32.0f * s))) {
+        if (ImGui::Button("📋 Salin", ImVec2(75.0f * s, 32.0f * s))) {
             ImGui::SetClipboardText(export_code_buffer.c_str());
         }
         ImGui::PopStyleColor(2);
+        
+        ImGui::SameLine();
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.20f, 0.65f, 0.35f, 0.90f));
+        if (ImGui::Button("📤 BAGIKAN (SHARE)", ImVec2(145.0f * s, 32.0f * s))) {
+            if (export_code_buffer.empty()) {
+                export_code_buffer = PawnExporter::export_pawn(manager.get_all_textdraws(), export_wrap_functions, export_only_selected);
+            }
+            android_share_text(export_code_buffer.c_str(), "SA-MP TextDraw Pawn Script");
+        }
+        ImGui::PopStyleColor();
+
+        ImGui::SameLine();
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.25f, 0.45f, 0.85f, 0.90f));
+        if (ImGui::Button("💾 SIMPAN .PWN", ImVec2(130.0f * s, 32.0f * s))) {
+            if (export_code_buffer.empty()) {
+                export_code_buffer = PawnExporter::export_pawn(manager.get_all_textdraws(), export_wrap_functions, export_only_selected);
+            }
+            android_save_pawn_file(project_name_buf, export_code_buffer.c_str());
+        }
+        ImGui::PopStyleColor();
         
         bool changed = false;
         if (ImGui::Checkbox("Hanya Yang Dipilih (Group)", &export_only_selected)) changed = true;
@@ -1824,13 +1862,27 @@ void EditorUI::render_load_project_modal(TextDrawManager& manager) {
                     std::string fname = ent->d_name;
                     if (fname.size() > 5 && fname.substr(fname.size() - 5) == ".json") {
                         found_any = true;
+                        std::string full_path = storage_path.empty() ? fname : (storage_path + "/" + fname);
+                        float del_btn_w = 64.0f * s;
+                        float avail_w = ImGui::GetContentRegionAvail().x - del_btn_w - 10.0f * s;
+                        if (avail_w < 100.0f * s) avail_w = 100.0f * s;
                         std::string label = "📂 " + fname;
-                        if (ImGui::Selectable(label.c_str(), false, ImGuiSelectableFlags_None, ImVec2(-1, 36.0f * s))) {
-                            std::string full_path = storage_path.empty() ? fname : (storage_path + "/" + fname);
+                        if (ImGui::Selectable(label.c_str(), false, ImGuiSelectableFlags_None, ImVec2(avail_w, 34.0f * s))) {
                             manager.load_project_from_file(full_path);
                             show_load_project_modal = false;
                             break;
                         }
+                        ImGui::SameLine();
+                        ImGui::PushID(fname.c_str());
+                        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.70f, 0.20f, 0.20f, 0.85f));
+                        if (ImGui::Button("Hapus", ImVec2(del_btn_w, 32.0f * s))) {
+                            unlink(full_path.c_str());
+                            ImGui::PopStyleColor();
+                            ImGui::PopID();
+                            break;
+                        }
+                        ImGui::PopStyleColor();
+                        ImGui::PopID();
                     }
                 }
                 closedir(dir);
@@ -1858,7 +1910,11 @@ void EditorUI::set_dialog_text(int field_id, const std::string& text, TextDrawMa
     } else if (field_id == 2 && td) {
         td->variable_name = text;
     } else if (field_id == 3) {
-        strncpy(sprite_search_filter, text.c_str(), sizeof(sprite_search_filter) - 1);
+        if (td && td->font == 4) {
+            td->text = text;
+        } else {
+            strncpy(sprite_search_filter, text.c_str(), sizeof(sprite_search_filter) - 1);
+        }
     } else if (field_id == 4) {
         strncpy(model_search_filter, text.c_str(), sizeof(model_search_filter) - 1);
     } else if (field_id == 5) {

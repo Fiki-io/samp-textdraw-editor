@@ -24,6 +24,7 @@ public:
 
     void apply_ui_scale(float scale);
     float get_ui_scale() const { return ui_scale; }
+    bool handle_back_press(TextDrawManager& manager);
 
 private:
     EditorUI() = default;

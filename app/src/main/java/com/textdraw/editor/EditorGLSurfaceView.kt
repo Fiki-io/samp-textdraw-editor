@@ -20,6 +20,7 @@ class EditorGLSurfaceView @JvmOverloads constructor(
         setRenderer(this)
         renderMode = RENDERMODE_CONTINUOUSLY
         preserveEGLContextOnPause = true
+        holder.setSizeFromLayout()
 
         isFocusable = true
         isFocusableInTouchMode = true
@@ -49,14 +50,58 @@ class EditorGLSurfaceView @JvmOverloads constructor(
             }
 
             override fun deleteSurroundingText(beforeLength: Int, afterLength: Int): Boolean {
-                if (beforeLength > 0) {
+                val count = if (beforeLength > 0) beforeLength else 1
+                for (i in 0 until count) {
                     queueEvent {
-                        NativeBridge.nativeInputKey(67) // Android KEYCODE_DEL
+                        NativeBridge.nativeInputKey(android.view.KeyEvent.KEYCODE_DEL, true)
+                        NativeBridge.nativeInputKey(android.view.KeyEvent.KEYCODE_DEL, false)
                     }
                 }
-                return super.deleteSurroundingText(beforeLength, afterLength)
+                return true
+            }
+
+            override fun deleteSurroundingTextInCodePoints(beforeLength: Int, afterLength: Int): Boolean {
+                return deleteSurroundingText(beforeLength, afterLength)
+            }
+
+            override fun sendKeyEvent(event: android.view.KeyEvent): Boolean {
+                val keyCode = event.keyCode
+                val isDown = event.action == android.view.KeyEvent.ACTION_DOWN
+                queueEvent {
+                    NativeBridge.nativeInputKey(keyCode, isDown)
+                }
+                if (isDown && event.unicodeChar != 0 && keyCode != android.view.KeyEvent.KEYCODE_DEL && keyCode != android.view.KeyEvent.KEYCODE_ENTER) {
+                    val charStr = event.unicodeChar.toChar().toString()
+                    queueEvent {
+                        NativeBridge.nativeInputCharacters(charStr)
+                    }
+                }
+                return true
             }
         }
+    }
+
+    override fun dispatchKeyEvent(event: android.view.KeyEvent): Boolean {
+        val keyCode = event.keyCode
+        val isDown = event.action == android.view.KeyEvent.ACTION_DOWN
+        queueEvent {
+            NativeBridge.nativeInputKey(keyCode, isDown)
+        }
+        return super.dispatchKeyEvent(event)
+    }
+
+    override fun onKeyDown(keyCode: Int, event: android.view.KeyEvent): Boolean {
+        queueEvent {
+            NativeBridge.nativeInputKey(keyCode, true)
+        }
+        return true
+    }
+
+    override fun onKeyUp(keyCode: Int, event: android.view.KeyEvent): Boolean {
+        queueEvent {
+            NativeBridge.nativeInputKey(keyCode, false)
+        }
+        return true
     }
 
     override fun onSurfaceCreated(gl: GL10?, config: EGLConfig?) {
